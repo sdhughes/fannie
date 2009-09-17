@@ -1,0 +1,22 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<TITLE>Word wrap</TITLE>
+<STYLE>
+BODY {font-family:"Times New Roman",serif}
+H2 {color:#4000A0}
+.st {font-weight:bold; color:#900000}
+</STYLE>
+</HEAD>
+<BODY>
+<H2>Word wrap</H2>
+<H4 CLASS="st">Informations</H4>Author: <A HREF="mailto:r.korving@xit.nl?subject=Word%20wrap">Ron Korving</A><BR>License: Freeware
+<H4 CLASS="st">Description</H4>If you want to wrap some text without rendering it, you can use this simple function.<BR>
+<BR>
+<TT><B>int</B> WordWrap(<B>string</B> &text, <B>float</B> maxwidth)</TT><BR>
+<BR>
+It returns the total number of lines that the string consists of. The text parameter
+is overwritten (call by reference) with the new wrapped text. The maxwidth parameter
+is the maximum width a line may be, given in the unit set previously in your FPDF object.
+</BODY>
+</HTML>
