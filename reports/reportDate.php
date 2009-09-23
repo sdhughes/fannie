@@ -188,17 +188,6 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
          * Discounts by member type;
          */
 
-        $percentsQ = "SELECT c.discount AS 'Volunteer Discount',(ROUND(SUM(d.unitPrice),2)) AS Totals
-                FROM $transtable AS d LEFT JOIN is4c_op.custdata AS c
-                ON d.card_no = c.CardNo
-                WHERE date(d.datetime) = '".$db_date."'
-                AND c.staff IN(3,4,6)
-                AND d.voided = '5'
-                AND d.trans_status <> 'X'
-                AND d.emp_no <> 9999
-                GROUP BY c.discount
-                WITH ROLLUP";
-
         $memtypeQ = "SELECT m.memDesc as memType,ROUND(SUM(d.total),2) AS Sales
                 FROM $transtable d INNER JOIN
                         is4c_op.custdata c ON d.card_no = c.CardNo INNER JOIN
@@ -232,31 +221,9 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 AND trans_status <> 'X'
                 AND emp_no <> 9999";
 
-        $stampsQ = "SELECT SUM(quantity) AS stamp_count, ROUND(SUM(total),2) AS stamp_sales
-                FROM $transtable
-                WHERE date(datetime) = '".$db_date."'
-                AND trans_status <> 'X'
-                AND emp_no <> 9999
-                AND description LIKE 'Stamp%'";
-
-        $sistersQ = "SELECT SUM(quantity) AS 'Sisters Count', ROUND(SUM(total),2) AS 'Sisters Sales'
-                FROM $transtable
-                WHERE date(datetime) = '".$db_date."'
-                AND trans_status <> 'X'
-                AND emp_no <> 9999
-                AND upc = 3200";
-
         /**
          * Miscellaneus - store charges, R/As, returns
          */
-
-
-        $raQ = "SELECT COUNT(total) AS RA_count, ROUND(SUM(total),2) as RA_total
-                FROM $transtable
-                WHERE date(datetime) = '".$db_date."'
-                AND department = 45
-                AND trans_status <> 'X'
-                AND emp_no <> 9999";
 
         $returnsQ = "SELECT SUM(quantity) AS 'Returns Count', ROUND(sum(l.total),2) as 'Returns Total'
                 FROM $transtable as l
@@ -319,7 +286,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                FROM $transtable AS d
                WHERE date(d.datetime) = '".$db_date."'
                AND d.upc = 'DISCOUNT'
-               AND d.staff IN(1,2,5)
+               AND d.staff IN (1,2,5)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
 
@@ -341,7 +308,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                FROM $transtable d
                WHERE date(d.datetime) = '".$db_date."'
                AND d.upc = 'DISCOUNT'
-               AND d.memType IN(1,2,3,5)
+               AND d.memType IN (1,2,3,4,5)
                AND d.staff = 0
                AND d.emp_no <> 9999
                AND d.trans_status <> 'X'";
@@ -359,7 +326,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                FROM $transtable AS d
                WHERE date(d.datetime) = '".$db_date."'
                AND d.upc = 'DISCOUNT'
-               AND d.staff IN(3,6)
+               AND d.staff IN (3,6)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
 
@@ -414,7 +381,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                FROM $transtable d
                WHERE date(d.datetime) = '".$db_date."'
                AND d.upc = 'DISCOUNT'
-               AND d.memType = 0
+               AND d.memType IN (0, 7)
                AND d.staff = 0
                AND d.emp_no <> 9999
                AND d.trans_status <> 'X'";
@@ -480,7 +447,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                FROM $transtable d
                WHERE date(d.datetime) = '".$db_date."'
                AND d.upc = 'CASEDISCOUNT'
-               AND d.memType IN (1,2,3,5)
+               AND d.memType IN (1,2,3,4,5)
                AND d.staff = 0
                AND d.emp_no <> 9999
                AND d.trans_status <> 'X'";
@@ -582,20 +549,6 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        list($totaldiscount2) = mysqli_fetch_row($totaldiscount2R);
        // End Haus
 
-       $MADcouponQ = "SELECT ROUND(SUM(unitPrice),2) AS MAD_Coupon_total
-               FROM $transtable
-               WHERE date(datetime) = '".$db_date."'
-               AND voided = 9
-               AND trans_status <> 'X'
-               AND emp_no <> 9999";
-
-               $MADcouponR = mysqli_query($db_slave, $MADcouponQ);
-               list($MADcoupon) = mysqli_fetch_row($MADcouponR);
-
-               if (is_null($MADcoupon)) {
-                       $MADcoupon = 0;
-               }
-
        // Haus edit 08-06-2007
        $coupons2Q = "SELECT ROUND(SUM(total),2) AS Coupons
                FROM $transtable
@@ -615,7 +568,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        $chgQ = "SELECT ROUND(SUM(total),2) AS chg
                FROM $transtable
                WHERE date(datetime) = '".$db_date."'
-               AND trans_subtype IN('MI')
+               AND trans_subtype IN ('MI')
                AND trans_status <> 'X'
                AND emp_no <> 9999";
 

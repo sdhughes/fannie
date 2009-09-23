@@ -14,19 +14,46 @@ function drawSearchForm($error = NULL) {
 function drawDetailsPage($upc, $rowItem = NULL) {
     global $db_master;
     if ($rowItem) {
-        $query = "SELECT brand, product, distributor, pack_size, order_no, ingredients, certification
+        $query = "SELECT brand, product, distributor, pack_size, order_no, ingredients, certification, bitField
             FROM product_details WHERE upc={$rowItem['upc']}";
         $result = mysqli_query($db_master, $query);
         $detailRow = mysqli_fetch_array($result, MYSQLI_ASSOC);
     }
-    
+
     $certQ = "SELECT certID, certDesc FROM certList ORDER BY certID ASC";
     $certR = mysqli_query($db_master, $certQ);
     while (list($certID, $certDesc) = mysqli_fetch_array($certR, MYSQLI_NUM)) {
         $cert[$certID] = $certDesc;
     }
-    // print_r($cert);
-    
+
+    if (isset($rowItem)) { // Wine specific checkboxes...
+	$bitFieldQ = "SELECT fieldIndex, name FROM bitFields WHERE department = {$rowItem['department']} ORDER BY fieldIndex";
+	$bitFieldR = mysqli_query($db_master, $bitFieldQ);
+
+	$bitField = sprintf('%b', (int) $detailRow['bitField']);
+
+	for ($i = 1; $i <= strlen($bitField); $i++) {
+	   $bitFieldArray[] = substr($bitField, strlen($output)-$i, 1);
+	}
+
+	if ($bitFieldR && mysqli_num_rows($bitFieldR) > 0) {
+	    $bitFieldCount = mysqli_num_rows($bitFieldR);
+	    $bitFieldString = '';
+	    while (list($index, $name) = mysqli_fetch_row($bitFieldR)) {
+		$bitFieldString .= sprintf('<td align="center"><input type="hidden" name="bitCount" value="%u" /><b>%s</b><input type="checkbox" name="bitField[%u]" %s /></td>',
+					   $bitFieldCount, $name, $index, (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? 'checked="checked"' : '')
+					   );
+	    }
+	    ?>
+	    <script type="text/javascript">
+		$(document).ready(function() {
+		    $('#bitField').append('<?php echo $bitFieldString; ?>');
+		});
+	    </script>
+	    <?php
+	}
+    }
+
     // Depending on if it's new or not, let's make some pretties.
     if (!isset($rowItem) && is_numeric($upc)) $bodyString = '<font color="red">' . str_pad($upc, 13, 0, STRPADLEFT) . '</font><input type="hidden" name="upc" value="' . $upc . '" /></td><td align = "right"><b>Deposit</b></td><td align="right">$&nbsp;<input type="text" name="deposit" size="3" maxlength="6" value="0.00" /></td></tr>
         <tr><td align="right"><b>Description</b></td><td align="left"><input type="text" name="description" size="30" maxlength="30" value="Enter Description Here" /></td><td align="right"><b>Price</b></td><td align="right">$&nbsp;<input type="text" name="price" size="3" maxlength="6" /></td>';
@@ -41,7 +68,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
                     <td align="right"><b>UPC</b></td>
                     <td align="left">' . $bodyString . '
                 </tr></table>';
-                
+
     // Sale info if active...
     if ($rowItem["end_date"] != 0 && $rowItem["special_price"] != 0) {
         $date = new DateTime($rowItem["end_date"]);
@@ -112,7 +139,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
                             <option value="3">Superlocal</option>
                         </select>
                     </td>
-                </tr>
+                </tr><tr id="bitField"></tr>
                 <tr class="extraDetail">
                     <td align="left" colspan="2"><b>Ingredients</b></td>
                     <td align="left"><b>Certification</b></td>
@@ -135,7 +162,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
         elseif (!isset($detailRow)) echo '<input type="hidden" name="subAction" value="insert" />' . "\n";
         echo '</div>
         </form>';
-    
+
 }
 
 function chainedSelector($department = NULL, $subdepartment = NULL) {
@@ -143,15 +170,15 @@ function chainedSelector($department = NULL, $subdepartment = NULL) {
     **	BEGIN CHAINEDSELECTOR CLASS
     **/
     require("../src/chainedSelectors.php");
-    
+
     global $db_master;
-    
+
     $selectorNames = array(
-        CS_FORM=>"pickSubDepartment", 
-        CS_FIRST_SELECTOR=>"department", 
+        CS_FORM=>"pickSubDepartment",
+        CS_FIRST_SELECTOR=>"department",
         CS_SECOND_SELECTOR=>"subdepartment");
 
-    $Query = "SELECT d.dept_no AS dept_no,d.dept_name AS dept_name,s.subdept_no AS subdept_no,s.subdept_name AS subdept_name	
+    $Query = "SELECT d.dept_no AS dept_no,d.dept_name AS dept_name,s.subdept_no AS subdept_no,s.subdept_name AS subdept_name
         FROM is4c_op.departments AS d, is4c_op.subdepts AS s
         WHERE d.dept_no = s.dept_ID
         ORDER BY d.dept_no, s.subdept_no";
@@ -162,14 +189,14 @@ function chainedSelector($department = NULL, $subdepartment = NULL) {
     }
     while ($row = mysqli_fetch_object($DatabaseResult)) {
         $selectorData[] = array(
-            CS_SOURCE_ID=>$row->dept_no, 
-            CS_SOURCE_LABEL=>ucfirst(strtolower($row->dept_name)), 
-            CS_TARGET_ID=>$row->subdept_no, 
+            CS_SOURCE_ID=>$row->dept_no,
+            CS_SOURCE_LABEL=>ucfirst(strtolower($row->dept_name)),
+            CS_TARGET_ID=>$row->subdept_no,
             CS_TARGET_LABEL=>$row->subdept_name);
-    }            
+    }
 
     $subdept = new chainedSelectors(
-    $selectorNames, 
+    $selectorNames,
     $selectorData);
     ?>
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html40/loose.dtd">
@@ -192,7 +219,7 @@ function chainedSelector($department = NULL, $subdepartment = NULL) {
     </script>
     </body>
     </html>
-    <?php			
+    <?php
     /**
     **	CHAINEDSELECTOR CLASS ENDS . . . . . . . NOW
     **/
