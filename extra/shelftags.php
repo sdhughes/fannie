@@ -493,6 +493,115 @@ if (isset($_POST['submitted'])) {
 		$pdf->AddPage('P');
 	    }
 	}
+    } elseif ($_POST['type'] == 'WINE') {
+	// Basic static settings
+	$top = 12.7;
+	$left = 12.7;
+	$brandTop = 12.7;
+	$varietalTop = 17.9625;
+	$priceTop = 23.8125;
+	$extraTop = 38.10;
+	$bioW = 25.4;
+	$localLeft = $bioW;
+	$localW = 22.225;
+	$veganLeft = $localLeft + $localW;
+	$veganW = 19.05;
+	$orgLeft = $veganLeft + $veganW;
+	$orgW = $localW;
+
+	$xmax = 150;
+	$ymax = 220;
+	$leftShift = 101.6;
+	$downShift = 50.80;
+
+	$x = $left;
+	$y = $top;
+	$w = 88.9;
+	$h = 44.45;
+
+	// Inititialize the object
+	$pdf=new PDF('P', 'mm', 'Letter');
+	$pdf->SetMargins($left ,$top);
+	$pdf->SetAutoPageBreak('off',0);
+
+	// Include our specific fonts.
+	$pdf->AddFont('Georgia', '', 'georgia.php');
+	$pdf->AddFont('Georgia', 'B', 'georgiab.php');
+	$pdf->AddFont('Georgia', 'I', 'georgiai.php');
+	$pdf->AddFont('Century', '', 'CenturyRegular.php');
+	$pdf->AddFont('Century', 'B', 'CenturyBold.php');
+	$pdf->AddFont('Century', 'I', 'CenturyItalic.php');
+
+
+	$pdf->SetFont('Georgia','',10);
+
+	// Dynamic initial settings
+	$count = 1;
+	while ($count < 25) {
+	    $pdf->AddPage('P');
+	    while ($y < $ymax) {
+	        while ($x < $xmax) {
+		    $pdf->Rect($x, $y, $w, $h);
+		    // Brand
+		    $pdf->SetFont('Century','',16);
+		    $pdf->SetXY($x, $y + $brandTop);
+		    $pdf->Cell($w,6,'Brand',0,0,'C');
+
+		    // Varietal
+		    $pdf->SetFont('Century','I',13);
+		    $pdf->SetXY($x, $y + $varietalTop);
+		    $pdf->Cell($w,6,'Varietal',0,0,'C');
+
+		    // Price
+		    $pdf->SetFont('Arial','',13);
+		    $pdf->SetXY($x, $y + $priceTop);
+		    $pdf->Cell($w,6,'$12.99',0,0,'C');
+
+		    // Extra Bits
+		    // Biodynamic
+		    $pdf->SetFont('Arial','',10.5);
+		    $pdf->SetXY($x, $y + $extraTop);
+		    $pdf->Cell($bioW,4,'Biodynamic',0,0,'C');
+
+		    // Local
+		    $pdf->SetFont('Arial','',10.5);
+		    $pdf->SetXY($x + $localLeft, $y + $extraTop);
+		    $pdf->Cell($localW,4,'Local',0,0,'C');
+
+		    // Vegan
+		    $pdf->SetFont('Arial','',10.5);
+		    $pdf->SetXY($x + $veganLeft, $y + $extraTop);
+		    $pdf->Cell($veganW,4,'Vegan',0,0,'C');
+
+		    // Organic
+		    $pdf->SetFont('Arial','',10.5);
+		    $pdf->SetXY($x + $orgLeft, $y + $extraTop);
+		    $pdf->Cell($orgW,4,'Organic',0,0,'C');
+
+		    $x += $leftShift;
+		    $count++;
+		}
+
+		$y += $downShift;
+		$x = $left;
+	    }
+
+	    $x = $left;
+	    $y = $top;
+	}
+
+	$bitFieldQ = "SELECT fieldIndex, name FROM bitFields WHERE department = 5 ORDER BY fieldIndex";
+	$bitFieldR = mysqli_query($db_slave, $bitFieldQ);
+
+	$bitField = sprintf('%b', (int) $detailRow['bitField']);
+
+	for ($i = 1; $i <= strlen($bitField); $i++) {
+	   $bitFieldArray[] = substr($bitField, strlen($output)-$i, 1);
+	}
+
+	while (list($index, $name) = mysqli_fetch_row($bitFieldR)) {
+	    $bF[$index] = (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? $name : NULL);
+	}
     }
 
     /**
@@ -526,6 +635,7 @@ if (isset($_POST['submitted'])) {
                 <option value="TINY">HABA Style</option>
                 <option value="BIG" SELECTED>Standard Style</option>
 		<option value="CIRCLE">Bulk Herbs Tags</option>
+		<option value="WINE">Wine Tags</option>
             </select></b></p></th>
         </tr>
         <tr>

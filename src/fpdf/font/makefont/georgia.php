@@ -1,4 +1,6 @@
 <?php
-    require_once ('./src/fpdf/font/makefont/makefont.php');
-    MakeFont('./georgiai.ttf', './georgiai.afm');
+    require_once ('./makefont.php');
+    MakeFont('./CenturyFontFiles/CenturyItalic.ttf', './CenturyFontFiles/CenturyItalic.afm');
+    MakeFont('./CenturyFontFiles/CenturyBold.ttf', './CenturyFontFiles/CenturyBold.afm');
+    MakeFont('./CenturyFontFiles/CenturyRegular.ttf', './CenturyFontFiles/CenturyRegular.afm');
 ?>
