@@ -532,75 +532,90 @@ if (isset($_POST['submitted'])) {
 	$pdf->AddFont('Century', 'B', 'CenturyBold.php');
 	$pdf->AddFont('Century', 'I', 'CenturyItalic.php');
 
+	$mainQ = "SELECT d.brand, d.product, p.normal_price, p.department, d.bitField
+	    FROM products AS p
+		INNER JOIN product_details AS d ON p.upc=d.upc
+	    WHERE p.inuse = 1
+		AND p.department IN ($dArray)
+		AND p.discounttype <> 3
+	        AND DATE(p.modified) BETWEEN '$date1' AND '$date2'
+	    ORDER BY p.modified";
 
-	$pdf->SetFont('Georgia','',10);
+	$mainR = mysqli_query($db_slave, $mainQ);
 
-	// Dynamic initial settings
-	$count = 1;
-	while ($count < 25) {
+	if ($mainR && mysqli_num_rows($mainR) > 0) {
+	    // Print tags...
 	    $pdf->AddPage('P');
-	    while ($y < $ymax) {
-	        while ($x < $xmax) {
-		    $pdf->Rect($x, $y, $w, $h);
-		    // Brand
-		    $pdf->SetFont('Century','',16);
-		    $pdf->SetXY($x, $y + $brandTop);
-		    $pdf->Cell($w,6,'Brand',0,0,'C');
 
-		    // Varietal
-		    $pdf->SetFont('Century','I',13);
-		    $pdf->SetXY($x, $y + $varietalTop);
-		    $pdf->Cell($w,6,'Varietal',0,0,'C');
+	    while (list($brand, $product, $price, $dept, $bit) = mysqli_fetch_row($mainR)) {
+	    	$bitFieldQ = "SELECT fieldIndex, name FROM bitFields WHERE department = $dept ORDER BY fieldIndex";
+		$bitFieldR = mysqli_query($db_slave, $bitFieldQ);
 
-		    // Price
-		    $pdf->SetFont('Arial','',13);
-		    $pdf->SetXY($x, $y + $priceTop);
-		    $pdf->Cell($w,6,'$12.99',0,0,'C');
+		$bitField = sprintf('%b', (int) $bit);
 
-		    // Extra Bits
-		    // Biodynamic
-		    $pdf->SetFont('Arial','',10.5);
-		    $pdf->SetXY($x, $y + $extraTop);
-		    $pdf->Cell($bioW,4,'Biodynamic',0,0,'C');
+		$bitFieldArray = array();
 
-		    // Local
-		    $pdf->SetFont('Arial','',10.5);
-		    $pdf->SetXY($x + $localLeft, $y + $extraTop);
-		    $pdf->Cell($localW,4,'Local',0,0,'C');
-
-		    // Vegan
-		    $pdf->SetFont('Arial','',10.5);
-		    $pdf->SetXY($x + $veganLeft, $y + $extraTop);
-		    $pdf->Cell($veganW,4,'Vegan',0,0,'C');
-
-		    // Organic
-		    $pdf->SetFont('Arial','',10.5);
-		    $pdf->SetXY($x + $orgLeft, $y + $extraTop);
-		    $pdf->Cell($orgW,4,'Organic',0,0,'C');
-
-		    $x += $leftShift;
-		    $count++;
+		for ($i = 1; $i <= strlen($bitField); $i++) {
+		   $bitFieldArray[] = substr($bitField, strlen($output)-$i, 1);
 		}
 
-		$y += $downShift;
-		$x = $left;
+		while (list($index, $name) = mysqli_fetch_row($bitFieldR)) {
+		    $bF[$index] = (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? $name : NULL);
+		}
+
+		//$pdf->Rect($x, $y, $w, $h);
+		// Brand
+		$pdf->SetFont('Century','',16);
+		$pdf->SetXY($x, $y + $brandTop);
+		$pdf->Cell($w,6,$brand,0,0,'C');
+
+		// Varietal
+		$pdf->SetFont('Century','I',13);
+		$pdf->SetXY($x, $y + $varietalTop);
+		$pdf->Cell($w,6,$product,0,0,'C');
+
+		// Price
+		$pdf->SetFont('Arial','',13);
+		$pdf->SetXY($x, $y + $priceTop);
+		$pdf->Cell($w,6,'$' . number_format($price,2),0,0,'C');
+
+		// Extra Bits
+		// Biodynamic
+		$pdf->SetFont('Arial','',10.5);
+		$pdf->SetXY($x, $y + $extraTop);
+		$pdf->Cell($bioW,4,$bF[3],0,0,'C');
+
+		// Local
+		$pdf->SetFont('Arial','',10.5);
+		$pdf->SetXY($x + $localLeft, $y + $extraTop);
+		$pdf->Cell($localW,4,$bF[2],0,0,'C');
+
+		// Vegan
+		$pdf->SetFont('Arial','',10.5);
+		$pdf->SetXY($x + $veganLeft, $y + $extraTop);
+		$pdf->Cell($veganW,4,$bF[1],0,0,'C');
+
+		// Organic
+		$pdf->SetFont('Arial','',10.5);
+		$pdf->SetXY($x + $orgLeft, $y + $extraTop);
+		$pdf->Cell($orgW,4,$bF[0],0,0,'C');
+
+		$x += $leftShift;
+
+		if ($x > $xmax) {
+		    $y += $downShift;
+		    $x = $left;
+		}
+
+		if ($y > $ymax) {
+		    $x = $left;
+		    $y = $top;
+		    $pdf->AddPage('P');
+		}
+
 	    }
-
-	    $x = $left;
-	    $y = $top;
-	}
-
-	$bitFieldQ = "SELECT fieldIndex, name FROM bitFields WHERE department = 5 ORDER BY fieldIndex";
-	$bitFieldR = mysqli_query($db_slave, $bitFieldQ);
-
-	$bitField = sprintf('%b', (int) $detailRow['bitField']);
-
-	for ($i = 1; $i <= strlen($bitField); $i++) {
-	   $bitFieldArray[] = substr($bitField, strlen($output)-$i, 1);
-	}
-
-	while (list($index, $name) = mysqli_fetch_row($bitFieldR)) {
-	    $bF[$index] = (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? $name : NULL);
+	} else {
+	    drawForm(sprintf('Query: %s<br />Error: %s', $mainQ, mysqli_error($db_slave)));
 	}
     }
 
@@ -611,7 +626,10 @@ if (isset($_POST['submitted'])) {
 
 
 } else { // Show the form.
+    drawForm();
+}
 
+function drawForm($error = NULL) {
     $page_title = 'Fannie - Administration Module';
     $header = 'Shelftag Generator';
     include ('../includes/header.html');
@@ -624,6 +642,11 @@ if (isset($_POST['submitted'])) {
     <script src="../src/CalendarControl.js" language="javascript"></script>
 
     <form method="post" action="shelftags.php" target="_blank">
+
+    <?php if (isset($error) && !empty($error)) {
+	echo '<p><font color="red">' . $error . '</font></p><br />';
+    }
+    ?>
 
     <h2>Shelftag Generator</h2>
 
