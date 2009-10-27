@@ -65,9 +65,9 @@ function select_cols_to_table($query,$border,$bgcolor,$cols)
                                 echo "NULL";
                         }else{
                                  ?>
-                                 <a href="transaction.php?id=<? echo $row[5]; ?>">
-                                 <? echo $row[0]; ?></a>
-                        <? echo "</td>";
+                                 <a href="transaction.php?id=<?phpecho $row[5]; ?>">
+                                 <?phpecho $row[0]; ?></a>
+                        <?phpecho "</td>";
                         }
                 for ($i=1;$i<$cols; $i++)
                 {
@@ -105,9 +105,9 @@ function select_to_table($query,$border,$bgcolor)
 				echo "NULL";
 			}else{
 				 ?>
-				 <a href="transaction.php?id=<? echo $row[5]; ?>">
-				 <? echo $row[0]; ?></a>
-			<? echo "</td>";
+				 <a href="transaction.php?id=<?phpecho $row[5]; ?>">
+				 <?phpecho $row[0]; ?></a>
+			<?phpecho "</td>";
 			}
 		for ($i=1;$i<$number_cols-1; $i++)
 		{
@@ -157,9 +157,9 @@ function prodList_to_table($query,$border,$bgcolor,$upc)
                                 echo "NULL";
                         }else{
                                  ?>
-                                 <a href="productTestLike.php?upc=<? echo $row[0]; ?>">
-                                 <? echo $row[0]; ?></a>
-                        <? echo "</td>";
+                                 <a href="productTestLike.php?upc=<?phpecho $row[0]; ?>">
+                                 <?phpecho $row[0]; ?></a>
+                        <?phpecho "</td>";
                         }
 		echo "<td width=250>";
 		if(!isset($row[1]))
@@ -211,9 +211,9 @@ function like_to_table($query,$border,$bgcolor)
                                 echo "NULL";
                         }else{
                                  ?>
-                                 <a href="productTestLike.php?upc=<? echo $row[0]; ?>">
-                                 <? echo $row[0]; ?></a>
-                        <? echo "</td>";
+                                 <a href="productTestLike.php?upc=<?phpecho $row[0]; ?>">
+                                 <?phpecho $row[0]; ?></a>
+                        <?phpecho "</td>";
                         }
                 for ($i=1;$i<$number_cols-1; $i++)
                 {
@@ -274,8 +274,8 @@ function receipt_to_table($query,$query2,$border,$bgcolor)
 				echo "NULL";
 			}else{
 				 ?>
-				 <? echo $row[0]; ?>
-			<? echo "</td>";
+				 <?phpecho $row[0]; ?>
+			<?phpecho "</td>";
 			}
 		for ($i=1;$i<$number_cols-1; $i++)
 		{

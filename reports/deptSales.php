@@ -50,21 +50,21 @@ if (isset($_POST['submitted'])) {
 	$$key = $value;
     }
 
-    $today = date("F d, Y");	
+    $today = date("F d, Y");
 
     $_SESSION['deptArray'] = 0;
-    
+
     if($_POST['allDepts'] == 1) {
         $_SESSION['deptArray'] = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,40";
         $arrayName = "ALL DEPARTMENTS";
     } else {
-        
+
     }
-    
+
     if (is_array($_POST['dept'])) {
         $_SESSION['deptArray'] = implode(",",$_POST['dept']);
         $arrayName = $_SESSION['deptArray'];
-    } 
+    }
 
 // Following lines creates a header for the report, listing sort option chosen, report date, date and department range.
 
@@ -72,20 +72,20 @@ if (isset($_POST['submitted'])) {
         $today<br />
         From $date1 to $date2<br />
         Department range: $arrayName<br /><br />";
-    
+
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
-    
+
     $date2a = $date2 . " 23:59:59";
     $date1a = $date1 . " 00:00:00";
     //decide what the sort index is and translate from lay person to mySQL table label
-    
+
     $_SESSION['sort'] = $_POST['sort'];
     $sort = $_SESSION['sort'];
-    
-    if ($sort == 'Department') {		
+
+    if ($sort == 'Department') {
         $order = "Dept";
-    } elseif($sort == 'PLU') {	
+    } elseif($sort == 'PLU') {
         $order = "PLU";
     } elseif($sort == 'Qty') {
         $order = 'Qty';
@@ -94,14 +94,14 @@ if (isset($_POST['submitted'])) {
     } elseif($sort == 'Subdepartment') {
         $order = 'Subdept';
     }
-    
+
     if (isset($inUse)) {
         $inUseA = "AND p.inUse = 1";
     } else {
         $inUseA = "AND p.inUse IN(0,1)";
     }
 
-            
+
     if (isset($salesTotal)) {
         $query1 = "SELECT * FROM (";
         for ($i = $year1; $i <= $year2; $i++) {
@@ -113,7 +113,7 @@ if (isset($_POST['submitted'])) {
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999
                 GROUP BY t.department";
-            
+
             if ($i == $year2) {
                 if (substr($date2a, 0, 10) == date('Y-m-d')) {
                     $query1 .= " UNION SELECT d.dept_name,ROUND(SUM(t.total),2) AS total
@@ -125,13 +125,13 @@ if (isset($_POST['submitted'])) {
                             AND t.emp_no <> 9999
                         GROUP BY t.department";
                 }
-                
+
                 $query1 .= ") AS yearSpan";
-                
+
             } else $query1 .= " UNION ";
-            
+
         }
-            
+
         $result1 = mysqli_query($db_slave, $query1);
         //echo $query1;
         echo "<table>\n"; //create table
@@ -146,44 +146,44 @@ if (isset($_POST['submitted'])) {
         }
 
         while ($myrow = mysqli_fetch_row($result1)) { //create array from query
-                                
+
         printf("<tr><td>%s</td><td>%s</td></tr>\n",$myrow[0], $myrow[1]);
-        //convert row information to strings, enter in table cells		
-    } 
-                    
+        //convert row information to strings, enter in table cells
+    }
+
     echo "</table>\n";//end table
-                    
-    }    
-			
+
+    }
+
     if (isset($openRing)) {
         //$query2 - Total open dept. ring
         $query2 = "SELECT * FROM (";
         for ($i = $year1; $i <= $year2; $i++) {
             $query2 .= "SELECT d.dept_name AS Department,ROUND(SUM(t.total),2) AS open_dept, d.dept_no AS Dept_No
-                FROM is4c_op.departments AS d,is4c_log.trans_$i AS t 
-                WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
-                    AND t.trans_status <> 'X' 
-                    AND t.trans_type = 'D' 
-                    AND t.emp_no <> 9999 
+                FROM is4c_op.departments AS d,is4c_log.trans_$i AS t
+                WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a'
+                    AND t.trans_status <> 'X'
+                    AND t.trans_type = 'D'
+                    AND t.emp_no <> 9999
                     AND t.department IN(".$_SESSION['deptArray'].")
                     AND d.dept_no = t.department
                 GROUP BY t.department";
-                
+
             if ($i == $year2) {
                 if (substr($date2a, 0, 10) == date('Y-m-d')) {
                     $query2 .= " UNION SELECT d.dept_name AS Department,ROUND(SUM(t.total),2) AS open_dept, d.dept_no AS Dept_No
-                        FROM is4c_op.departments AS d,is4c_log.dtransactions AS t 
-                        WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
-                            AND t.trans_status <> 'X' 
-                            AND t.trans_type = 'D' 
-                            AND t.emp_no <> 9999 
+                        FROM is4c_op.departments AS d,is4c_log.dtransactions AS t
+                        WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a'
+                            AND t.trans_status <> 'X'
+                            AND t.trans_type = 'D'
+                            AND t.emp_no <> 9999
                             AND t.department IN(".$_SESSION['deptArray'].")
                             AND d.dept_no = t.department
                         GROUP BY t.department";
                 }
-                
+
                 $query2 .= ") AS yearSpan";
-                
+
             } else $query2 .= " UNION ";
         }
 
@@ -212,21 +212,21 @@ if (isset($_POST['submitted'])) {
                     <a href=" . '"openRingDetail.php?date1=' . $date1 . '&date2=' . $date2 . '&dept=' . $dept . '" onClick="return popup(this, \'openRingDetail\')">(Detail)</a></td>
                 </tr>' . "\n";
             //convert row information to strings, enter in table cells
-                                            
+
         }
         echo "</table><br />\n";//end table
         // end of $query2
-			
 
-    } 
-			
+
+    }
+
     if (isset($pluReport)) {
 	// $query3 - Sales per PLU
 /*	SELECT DISTINCT p.upc AS PLU, p.description AS Description, ROUND(p.normal_price,2) AS 'Current Price', ROUND(t.unitPrice,2) AS Price, p.department AS Dept, p.subdept AS Subdept, SUM(t.quantity) AS Qty, ROUND(SUM(t.total),2) AS Total, p.scale as Scale FROM is4c_log.dtransactions t, is4c_op.products p WHERE t.upc = p.upc AND t.department IN(8) AND t.datetime >= '2007-08-06 00:00:00' AND t.datetime <= '2007-08-13 23:59:59' AND t.emp_no <> 9999 AND t.trans_status <> 'X' AND t.upc NOT LIKE '%DP%' AND p.inUse = 1 GROUP BY CONCAT(t.upc, '-',t.unitprice) ORDER BY t.upc */
 	if (isset($deptDetails)) {
             if ($year1 == $year2 && substr($date2a, 0, 10) != date('Y-m-d')) {
-                
-                $query3 = "SELECT DISTINCT 
+
+                $query3 = "SELECT DISTINCT
                         p.upc AS PLU,
                         p.description AS Description,
                         ROUND(p.normal_price,2) AS 'Current Price',
@@ -238,20 +238,20 @@ if (isset($_POST['submitted'])) {
                         p.scale as Scale
                         FROM is4c_log.trans_$year1 t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
                     WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                        AND t.department IN (".$_SESSION['deptArray'].") 
-                        AND t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
+                        AND t.department IN (".$_SESSION['deptArray'].")
+                        AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                         AND t.emp_no <> 9999
                         AND t.trans_status <> 'X'
                         AND t.upc NOT LIKE '%DP%'
                         $inUseA
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)
                     ORDER BY $order";
-                    
+
             } else {
-                    
+
                 $query3 = "SELECT * FROM (";
                 for ($i = $year1; $i <= $year2; $i++) {
-                    $query3 .= "SELECT DISTINCT 
+                    $query3 .= "SELECT DISTINCT
                             p.upc AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
@@ -263,17 +263,17 @@ if (isset($_POST['submitted'])) {
                             p.scale as Scale
                             FROM is4c_log.trans_$i t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
                         WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                            AND t.department IN (".$_SESSION['deptArray'].") 
-                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
+                            AND t.department IN (".$_SESSION['deptArray'].")
+                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
                             AND t.upc NOT LIKE '%DP%'
                             $inUseA
                         GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-                    
+
                     if ($i == $year2) {
                         if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                            $query3 .= "UNION SELECT DISTINCT 
+                            $query3 .= "UNION SELECT DISTINCT
                                     p.upc AS PLU,
                                     p.description AS Description,
                                     ROUND(p.normal_price,2) AS 'Current Price',
@@ -285,8 +285,8 @@ if (isset($_POST['submitted'])) {
                                     p.scale as Scale
                                     FROM is4c_log.dtransactions t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
                                 WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                                    AND t.department IN (".$_SESSION['deptArray'].") 
-                                    AND t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
+                                    AND t.department IN (".$_SESSION['deptArray'].")
+                                    AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                                     AND t.emp_no <> 9999
                                     AND t.trans_status <> 'X'
                                     AND t.upc NOT LIKE '%DP%'
@@ -297,7 +297,7 @@ if (isset($_POST['submitted'])) {
                     } else $query3 .= " UNION ";
                 }
             }
-            
+
             $scaleRow = 8;
             $table_header = '<thead>
                     <tr>
@@ -325,12 +325,12 @@ if (isset($_POST['submitted'])) {
                         <th>Scale</th>
                     </tr>
                 </tfoot><tbody>';
-            
+
 	} elseif (!isset($deptDetails)) {
-            
+
             if ($year1 == $year2 && substr($date2a, 0, 10) != date('Y-m-d')) {
-                
-                $query3 = "SELECT DISTINCT 
+
+                $query3 = "SELECT DISTINCT
                         p.upc AS PLU,
                         p.description AS Description,
                         ROUND(p.normal_price,2) AS 'Current Price',
@@ -340,18 +340,18 @@ if (isset($_POST['submitted'])) {
                         p.scale as Scale
                     FROM is4c_log.trans_$year1 t, is4c_op.products p
                     WHERE t.upc = p.upc
-                        AND t.department IN(".$_SESSION['deptArray'].") 
-                        AND t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
+                        AND t.department IN(".$_SESSION['deptArray'].")
+                        AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                         AND t.emp_no <> 9999
                         AND t.trans_status <> 'X'
                         AND t.upc NOT LIKE '%DP%'
                         $inUseA
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-                    
+
             } else {
                 $query3 = "SELECT * FROM (";
                 for ($i = $year1; $i <= $year2; $i++) {
-                    $query3 .= "SELECT DISTINCT 
+                    $query3 .= "SELECT DISTINCT
                             p.upc AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
@@ -361,17 +361,17 @@ if (isset($_POST['submitted'])) {
                             p.scale as Scale
                         FROM is4c_log.trans_$i t, is4c_op.products p
                         WHERE t.upc = p.upc
-                            AND t.department IN(".$_SESSION['deptArray'].") 
-                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
+                            AND t.department IN(".$_SESSION['deptArray'].")
+                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
                             AND t.upc NOT LIKE '%DP%'
                             $inUseA
                         GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-                        
+
                     if ($i == $year2) {
                         if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                            $query3 .= " UNION SELECT DISTINCT 
+                            $query3 .= " UNION SELECT DISTINCT
                                 p.upc AS PLU,
                                 p.description AS Description,
                                 ROUND(p.normal_price,2) AS 'Current Price',
@@ -381,20 +381,20 @@ if (isset($_POST['submitted'])) {
                                 p.scale as Scale
                             FROM is4c_log.trans_$i t, is4c_op.products p
                             WHERE t.upc = p.upc
-                                AND t.department IN(".$_SESSION['deptArray'].") 
-                                AND t.datetime >= '$date1a' AND t.datetime <= '$date2a' 
+                                AND t.department IN(".$_SESSION['deptArray'].")
+                                AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                                 AND t.emp_no <> 9999
                                 AND t.trans_status <> 'X'
                                 AND t.upc NOT LIKE '%DP%'
                                 $inUseA
                             GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                         }
-                        
+
                         $query3 .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
                     } else $query3 .= " UNION ";
                 }
             }
-            
+
             $scaleRow = 6;
             $table_header = '<thead>
                     <tr>
@@ -424,7 +424,7 @@ if (isset($_POST['submitted'])) {
 	echo '<table border="1" cellpadding="3" cellspacing="3" class="tablesorter">';
 	echo $table_header;
         echo $table_footer;
-	
+
 	if (!$result3) {
             $message  = 'Invalid query: ' . mysqli_error($db_slave) . "\n";
             $message .= 'Whole query: ' . $query3;
@@ -466,7 +466,7 @@ if (isset($_POST['submitted'])) {
     }
 
 } else { // Show the form.
-  
+
     $page_title = 'Fannie - Reports Module';
     $header = 'Department Movement Report';
     include ('../includes/header.html');
@@ -479,15 +479,15 @@ if (isset($_POST['submitted'])) {
     <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker-2.1.2.js"></script>
     <script type="text/javascript">
         Date.format = 'yyyy-mm-dd';
-        $(function(){    
+        $(function(){
             $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
             .dpSetOffset(0, 125);
         });
     </script>
-    <form method="post" action="deptSales.php" target="_blank">		
+    <form method="post" action="deptSales.php" target="_blank">
         <div id="box">
             <table border="0" cellspacing="3" cellpadding="5">
-                <tr> 
+                <tr>
                     <th colspan="2" align="center"> <p><b>Select dept.*</b></p></th>
                 </tr>
                 <tr>
@@ -514,7 +514,7 @@ if (isset($_POST['submitted'])) {
                         <input type="checkbox" name="dept[]" value="10">NF-General<br>
                         <input type="checkbox" name="dept[]" value="9">Bulk Herbs<br>
                         <input type="checkbox" name="dept[]" value="13">NF-Pet<br>
-                        <input type="checkbox" name="dept[]" value="17">Floral<br>	
+                        <input type="checkbox" name="dept[]" value="17">Floral<br>
                         <input type="checkbox" name="dept[]" value="40">Tri-Met<br />
                         <input type="checkbox" name="dept[]" value="18">Marketing
                         </p></font>
@@ -529,7 +529,7 @@ if (isset($_POST['submitted'])) {
                         <p><b>Date Start</b> </p>
                         <p><b>End</b></p>
                     </td>
-                    <td>			
+                    <td>
                         <p><input type="text" size="10" autocomplete="off" name="date1" class="datepick">&nbsp;&nbsp;*</p>
                         <p><input type="text" size="10" autocomplete="off" name="date2" class="datepick">&nbsp;&nbsp;*</p>
                     </td>
@@ -565,7 +565,7 @@ if (isset($_POST['submitted'])) {
                                 <option>Department</option>
                                 <option>Subdepartment</option>
                             </select></p>
-                    </td>		
+                    </td>
                 </tr>
                 <tr>
                     <td align="right"><p><b>In use</b></p></td>
@@ -575,7 +575,7 @@ if (isset($_POST['submitted'])) {
                 <tr>
                     <td colspan="3" align="center"><p>* -- indicates required field</p></td>
                 </tr>
-                <tr> 
+                <tr>
                     <td>&nbsp;</td>
                     <td> <input type=submit name=submit value="Submit"> </td>
                     <td> <input type=reset name=reset value="Start Over"> </td>

@@ -33,7 +33,7 @@ echo '</form>';
 
 ?>
 
-<form name='addBatch' action = 'display.php?batchID=<? echo $newBatch; ?>' method='POST' target=_blank>
+<form name='addBatch' action = 'display.php?batchID=<?phpecho $newBatch; ?>' method='POST' target=_blank>
 	<table>
 		<tr>
 			<td>&nbsp;</td>

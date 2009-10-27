@@ -39,7 +39,7 @@ if ($getBatchIDW[0] < $batchID) {
       $discounttype = 1;
    }
    if ($endDate > $startDate) {
-         $insBatchQ = "INSERT INTO batches(startDate,endDate,batchName,batchType,discounttype) 
+         $insBatchQ = "INSERT INTO batches(startDate,endDate,batchName,batchType,discounttype)
                  VALUES('$startDate','$endDate','$batchName',$batchType,$discounttype)";
         $insBatchR = mysqli_query($db_master, $insBatchQ);
    } else {
@@ -53,6 +53,6 @@ if ($getBatchIDW[0] < $batchID) {
 }
 ?>
 	<FRAMESET rows='40,*' frameborder='0'>
-	   <FRAME src='addItems.php?batchID=<? echo $batchID; ?>' name='add' border='0' scrolling='no'>
-	   <FRAME src='batches.php?batchID=<? echo $batchID; ?>' name='items' border='0' scrolling='yes'>
+	   <FRAME src='addItems.php?batchID=<?php echo $batchID; ?>' name='add' border='0' scrolling='no'>
+	   <FRAME src='batches.php?batchID=<?php echo $batchID; ?>' name='items' border='0' scrolling='yes'>
 	</FRAMESET>
