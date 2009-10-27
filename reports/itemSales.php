@@ -23,13 +23,13 @@ if ((!isset($_POST['submit'])) && (!isset($_POST['upc'])) && (!isset($_GET['upc'
         <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker-2.1.2.js"></script>
         <script type="text/javascript">
             Date.format = 'yyyy-mm-dd';
-            $(function(){    
+            $(function(){
                 $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
                 .dpSetOffset(0, 125);
             });
         </script>
     <BODY onLoad="putFocus(0,0);">
-        <form method="post" action="itemSales.php">		
+        <form method="post" action="itemSales.php">
             <div id="box">
                 <table border="0" cellspacing="3" cellpadding="3">
                     <tr>
@@ -39,7 +39,7 @@ if ((!isset($_POST['submit'])) && (!isset($_POST['upc'])) && (!isset($_GET['upc'
                         <td align="right">
                             <p><b>Date Start</b> </p><p><b>End</b></p>
                         </td>
-                        <td>			
+                        <td>
                             <p><input type="text" size="10" autocomplete="off" name="date1" class="datepick">&nbsp;&nbsp;*</p>
                             <p><input type="text" size="10" autocomplete="off" name="date2" class="datepick">&nbsp;&nbsp;*</p>
                         </td>
@@ -53,7 +53,7 @@ if ((!isset($_POST['submit'])) && (!isset($_POST['upc'])) && (!isset($_GET['upc'
                 <p>If no date is selected, it will default to today and August 1st, 2007.</p><br /><br />
                 <input type=submit name=submit value="Submit">
             </div>
-  
+
         </form>
     </body>
     <?php
@@ -68,7 +68,7 @@ $date2 = $_REQUEST['date2'];
 
 <body>
 
-<?php		
+<?php
 if (isset($upc)) {
     if (is_numeric($upc)) {
 	$upc = str_pad($upc,13,0,STR_PAD_LEFT);
@@ -78,7 +78,7 @@ if (isset($upc)) {
     }
     $resultItem = mysqli_query($db_slave, $queryItem);
     $num = mysqli_num_rows($resultItem);
-   
+
     if ($num == 0) {
         echo "<p>No item match found, would you like to add this (<a href='../item/itemMaint.php?submitted=search&upc=$upc'>" . $upc . " </a>) item?</p>";
     } elseif($num > 1) {
@@ -88,23 +88,23 @@ if (isset($upc)) {
             echo "<a href='itemSales.php?upc=$upc&date1=$date1&date2=$date2'>" . $upc . " </a>- " . $rowItem['description'] . " -- $" .$rowItem['normal_price']. "<br>";
         }
     } else {
-    
-        $today = date("F d, Y");	
+
+        $today = date("F d, Y");
         if (empty($date1)) $date1 = '2007-08-01';
         if (empty($date2)) $date2 = date('Y-m-d');
         // Following lines creates a header for the report, listing sort option chosen, report date, date and department range.
-        
+
         echo "Report on item $upc<br />
         Report run on: $today<br />
         From $date1 to $date2<br /><br />";
-        
+
         $year1 = substr($date1, 0, 4);
         $year2 = substr($date2, 0, 4);
-        
-        if (is_numeric($upc)) {                
+
+        if (is_numeric($upc)) {
             $query = "SELECT SUM(PLU) AS PLU, Description, Current, Price, Dept, Subdept, SUM(Qty) AS Qty, SUM(Total) AS Total FROM (";
             for ($i = $year1; $i <= $year2; $i++) {
-                $query .= "SELECT DISTINCT 
+                $query .= "SELECT DISTINCT
                     p.upc AS PLU,
                     p.description AS Description,
                     ROUND(p.normal_price,2) AS Current,
@@ -115,16 +115,16 @@ if (isset($upc)) {
                     ROUND(SUM(t.total),2) AS Total,
                     p.scale as Scale
                 FROM is4c_log.trans_$i t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no 
-                    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2' 
+                WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+                    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.emp_no <> 9999
                     AND t.trans_status <> 'X'
                     AND t.upc = $upc
                 GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-                
+
                 if ($i == $year2) {
                     if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                        $query .= " UNION SELECT DISTINCT 
+                        $query .= " UNION SELECT DISTINCT
                             p.upc AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS Current,
@@ -135,23 +135,23 @@ if (isset($upc)) {
                             ROUND(SUM(t.total),2) AS Total,
                             p.scale as Scale
                         FROM is4c_log.dtransactions t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                        WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no 
-                            AND DATE(t.datetime) BETWEEN '$date1' AND '$date2' 
+                        WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+                            AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
                             AND t.upc = $upc
                         GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                     }
-                    
-                    $query .= ") AS yearSpan  GROUP BY PLU, Price ORDER BY Price";
-                    
+
+                    $query .= ") AS yearSpan  GROUP BY yearSpan.PLU, Price ORDER BY Price";
+
                 } else $query .= " UNION ";
             }
-                
+
         } elseif (!is_numeric($upc)) {
             $query = "SELECT SUM(PLU) AS PLU, Description, Current, Price, Dept, Subdept, SUM(Qty) AS Qty, SUM(Total) AS Total FROM (";
             for ($i = $year1; $i <= $year2; $i++) {
-                $query .= "SELECT DISTINCT 
+                $query .= "SELECT DISTINCT
                         p.upc AS PLU,
                         p.description AS Description,
                         ROUND(p.normal_price,2) AS Current,
@@ -162,15 +162,15 @@ if (isset($upc)) {
                         ROUND(SUM(t.total),2) AS Total,
                         p.scale as Scale
                     FROM is4c_log.trans_$year t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                    WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no 
-                        AND DATE(t.datetime) BETWEEN '$date1' AND '$date2' 
+                    WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+                        AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                         AND t.emp_no <> 9999
                         AND t.trans_status <> 'X'
                         AND t.description LIKE '%$upc%'
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                 if ($i == $year2) {
                     if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                        $query .= "UNION SELECT DISTINCT 
+                        $query .= "UNION SELECT DISTINCT
                                 p.upc AS PLU,
                                 p.description AS Description,
                                 ROUND(p.normal_price,2) AS Current,
@@ -181,40 +181,40 @@ if (isset($upc)) {
                                 ROUND(SUM(t.total),2) AS Total,
                                 p.scale as Scale
                             FROM is4c_log.dtransactions t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                            WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no 
-                                AND DATE(t.datetime) BETWEEN '$date1' AND '$date2' 
+                            WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+                                AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                                 AND t.emp_no <> 9999
                                 AND t.trans_status <> 'X'
                                 AND t.description LIKE '%$upc%'
                             GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                     }
-                    
-                    $query .= ") AS yearSpan GROUP BY PLU, Price ORDER BY Price";
-                    
+
+                    $query .= ") AS yearSpan GROUP BY yearSpan.PLU, Price ORDER BY Price";
+
                } else $query .= " UNION ";
             }
         }
-        
+
         $query2 = "SELECT DATEDIFF('$date2', '$date1')";
         $result2 = mysqli_query($db_slave, $query2);
         $row2 = mysqli_fetch_row($result2);
         $numdays = $row2[0] + 1;
-        
+
         $result = mysqli_query($db_slave, $query);
-        
-        
+
+
         echo "<table border=1 cellpadding=3 cellspacing=3>";
         echo "<tr><th>UPC</th><th>Description</th><th>Current Price</th><th>Price Sold At</th><th>Department</th><th>Subdepartment</th><th>Qty</th><th>Sales</th><th>Scale</th></tr>";
-        
+
         if (!$result) {
             $message  = 'Invalid query: ' . mysql_error() . "\n";
             $message .= 'Whole query: ' . $query;
             die($message);
         }
-        
+
         $total_sold = 0;
         $total_value_sold = 0;
-        
+
         while ($myrow = mysqli_fetch_row($result)) { //create array from query
             if ($myrow[8] == 0) {$myrow[8] = 'No';} elseif ($myrow[8] == 1) {$myrow[8] = 'Yes';}
             $total_sold += $myrow[6];
@@ -222,10 +222,10 @@ if (isset($upc)) {
             printf('<tr><td><a href="/item/itemMaint.php?submitted=search&upc=%s">' . $myrow[0] . '</a></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' . "\n",$myrow[0], $myrow[1], number_format($myrow[2], 2), number_format($myrow[3], 2),$myrow[4],$myrow[5],number_format($myrow[6], 2), number_format($myrow[7], 2), $myrow[8]);
             //convert row information to strings, enter in table cells
         }
-        
+
         $avg_sold_per_day = number_format(($total_sold / $numdays),2);
         if ($total_sold != 0) {$avg_price_sold_at = "$" . number_format(($total_value_sold / $total_sold),2);} else {$avg_price_sold_at = 'N/A';}
-        
+
         echo "</table>\n";//end table
         //end $query
         echo "  <p>Number of Days: $numdays </p>
