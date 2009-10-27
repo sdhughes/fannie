@@ -8,7 +8,7 @@ $page_title = 'Fannie - Batch Module';
 include ('../includes/header.html');
 require_once ('../includes/mysqli_connect.php');
 
-$batchListQ= "SELECT b.batchID,b.batchName,b.batchType,DATE(b.startDate),b.endDate 
+$batchListQ= "SELECT b.batchID,b.batchName,b.batchType,DATE(b.startDate),b.endDate
           FROM batches as b
           ORDER BY b.batchID DESC";
 
@@ -19,7 +19,7 @@ $batchListR = mysqli_query($db_slave, $batchListQ);
 $maxBatchQ = "SELECT max(batchID) FROM batches";
 $maxBatchR = mysqli_query($db_slave, $maxBatchQ);
 $maxBatchW = mysqli_fetch_row($maxBatchR);
-$newBatch = $maxBatchW[0] + 1; 
+$newBatch = $maxBatchW[0] + 1;
 
 
 if (!isset($_POST["showinactive"])) {$_POST["showinactive"] = "hide";}
@@ -33,7 +33,7 @@ echo '</form>';
 
 ?>
 
-<form name='addBatch' action = 'display.php?batchID=<?phpecho $newBatch; ?>' method='POST' target=_blank>
+<form name='addBatch' action = 'display.php?batchID=<?php echo $newBatch; ?>' method='POST' target=_blank>
 	<table>
 		<tr>
 			<td>&nbsp;</td>
@@ -68,10 +68,10 @@ while($batchListW = mysqli_fetch_row($batchListR)){
 		if ($batchListW[2] == 1) $batchType = "Sales Batch";
 		elseif ($batchListW[2] == 2) $batchType = "Discontinued Items Batch";
 		elseif ($batchListW[2] == 6) $batchType = "Price Change Batch";
-		
+
 		if ($start <= $date && $end >= $date) $active = "<font color=green>Active</font>";
 		else $active = "<font color=red>InActive</font>";
-	   	
+
 		$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
 		echo "<tr bgcolor='$bg'><td><a href=display.php?batchID=$batchListW[0] target=_blank>";
 	   	echo "$batchListW[1]</a></td>";
@@ -84,10 +84,10 @@ while($batchListW = mysqli_fetch_row($batchListR)){
 		if ($batchListW[2] == 1) $batchType = "Sales Batch";
 		elseif ($batchListW[2] == 2) $batchType = "Discontinued Items Batch";
 		elseif ($batchListW[2] == 6) $batchType = "Price Change Batch";
-		
+
 		if ($start <= $date && $end >= $date) $active = "<font color=green>Active</font>";
 		else $active = "<font color=red>InActive</font>";
-		
+
 		$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
 		echo "<tr bgcolor='$bg'><td><a href=display.php?batchID=$batchListW[0] target=_blank>";
 		echo "$batchListW[1]</a></td>";
