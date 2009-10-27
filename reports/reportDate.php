@@ -403,6 +403,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                WHERE (date(d.datetime) = '".$db_date."')
                AND d.upc = 'DISCOUNT'
                AND d.memType = 6
+	       AND d.staff NOT IN (3,6)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
 
@@ -497,6 +498,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                WHERE date(d.datetime) = '".$db_date."'
                AND d.upc = 'CASEDISCOUNT'
                AND d.memType = 6
+	       AND d.staff NOT IN (3,6)
                AND d.emp_no <> 9999
                AND d.trans_status <> 'X'";
 
