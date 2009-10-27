@@ -32,10 +32,10 @@ mysql_select_db($dbdata,$db);
 
 
 /* -----------------------start select_to_table-----------------------*/
-/* creates a table from query defined outside function. 
+/* creates a table from query defined outside function.
    Variables are:
-   		$query = query to run 
-  
+   		$query = query to run
+
    example:
 	$x = "SELECT * FROM tlog WHERE TransDate BETWEEN '2004-04-01' AND '2004-04-02' LIMIT 50"
 	select_to_table($x);
@@ -65,9 +65,9 @@ function select_cols_to_table($query,$border,$bgcolor,$cols)
                                 echo "NULL";
                         }else{
                                  ?>
-                                 <a href="transaction.php?id=<?phpecho $row[5]; ?>">
-                                 <?phpecho $row[0]; ?></a>
-                        <?phpecho "</td>";
+                                 <a href="transaction.php?id=<?php echo $row[5]; ?>">
+                                 <?php echo $row[0]; ?></a>
+                        <?php echo "</td>";
                         }
                 for ($i=1;$i<$cols; $i++)
                 {
@@ -105,9 +105,9 @@ function select_to_table($query,$border,$bgcolor)
 				echo "NULL";
 			}else{
 				 ?>
-				 <a href="transaction.php?id=<?phpecho $row[5]; ?>">
-				 <?phpecho $row[0]; ?></a>
-			<?phpecho "</td>";
+				 <a href="transaction.php?id=<?php echo $row[5]; ?>">
+				 <?php echo $row[0]; ?></a>
+			<?php echo "</td>";
 			}
 		for ($i=1;$i<$number_cols-1; $i++)
 		{
@@ -123,7 +123,7 @@ function select_to_table($query,$border,$bgcolor)
 	} echo "</table>\n";
 }
 
-/* -------------------------------end select_to_table-------------------*/ 
+/* -------------------------------end select_to_table-------------------*/
 
 function prodList_to_table($query,$border,$bgcolor,$upc)
 {
@@ -151,15 +151,15 @@ function prodList_to_table($query,$border,$bgcolor,$upc)
 		}else{
                 	echo "<td >";
 		}
-                
+
 		if(!isset($row[0]))
                         {
                                 echo "NULL";
                         }else{
                                  ?>
-                                 <a href="productTestLike.php?upc=<?phpecho $row[0]; ?>">
-                                 <?phpecho $row[0]; ?></a>
-                        <?phpecho "</td>";
+                                 <a href="productTestLike.php?upc=<?php echo $row[0]; ?>">
+                                 <?php echo $row[0]; ?></a>
+                        <?php echo "</td>";
                         }
 		echo "<td width=250>";
 		if(!isset($row[1]))
@@ -167,7 +167,7 @@ function prodList_to_table($query,$border,$bgcolor,$upc)
 			echo "NULL";
 		}else{
 			echo $row[1];
-		}	
+		}
 		echo "</td>";
                 for ($i=2;$i<$number_cols; $i++)
                 {
@@ -211,9 +211,9 @@ function like_to_table($query,$border,$bgcolor)
                                 echo "NULL";
                         }else{
                                  ?>
-                                 <a href="productTestLike.php?upc=<?phpecho $row[0]; ?>">
-                                 <?phpecho $row[0]; ?></a>
-                        <?phpecho "</td>";
+                                 <a href="productTestLike.php?upc=<?php echo $row[0]; ?>">
+                                 <?php echo $row[0]; ?></a>
+                        <?php echo "</td>";
                         }
                 for ($i=1;$i<$number_cols-1; $i++)
                 {
@@ -236,20 +236,20 @@ function receipt_to_table($query,$query2,$border,$bgcolor)
 {
 	//echo $query2;
         $result = mysql_query($query2);
-	$results = mysql_query($query); 
+	$results = mysql_query($query);
 	$number_cols = mysql_num_fields($results);
 	$number2_cols = mysql_num_fields($result);
 	//display query
 	//echo "<b>query: $query</b>";
 	//layout table header
 	$row2 = mysql_fetch_row($result);
-	$emp_no = $row2[4];	
+	$emp_no = $row2[4];
 	//echo $emp_no;
 	//$queryEmp = "SELECT * FROM Employees where emp_no = $emp_no";
 	//$resEmp = mysql_query($queryEmp,$db);
 	//$rowEmp = mysql_fetch_row($resEmp);
 	//echo $rowEmp[4];
-	
+
 	//echo $query2;
 	echo "<table border = $border bgcolor=$bgcolor>\n";
 	echo "<tr><td align=center colspan=4>W H O L E" . " &nbsp " ."F O O D S" . " &nbsp "."C O - O P</TD></tR>";
@@ -274,8 +274,8 @@ function receipt_to_table($query,$query2,$border,$bgcolor)
 				echo "NULL";
 			}else{
 				 ?>
-				 <?phpecho $row[0]; ?>
-			<?phpecho "</td>";
+				 <?php echo $row[0]; ?>
+			<?php echo "</td>";
 			}
 		for ($i=1;$i<$number_cols-1; $i++)
 		{
@@ -288,9 +288,9 @@ function receipt_to_table($query,$query2,$border,$bgcolor)
 			}
 			echo "</td>\n";
 		} echo "</tr>\n";
-	
-		
-	} 
+
+
+	}
 	echo "<tr><td colspan=4>&nbsp;</td></tr>";
 	echo "<tr><td colspan=4 align=center>--------------------------------------------------------</td></tr>";
 	echo "<tr><td colspan=4 align=center>Reprinted Transaction</td></tr>";
@@ -306,7 +306,7 @@ function receipt_to_table($query,$query2,$border,$bgcolor)
 /* creates a table returning all values from a table (SELECT * FROM depts)
    Variables are:
    		$table = table to run query on
-  
+
    example:
    	select_star_from(depts);
 */
@@ -401,8 +401,8 @@ function select_where_equal($table,$where,$whereVar)
 
 /* ----------------------------start select_where_between----------------------*/
 /* creates a table using a SELECT WHERE syntax (SELECT * FROM transmemhead WHERE memNum BETWEEN '175' AND '185')
-   Variables are 
-   		$table = table for select 
+   Variables are
+   		$table = table for select
 		$where = field for where statement
 		$whereVar1 = beginning value for where statement
 		$whereVar2 = ending value for where statement
@@ -456,10 +456,10 @@ function select_where_between($table,$where,$whereVar1,$whereVar2)
 	$value = field to be used for drop down value
 	$label = field to be used for the label on the drop down menu
 	$name = name of the drop down menu
-	
+
 	example:
 		select_to_drop(depts,deptNum,deptDesc,deptList)
-		
+
 */
 
 function select_to_drop($table,$value,$label,$name)
@@ -473,14 +473,14 @@ function select_to_drop($table,$value,$label,$name)
 	//display query
 	//echo "<b>query: $query</b>";
 	echo "<select name=$name id=$name>";
-	do 
-	{  
+	do
+	{
   		echo "<option value=" .$row_members[$value] . ">";
   		echo $row_members[$label];
   		echo "</option>";
 	} while ($row_members = mysql_fetch_array($results));
   	$rows = mysql_num_rows($results);
-  	if($rows > 0) 
+  	if($rows > 0)
   	{
     	mysql_data_seek($results, 0);
 		$row_members = mysql_fetch_assoc($results);
@@ -489,24 +489,24 @@ function select_to_drop($table,$value,$label,$name)
 }
 
 
-/** SNIPPED FROM PRODfUNCTION.PHP . . . 
+/** SNIPPED FROM PRODfUNCTION.PHP . . .
 	$query2 = "SELECT * FROM departments ORDER BY  dept_no";
     $value = "dept_no";
     $label = "dept_name";
     $deptList = "dept";
-    $select = $rowItem[12]; 
+    $select = $rowItem[12];
 	query_to_drop($query2,$value,$label,$deptList,$select);
 **/
 
 function query_to_drop($query,$value,$label,$name,$line)
 {
-	$results = mysql_query($query); 
+	$results = mysql_query($query);
         //$number_cols = mysql_num_fields($results);
         //display query
 	//echo $number_cols;
         //echo "<b>query: $query</b>";
 	echo "<select name=$name id=$name>";
-        
+
 	while($row_members = mysql_fetch_array($results)){
 	   if($line == $row_members[$value]){
    	      echo "<option value=" .$row_members[$value] . " selected>";
@@ -514,7 +514,7 @@ function query_to_drop($query,$value,$label,$name,$line)
  	   }else{
 	      echo "<option value=" .$row_members[$value] . ">";
 	      echo $row_members[$label];
-	   }	
+	   }
 	}
 	/*do
         {
@@ -537,28 +537,28 @@ function query_to_drop($query,$value,$label,$name,$line)
 
 function item_sales_month($upc,$period,$time){
     $query_sales = "SELECT COUNT(upc),SUM(total) FROM dLogMonth WHERE upc = '$upc' AND datediff($period,getdate(),tdate) = $time";
-    //echo $query_sales;	
+    //echo $query_sales;
     $result_sales = mysql_query($query_sales);
     $num_sales = mysql_num_rows($result_sales);
-    
+
     $row_sales=mysql_fetch_row($result_sales);
     echo "<td align=right>";
-    echo $row_sales[0]; 
+    echo $row_sales[0];
     echo "</td><td align=right>$ " . $row_sales[1];
-    
+
 }
 
 function item_sales_last_month($upc,$period,$time){
     $query_sales = "SELECT COUNT(upc),SUM(total) FROM dLogLastMonth WHERE upc = '$upc' AND datediff($period,getdate(),tdate) = $time";
-    //echo $query_sales;        
+    //echo $query_sales;
     $result_sales = mysql_query($query_sales);
     $num_sales = mysql_num_rows($result_sales);
-    
+
     $row_sales=mysql_fetch_row($result_sales);
     echo "<td align=right>";
-    echo $row_sales[0]; 
+    echo $row_sales[0];
     echo "</td><td align=right>$ " . $row_sales[1];
-    
+
 }
 
 /* pads upc with zeroes to make $upc into IS4C compliant upc*/
@@ -577,7 +577,7 @@ function test_upc($upc){
 }
 
 function test_like($upc){
-   $upc = str_pad_upc($upc); 
+   $upc = str_pad_upc($upc);
    $testLikeQ = "SELECT likeCode FROM upcLike WHERE upc = '$upc'";
    $testLikeR = mysql_query($testLikeQ);
    $testLikeN = mysql_num_rows($testLikeR);
@@ -598,12 +598,12 @@ function find_like_code($upc){
       //echo $getLikeCodeQ;
       $getLikeCodeR = mysql_query($getLikeCodeQ);
       $getLikeCodeW = mysql_fetch_row($getLikeCodeR);
-      $likeCode = $getLikeCodeW[1];     
+      $likeCode = $getLikeCodeW[1];
       //echo $likeCode;
     }else{
       $likeCode = 0;
-    } 
-  
+    }
+
     return $likeCode;
 }
 
@@ -612,11 +612,11 @@ function find_like_code($upc){
 function like_coded_items($upc){
    $like = test_like($upc);
    $upc = str_pad_upc($upc);
-   
+
    $selUPCLikeQ = "SELECT * FROM upcLike where likeCode = $like";
    $selUPCLikeR = mysql_query($selUPCLikeQ);
- 
-   return $selUPCLikeR;   
+
+   return $selUPCLikeR;
 }
 
 /* create an array from the results of a POSTed form */
@@ -644,4 +644,3 @@ function get_get_data($int){
 /* rounding function to create 'non-stupid' pricing */
 
 ?>
-
