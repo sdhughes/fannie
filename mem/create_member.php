@@ -137,21 +137,21 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, check the d
 	}
 	if (isset($_POST['phone1']) && ($_POST['phone1'] <= 999)) {
 		$ph1 = (int)(escape_data($_POST['phone1']));
-		$ph1 = str_pad($ph1, 3, '0', STRPADLEFT);
+		$ph1 = str_pad($ph1, 3, '0', STR_PAD_LEFT);
 	} else {
 		$ph1 = NULL;
 	}
 	
 	if (isset($_POST['phone2']) && ($_POST['phone2'] <= 999)) {
 		$ph2 = (int)(escape_data($_POST['phone2']));
-		$ph2 = str_pad($ph2, 3, '0', STRPADLEFT);
+		$ph2 = str_pad($ph2, 3, '0', STR_PAD_LEFT);
 	} else {
 		$ph2 = NULL;
 	}
 	
 	if (isset($_POST['phone3']) && ($_POST['phone3'] <= 9999)) {
 		$ph3 = (int)(escape_data($_POST['phone3']));
-		$ph3 = str_pad($ph3, 4, '0', STRPADLEFT);
+		$ph3 = str_pad($ph3, 4, '0', STR_PAD_LEFT);
 	} else {
 		$ph3 = NULL;
 	}

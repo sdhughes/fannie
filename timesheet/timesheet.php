@@ -10,7 +10,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         $errors = array();
         
         if (checkdate($_POST['month'], $_POST['date'], date('Y'))) {
-                $date = date('Y') . '-' . str_pad($_POST['month'], 2, 0, STRPADLEFT) . '-' . $_POST['date'];
+                $date = date('Y') . '-' . str_pad($_POST['month'], 2, 0, STR_PAD_LEFT) . '-' . $_POST['date'];
         } else {
                 $errors[] = 'The date you have entered is not a valid date.';
         }
@@ -213,7 +213,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         echo '</select>
             Date: <select name="date">';
             for ($i = 1; $i <= 31; $i++) {
-                $i = str_pad($i, 2, 0, STRPADLEFT);
+                $i = str_pad($i, 2, 0, STR_PAD_LEFT);
                 echo "<option value=\"$i\"";
                 if (date('d') == $i) echo ' SELECTED';
                 echo ">$i</option>\n";

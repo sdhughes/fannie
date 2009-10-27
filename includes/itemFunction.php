@@ -33,7 +33,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 	$bitField = sprintf('%b', (int) $detailRow['bitField']);
 
 	for ($i = 1; $i <= strlen($bitField); $i++) {
-	   $bitFieldArray[] = substr($bitField, strlen($output)-$i, 1);
+	   $bitFieldArray[] = substr($bitField, -$i, 1);
 	}
 
 	if ($bitFieldR && mysqli_num_rows($bitFieldR) > 0) {
@@ -55,7 +55,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
     }
 
     // Depending on if it's new or not, let's make some pretties.
-    if (!isset($rowItem) && is_numeric($upc)) $bodyString = '<font color="red">' . str_pad($upc, 13, 0, STRPADLEFT) . '</font><input type="hidden" name="upc" value="' . $upc . '" /></td><td align = "right"><b>Deposit</b></td><td align="right">$&nbsp;<input type="text" name="deposit" size="3" maxlength="6" value="0.00" /></td></tr>
+    if (!isset($rowItem) && is_numeric($upc)) $bodyString = '<font color="red">' . str_pad($upc, 13, 0, STR_PAD_LEFT) . '</font><input type="hidden" name="upc" value="' . $upc . '" /></td><td align = "right"><b>Deposit</b></td><td align="right">$&nbsp;<input type="text" name="deposit" size="3" maxlength="6" value="0.00" /></td></tr>
         <tr><td align="right"><b>Description</b></td><td align="left"><input type="text" name="description" size="30" maxlength="30" value="Enter Description Here" /></td><td align="right"><b>Price</b></td><td align="right">$&nbsp;<input type="text" name="price" size="3" maxlength="6" /></td>';
     elseif (!isset($rowItem) && !is_numeric($upc)) $bodyString = '<input type="text" name="upc" size="8" maxlength="13" /></td><td align = "right"><b>Deposit</b></td><td align="right">$&nbsp;<input type="text" name="deposit" size="3" maxlength="6" value="0.00" /></td></tr>
         <tr><td align="right"><b>Description</b></td><td align="left"><input type="text" name="description" size="30" maxlength="30" value="' . $upc . '" /></td><td align="right"><b>Price</b></td><td align="right">$&nbsp;<input type="text" name="price" size="3" maxlength="6" /></td>';
@@ -71,8 +71,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 
     // Sale info if active...
     if ($rowItem["end_date"] != 0 && $rowItem["special_price"] != 0) {
-        $date = new DateTime($rowItem["end_date"]);
-        echo '<center><font color="green">Item is on sale at $' . number_format($rowItem["special_price"], 2) . ' through ' . $date->format('m' . "/" . 'd' . "/" . 'y') . '.</font></center>';
+        echo '<center><font color="green">Item is on sale at $' . number_format($rowItem["special_price"], 2) . ' through ' . $rowItem["end_date"] . '.</font></center>';
     }
     // Now Subdept, dept, checkboxes, etc.
     echo    '<br />
