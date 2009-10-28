@@ -7,43 +7,43 @@ function reloadtable($table) {
             "192.168.1.52",
             "192.168.1.53"
             );
-    
+
     $server = "localhost";
     $opDB = "is4c_op";
     $serveruser = "root";
     $serverpass = "";
-    
+
     $laneuser = "root";
     $lanepass = "";
-    
+
     $file = "/pos/is4c/download/".$table.".out";
     $dump = "select * into outfile '".$file."' from ".$table;
     $load = "load data infile '".$file."' into table is4c_op.".$table;
-    
+
     $is4c_op_truncate = "truncate is4c_op.".$table;
     $opdata_truncate = "truncate opdata.".$table;
     $opdata_insert = "insert into opdata. ".$table." select * from is4c_op.".$table;
-    
+
     echo "<font color='#004080' face=helvetica><b>".$table."</b></font>";
     echo "<p>";
-    
-    
+
+
     $continue = 0;
-    
+
     /* establish connection to server */
-    
+
     if ($s_conn = mysql_connect($server, $serveruser, $serverpass)) {
         $continue = 1;
     } else {
         echo "<p><font color='#800000' face=helvetica size=-1>Failed to connect to server</font>";
     }
-    
+
     if ($continue == 1) {
         $continue = 0;
-        if (mysql_select_db("is4c_op", $s_conn)) $continue = 1; 
+        if (mysql_select_db("is4c_op", $s_conn)) $continue = 1;
         else echo "<p><font color='#800000' face=helvetica size=-1>Failed to connect to server database</font>";
     }
-    
+
     if ($continue == 1) {
         $continue = 0;
         $result = mysql_query("select count(*) from ".$table, $s_conn);
@@ -55,13 +55,13 @@ function reloadtable($table) {
     }
 
     // synchronize lanes
-    
+
     if ($continue == 1) {
-        
+
         $continue = 0;
         echo "<p><font color='#004080' face=helvetica size=-1>".$server_num_rows." records downloaded from server</font>";
         echo "<p>";
-            
+
         $i = 1;
         foreach ($aLane as $lane) {
             $lane_num = "lane ".$i;
@@ -80,7 +80,7 @@ function reloadtable($table) {
                 $lane_continue = 0;
                 mysql_query($is4c_op_truncate, $lane_conn);
 
-                if (synctable($table,$serveruser,$opDB,$lane) == 1) {
+                if (synctable($table,$serveruser,$opDB,$lane,$serverpass) == 1) {
                     $result = mysql_query("select count(*) from is4c_op.".$table, $lane_conn);
                     $row = mysql_fetch_array($result);
                     $lane_num_rows = $row[0];
@@ -106,12 +106,12 @@ function reloadtable($table) {
     }
     $time = strftime("%m-%d-%y %I:%M %p", time());
     echo "<p> <p><font color='#004080' face=helvetica size=-1>last run: ".$time."</font>";
-	
+
 }
 
-function synctable($table,$serveruser,$opDB,$lane) {
+function synctable($table,$serveruser,$opDB,$lane,$serverpass) {
     openlog("is4c_connect", LOG_PID | LOG_PERROR, LOG_LOCAL0);
-    exec('mysqldump -u '.$serveruser.' -t '.$opDB.' '.$table.' | mysql -h '.$lane.' '.$opDB." 2>&1", $result, $return_code);
+    exec('mysqldump -u '.$serveruser.' -p' . $serverpass . ' -t '.$opDB.' '.$table.' | mysql -h '.$lane.' '.$opDB." 2>&1", $result, $return_code);
     foreach ($result as $v) {$output .= "$v\n";}
     if ($return_code == 0) {
         return 1;
