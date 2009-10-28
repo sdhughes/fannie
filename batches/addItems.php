@@ -21,23 +21,23 @@ $batchID = $maxBatchIDW[0];
 $batchInfoQ = "SELECT * FROM batches WHERE batchID = $batchID";
 $batchInfoR = mysqli_query($db_master, $batchInfoQ);
 $batchInfoW = mysqli_fetch_row($batchInfoR);
- 
+
 //$batchID = 1;
-if(isset($_GET['batchID'])){
-   $batchID = $_GET['batchID'];
+if (isset($_GET['batchID'])) {
+   $batchID = (int) $_GET['batchID'];
 }
 
-if(isset($_GET['submit'])){
-   $upc = $upc =str_pad($_GET['upc'],13,0,STR_PAD_LEFT);
+if (isset($_GET['submit'])) {
+   $upc = str_pad($_GET['upc'],13,0,STR_PAD_LEFT);
    $salePrice = $_GET['saleprice'];
-   if(isset($_GET['delete'])){
+
+   if (isset($_GET['delete'])) {
       $del = $_GET['delete'];
    }
-   ;
 ?>   <script language="javascript">
     parent.frames[1].location.reload();
     </script>
-<?
+<?php
 } else {
 	$upc = '';
 	$salePrice = '';
@@ -54,7 +54,7 @@ echo "<td><input type=submit name=submit value=submit></td></tr></table>";
 
 //echo "this is upc" . $upc;
 
-$selBListQ = "SELECT * FROM batchList WHERE upc = $upc 
+$selBListQ = "SELECT * FROM batchList WHERE upc = $upc
               AND batchID = $batchID";
 $selBListR = mysqli_query($db_master, $selBListQ);
 $selBListN = mysqli_num_rows($selBListR);
@@ -73,9 +73,9 @@ if ($del == 1) {
    $delBListQ = "DELETE FROM batchList WHERE upc = $upc AND
                 batchID = $batchID";
    $delBListR = mysqli_query($db_master, $delBListQ);
-   $delUpdateQ = "UPDATE products AS p SET p.start_date = NULL, 
-   		p.end_date = NULL, 
-		p.special_price = 0, 
+   $delUpdateQ = "UPDATE products AS p SET p.start_date = NULL,
+   		p.end_date = NULL,
+		p.special_price = 0,
 		p.discounttype = 0
 		WHERE p.upc = $upc";
    $delUpdateR = mysqli_query($db_master, $delUpdateQ);
@@ -86,7 +86,7 @@ if ($del == 1) {
          //echo $insBItemQ;
          $insBItemR = mysqli_query($db_master, $insBItemQ);
       } else {
-         $upBItemQ = "UPDATE batchList SET salePrice=$salePrice WHERE upc = '$upc' 
+         $upBItemQ = "UPDATE batchList SET salePrice=$salePrice WHERE upc = '$upc'
                    AND batchID = $batchID";
          //echo $upBItemQ;
          $upBItemR = mysqli_query($db_master, $upBItemQ);
