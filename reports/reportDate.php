@@ -29,7 +29,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 $date = $_POST['date'];
                 //echo "Date entered: ".$date;
         }
-        if (($_POST['date'] == '1969-12-31') || (!isset($_POST['date']))) {
+        if ((!isset($_POST['date'])) || ($_POST['date'] == '1969-12-31')) {
                 $date = date('Y-m-d');
                 //echo "Date entered: ".$date;
         }
