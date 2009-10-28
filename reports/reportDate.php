@@ -27,14 +27,12 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         setlocale(LC_MONETARY, 'en_US');
         if (isset($_POST['date'])) {
                 $date = $_POST['date'];
-                echo "Date entered: ".$date;
+                //echo "Date entered: ".$date;
         }
         if (($_POST['date'] == '1969-12-31') || (!isset($_POST['date']))) {
                 $date = date('Y-m-d');
-                echo "Date entered: ".$date;
+                //echo "Date entered: ".$date;
         }
-
-        echo "<br />";
 
         if (strpbrk($date, "-") == false) {
             $dateArray = explode("/",$date);
@@ -44,7 +42,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
             $db_date = date('Y-m-d', mktime(0, 0, 0, $dateArray[1], $dateArray[2], $dateArray[0]));
         }
 
-        echo "<br>Report run " .date('Y-m-d'). " for ";
+        echo "Report run " .date('Y-m-d'). " for ";
 
         require_once('../includes/mysqli_connect.php');
         require_once('../includes/selectToTable.php');
@@ -79,12 +77,11 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 list($gross) = mysqli_fetch_row($results);
                 if (!$gross) $gross = -1;
 
-
         /**
          * sales of inventory departments
          */
 
-        $inventoryDeptQ = "SELECT t.dept_no AS Department ,t.dept_name AS 'Department Name',ROUND(sum(d.total),2) AS 'Department Total',ROUND((SUM(d.total)/$gross)*100,2) as 'Percent of Store Sales'
+        $inventoryDeptQ = "SELECT t.dept_no AS Department ,t.dept_name AS 'Department Name',ROUND(sum(d.total),2) AS 'Department Total'
                 FROM $transtable AS d RIGHT JOIN is4c_op.departments AS t
                 ON d.department = t.dept_no
                 AND date(d.datetime) = '".$db_date."'
@@ -93,24 +90,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 AND d.trans_subtype <> 'MC'
                 AND d.emp_no <> 9999
                 GROUP BY t.dept_no
-                ORDER BY t.dept_no
-                LIMIT 27";
-
-        /**
-         * Sales for non-inventory departments
-         */
-
-        $noninventoryDeptQ = "SELECT d.department AS Department,t.dept_name AS 'Department Name',ROUND(sum(total),2) as 'Department Total'
-                FROM $transtable as d RIGHT JOIN is4c_op.departments as t
-                ON d.department = t.dept_no
-                AND date(d.datetime) = '".$db_date."'
-                AND d.department > 35
-                AND d.trans_status <> 'X'
-                AND d.trans_subtype <> 'MC'
-                AND d.emp_no <> 9999
-                GROUP BY t.dept_no
-                ORDER BY t.dept_no
-                LIMIT 31,7";
+                ORDER BY t.dept_no";
 
         $dept_subtotalQ = "SELECT ROUND(SUM(d.total),2) AS 'Department Subtotal'
                 FROM $transtable d
@@ -127,6 +107,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 WHERE d.trans_subtype = t.TenderCode
                 AND date(d.datetime) = '".$db_date."'
                 AND d.trans_status <> 'X'
+		AND d.trans_subtype <> 'MI'
                 AND d.emp_no <> 9999
                 GROUP BY t.TenderName";
 
@@ -146,93 +127,6 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 AND date(d.datetime) = '".$db_date."'
                 AND d.emp_no <> 9999";
 
-        $transCountQ = "SELECT COUNT(d.total) as 'Transaction Count'
-                FROM $transtable AS d
-                WHERE date(d.datetime) = '".$db_date."'
-                AND d.trans_status <> 'X'
-                AND d.emp_no <> 9999
-                AND d.upc = 'DISCOUNT'";
-
-                $transCountR = mysqli_query($db_slave, $transCountQ);
-                list($count) = mysqli_fetch_row($transCountR);
-
-
-        $basketSizeQ = "SELECT ROUND(($gross/$count),2) AS 'Average Bag'";
-
-        /**
-         * Sales of equity
-         * ACG Equity dept. = 45
-        */
-
-        $sharePaymentsQ = "SELECT d.card_no AS 'Card Number',t.dept_name AS 'Department Name',ROUND(sum(total),2) as Total
-                FROM $transtable as d JOIN is4c_op.departments as t ON d.department = t.dept_no
-                WHERE date(datetime) = '".$db_date."'
-                AND d.department = 45
-                AND d.trans_status <> 'X'
-                AND d.emp_no <> 9999
-                GROUP BY d.card_no, t.dept_name";
-
-        /*
-        $shareCountQ = "SELECT COUNT(total) AS peopleshare_count
-                FROM $transtable
-                WHERE date(datetime) = '".$db_date."'
-                AND description = 'MEMBERSHIP EQUITY'
-                AND trans_status <> 'X'
-                AND emp_no <> 9999";
-
-                $shareCountR = mysqli_query($db_slave, $shareCountQ);
-                $row = mysql_fetch_row($shareCountR);
-                $shareCount = $row[0];
-        */
-        /**
-         * Discounts by member type;
-         */
-
-        $memtypeQ = "SELECT m.memDesc as memType,ROUND(SUM(d.total),2) AS Sales
-                FROM $transtable d INNER JOIN
-                        is4c_op.custdata c ON d.card_no = c.CardNo INNER JOIN
-                        is4c_op.memtype m ON c.memType = m.memtype
-                WHERE date(d.datetime) = '".$db_date."'
-                AND d.trans_type IN('I','D')
-                AND d.trans_status <>'X'
-                AND d.department <= 35 AND d.department <> 0
-                AND d.upc <> 'DISCOUNT'
-                AND d.emp_no <> 9999
-                GROUP BY c.memtype";
-
-        /*
-        $MADcouponQ = "SELECT (ROUND(SUM(unitPrice),2)) AS MAD_Coupon_total
-                FROM $transtable
-                WHERE date(datetime) = '".$db_date."'
-                AND trans_subtype = 'IC'
-                AND voided = 9
-                AND trans_status <> 'X'
-                AND emp_no <> 9999";
-        */
-
-        /**
-         * Customer Services - Tri-met, stamps, sisters of the road coupons
-         */
-
-        $trimetQ = "SELECT SUM(quantity) AS 'Trimet Count', ROUND(SUM(total),2) AS 'Trimet Sales'
-                FROM $transtable
-                WHERE date(datetime) = '".$db_date."'
-                AND department = 40
-                AND trans_status <> 'X'
-                AND emp_no <> 9999";
-
-        /**
-         * Miscellaneus - store charges, R/As, returns
-         */
-
-        $returnsQ = "SELECT SUM(quantity) AS 'Returns Count', ROUND(sum(l.total),2) as 'Returns Total'
-                FROM $transtable as l
-                WHERE date(datetime) = '".$db_date."'
-                AND l.department < 20 AND l.department <> 0
-                AND l.trans_status = 'R'
-                AND l.emp_no <> 9999";
-
-
         ////////////////////////////
         //
         //
@@ -245,13 +139,6 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         echo $db_date . '<br>';
         echo '<font size = 2>';
         echo '<h4>Sales - Gross & NET</h4>';
-        /**
-        * total sales
-        * Gross = total of all inventory depts. 1-15 (at PFC)
-        * Hash = People Shares + General Donations + Customers Svcs. + gift certs. sold + Bottle Deposits & Returns + Comm. Rm. fees
-        * Net = Gross + Everything else + R/A (45) - Market EBT (37) - Charge pmts.(35) - All discounts - Coupons(IC & MC) -
-        * 		Gift Cert. Tender - Store Charge
-        */
 
        // Haus edit 08-06-07
        $gross2Q = "SELECT ROUND(SUM(total),2) AS 'Gross Sales'
@@ -280,12 +167,11 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 
        //
        //	BEGIN STAFF_TOTAL
-       //	Total Staff discount given less the needbased and MAD discount
        //
        $staffQ = "SELECT (SUM(d.unitPrice)) AS 'Staff Total'
                FROM $transtable AS d
                WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'DISCOUNT'
+               AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.staff IN (1,2,5)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
@@ -307,7 +193,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        $memQ = "SELECT SUM(d.total) as 'Member'
                FROM $transtable d
                WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'DISCOUNT'
+               AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.memType IN (1,2,3,4,5)
                AND d.staff = 0
                AND d.emp_no <> 9999
@@ -325,7 +211,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        $wmQ = "SELECT SUM(d.unitPrice) AS 'Working Member'
                FROM $transtable AS d
                WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'DISCOUNT'
+               AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.staff IN (3,6)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
@@ -357,7 +243,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
               $boardQ = "SELECT SUM(d.unitPrice) AS 'Board Member'
                FROM $transtable AS d
                WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'DISCOUNT'
+               AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.staff = 4
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
@@ -380,7 +266,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        $nonQ = "SELECT SUM(d.total) as non
                FROM $transtable d
                WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'DISCOUNT'
+               AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.memType IN (0, 7)
                AND d.staff = 0
                AND d.emp_no <> 9999
@@ -401,7 +287,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        $sisterQ = "SELECT (ROUND(SUM(d.unitPrice),2)) AS 'Sister Orgs'
                FROM $transtable AS d
                WHERE (date(d.datetime) = '".$db_date."')
-               AND d.upc = 'DISCOUNT'
+               AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.memType = 6
 	       AND d.staff NOT IN (3,6)
                AND d.trans_status <> 'X'
@@ -425,126 +311,12 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        //
        //	END SISTER_ORGS
        //
-       /* Case Discount Tracking */
-        // Non-Member
-        $nonCaseQ = "SELECT SUM(d.total) as non
-               FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'CASEDISCOUNT'
-               AND d.memType in (0, 7)
-               AND d.staff = 0
-               AND d.emp_no <> 9999
-               AND d.trans_status <> 'X'";
-
-        $nonCaseR = mysqli_query($db_slave, $nonCaseQ);
-        list($nonCase) = mysqli_fetch_row($nonCaseR);
-
-        if (is_null($nonCase)) {
-                $nonCase = 0;
-        }
-
-        // Member
-        $memCaseQ = "SELECT SUM(d.total) as 'Member'
-               FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'CASEDISCOUNT'
-               AND d.memType IN (1,2,3,4,5)
-               AND d.staff = 0
-               AND d.emp_no <> 9999
-               AND d.trans_status <> 'X'";
-
-        $memCaseR= mysqli_query($db_slave, $memCaseQ);
-        list($memCase) = mysqli_fetch_row($memCaseR);
-
-        if (is_null($memCase)) {
-                $memCase = 0;
-        }
-
-        // Working Member & NOV
-        $wmemCaseQ = "SELECT SUM(d.total) as 'Member'
-               FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'CASEDISCOUNT'
-               AND d.staff IN (3,6)
-               AND d.emp_no <> 9999
-               AND d.trans_status <> 'X'";
-
-        $wmemCaseR= mysqli_query($db_slave, $wmemCaseQ);
-        list($wmemCase) = mysqli_fetch_row($wmemCaseR);
-
-        if (is_null($wmemCase)) {
-                $wmemCase = 0;
-        }
-
-        // Board
-        $bdmemCaseQ = "SELECT SUM(d.total) as 'Member'
-               FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'CASEDISCOUNT'
-               AND d.staff = 4
-               AND d.emp_no <> 9999
-               AND d.trans_status <> 'X'";
-
-        $bdmemCaseR= mysqli_query($db_slave, $bdmemCaseQ);
-        list($bdmemCase) = mysqli_fetch_row($bdmemCaseR);
-
-        if (is_null($bdmemCase)) {
-                $bdmemCase = 0;
-        }
-
-        // Sister Orgs
-        $sisCaseQ = "SELECT SUM(d.total) as 'Member'
-               FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'CASEDISCOUNT'
-               AND d.memType = 6
-	       AND d.staff NOT IN (3,6)
-               AND d.emp_no <> 9999
-               AND d.trans_status <> 'X'";
-
-        $sisCaseR= mysqli_query($db_slave, $sisCaseQ);
-        list($sisCase) = mysqli_fetch_row($sisCaseR);
-
-        if (is_null($sisCase)) {
-                $sisCase = 0;
-        }
-
-        // Staff, Sub, SO
-        $staffCaseQ = "SELECT SUM(d.total) as 'Member'
-               FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
-               AND d.upc = 'CASEDISCOUNT'
-               AND d.staff IN (1,2,5)
-               AND d.emp_no <> 9999
-               AND d.trans_status <> 'X'";
-
-        $staffCaseR= mysqli_query($db_slave, $staffCaseQ);
-        list($staffCase) = mysqli_fetch_row($staffCaseR);
-
-        if (is_null($staffCase)) {
-                $staffCase = 0;
-        }
-
-        // Add it all up.
-        $totalCaseQ = "SELECT SUM(total) AS totaldisc
-               FROM $transtable
-               WHERE date(datetime) = '" . $db_date . "'
-               AND upc = 'CASEDISCOUNT'
-               AND trans_status <> 'X'
-               AND emp_no <> 9999";
-
-        $totalCaseR = mysqli_query($db_slave, $totalCaseQ);
-        list($totalCase) = mysqli_fetch_row($totalCaseR);
-        if (is_null($totalCase)) {
-                $totalCase = 0;
-        }
-       // End Case Discount Queries
 
        // Haus - 08-03-2007
        $totaldiscount2Q = "SELECT SUM(total) AS totaldisc
                FROM $transtable
                WHERE date(datetime) = '" . $db_date . "'
-               AND upc = 'DISCOUNT'
+               AND upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND trans_status <> 'X'
                AND emp_no <> 9999";
        $totaldiscount2R = mysqli_query($db_slave, $totaldiscount2Q);
@@ -567,60 +339,30 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                $net2 = $net2 + $coupons2;
        // End haus edit.
 
-       $chgQ = "SELECT ROUND(SUM(total),2) AS chg
-               FROM $transtable
-               WHERE date(datetime) = '".$db_date."'
-               AND trans_subtype IN ('MI')
-               AND trans_status <> 'X'
-               AND emp_no <> 9999";
-
-               $chgR = mysqli_query($db_slave, $chgQ);
-               list($chg) = mysqli_fetch_row($chgR);
-
-               if (is_null($chg)) {
-                       $chg = 0;
-               }
-
        $totalDiscQ = "SELECT ($mem_total + $staff_total + $sister_org + $wm_total + $board + $non_total) as total_discounts";
 
                $totalDiscR = mysqli_query($db_slave, $totalDiscQ);
                list($totalDisc) = mysqli_fetch_row($totalDiscR);
 
-       //$netQ = "SELECT ($gross + $hash + $totalDisc + $coupons + $strchg + $RA + $other) as NET_TOTAL";
-       $netQ = "SELECT ($gross + $totalDisc + $totalCase) as NET_TOTAL";
-
-               $netR = mysqli_query($db_slave, $netQ);
-               list($net) = mysqli_fetch_row($netR);
-
        // Haus edit...checking (08-06-07)
        echo "<table border=0><tr><td>Gross Total</td><td align=right>".money_format('%n',$gross2)."</td></tr>";
        echo "<tr><td>Total Discount</td><td align=right>".money_format('%n',$totaldiscount2)."</td></tr>";
-       echo "<tr><td>Total Case Discount</td><td align=right>".money_format('%n',$totalCase)."</td></tr>";
        echo "<tr><td>Instore Coupons</td><td align=right>".money_format('%n',$coupons2)."</td></tr>";
-       echo "<tr><td>&nbsp;</td><td align=right>+___________</td></tr>";
        echo "<tr><b><td><b>Net Total</b></td><td align=right><b>".money_format('%n',$net2)."</b></td></tr></table>";
 
        // End haus edit.
 
-        echo '------------------------------<br>';
         echo '<h4>Sales by Inventory Dept.</h4>';
         select_to_table($db_slave, $inventoryDeptQ,0,'FFCC99');
-        echo '<h4>Sales by Non-Inventory Dept.</h4>';
-        select_to_table($db_slave, $noninventoryDeptQ,0,'FFCC99');
         // Haus add 08-03-2007
-        echo '<h4>Department Subtotal:</h4>';
         select_to_table($db_slave, $dept_subtotalQ,0,'FFCC99');
         // end Haus add 08-03-2007
-        echo '------------------------------<br>';
+
         echo '<h4>Tender Report</h4>';
         select_to_table($db_slave, $tendersQ,0,'FFCC99');									// sales by tender type
         select_to_table($db_slave, $storeChargeQ,0,'FFCC99');								// store charges
         select_to_table($db_slave, $houseChargeQ,0,'FFCC99');								// house charges
-        select_to_table($db_slave, $transCountQ,0,'FFCC99');								// transaction count
-        select_to_table($db_slave, $basketSizeQ,0,'FFCC99');								// basket size
-        echo '------------------------------<br>';
-        echo '<h4>Membership & Discount Totals</h4><br>';
-        echo "<p><b>Discount Totals</b></p>";
+        echo '<h4>Discount Totals</h4>';
         echo "<table border=0><font size=2>";
 
         // Specialize reporting based upon whether it is a Member Appreciation Day or not.
@@ -637,25 +379,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         echo "<tr><td>Board Member Total</td><td align=right>".money_format('%n',$board)."</td></tr>";
         echo "<tr><td>Sister Organizations Total</td><td align=right>".money_format('%n',$sister_org)."</td></tr>";
         echo "<tr><td>Non-owner Total</td><td align=right>".money_format('%n',$non_total)."</td></tr>";
-        echo "<tr><td>&nbsp;</td><td align=right>+___________</td></tr>";
-        echo "<tr><td><b>Total Discount</td><td align=right>".money_format('%n',$totalDisc)."</b></td></tr></font></table><br />";
-        echo "<p><b>Case Discount Totals</b></p>";
-        echo "<table border=0><font size=2>";
-        echo "<tr><td>Member Total</td><td align=right>".money_format('%n',$memCase)."</td></tr>";
-        echo "<tr><td>Staff Total</td><td align=right>".money_format('%n',$staffCase)."</td></tr>";
-        echo "<tr><td>Working Member Total</td><td align=right>".money_format('%n',$wmemCase)."</td></tr>";
-        echo "<tr><td>Board Member Total</td><td align=right>".money_format('%n',$bdmemCase)."</td></tr>";
-        echo "<tr><td>Sister Organizations Total</td><td align=right>".money_format('%n',$sisCase)."</td></tr>";
-        echo "<tr><td>Non-owner Total</td><td align=right>".money_format('%n',$nonCase)."</td></tr>";
-        echo "<tr><td>&nbsp;</td><td align=right>+___________</td></tr>";
-        echo "<tr><td><b>Total Case Discount</td><td align=right>".money_format('%n',$totalCase)."</b></td></tr></font></table><br />";
-        echo "<p><b>Shares Sales</b></p>";
-        select_to_table($db_slave, $sharePaymentsQ,0,'FFCC99');							// peopleshare payments
-        echo '<br>------------------------------<br>';
-        echo '<h4>Miscellaneous</h4>';
-        select_to_table($db_slave, $returnsQ,0,'FFCC99');									// total returns
-        select_to_table($db_slave, $trimetQ,0,'FFCC99');									// Tri-Met sales
-        select_to_table($db_slave, $sistersQ,0,'FFCC99');									// Sisters sales
+        echo "<tr><td><b>Total Discount</b></td><td align=right><b>".money_format('%n',$totalDisc)."</b></td></tr></font></table><br />";
         echo '</font>';
 
 
