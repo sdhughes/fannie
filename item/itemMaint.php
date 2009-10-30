@@ -43,7 +43,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         if (is_numeric($upc)) $where = "upc=$upc";
         else $where = "description LIKE '%$upc%'";
 
-        $query = "SELECT upc, description, normal_price, qttyEnforced, foodstamp, deposit, scale, discount, discounttype, inUse, subdept, department, special_price, start_date, DATE_FORMAT('%m/%d/%Y',end_date) AS end_date
+        $query = "SELECT upc, description, normal_price, qttyEnforced, foodstamp, deposit, scale, discount, discounttype, inUse, subdept, department, special_price, start_date, DATE_FORMAT(end_date, '%m/%d/%Y') AS end_date
             FROM products WHERE $where";
         $result = mysqli_query($db_master, $query);
 
