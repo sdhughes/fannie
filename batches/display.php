@@ -26,11 +26,11 @@ $getBatchIDQ = "SELECT max(batchID) FROM batches";
 $getBatchIDR = mysqli_query($db_master, $getBatchIDQ);
 $getBatchIDW = mysqli_fetch_row($getBatchIDR);
 
-$batchID = $_GET['batchID'];
-
 foreach ($_POST AS $key => $value) {
     $$key = $value;
 }
+
+$batchID = $_GET['batchID'];
 
 if ($getBatchIDW[0] < $batchID) {
    if ($batchType == 6) {
@@ -38,6 +38,7 @@ if ($getBatchIDW[0] < $batchID) {
    } else {
       $discounttype = 1;
    }
+   
    if ($endDate > $startDate) {
          $insBatchQ = "INSERT INTO batches(startDate,endDate,batchName,batchType,discounttype)
                  VALUES('$startDate','$endDate','$batchName',$batchType,$discounttype)";
