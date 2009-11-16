@@ -2,8 +2,8 @@
  * Copyright (c) 2008 Kelvin Luck (http://www.kelvinluck.com/)
  * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) 
  * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
- *
- * $Id: jquery.datePicker.js 70 2009-04-05 19:25:15Z kelvin.luck $
+ * .
+ * $Id: jquery.datePicker.js 84 2009-08-05 17:54:35Z kelvin.luck@gmail.com $
  **/
 
 (function($){
@@ -84,11 +84,12 @@
 			var tbody = $(dc('tbody'));
 			
 			var today = (new Date()).zeroTime();
+			today.setHours(12);
 			
 			var month = s.month == undefined ? today.getMonth() : s.month;
 			var year = s.year || today.getFullYear();
 			
-			var currentDate = new Date(year, month, 1);
+			var currentDate = (new Date(year, month, 1, 12, 0, 0));
 			
 			
 			var firstDayOffset = Date.firstDayOfWeek - currentDate.getDay() + 1;
@@ -140,7 +141,8 @@
 					}
 					// addDays(1) fails in some locales due to daylight savings. See issue 39.
 					//currentDate.addDays(1);
-					currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()+1);
+					// set the time to midday to avoid any weird timezone issues??
+					currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()+1, 12, 0, 0);
 				}
 				tbody.append(r);
 			}
@@ -697,9 +699,9 @@
 				if (moveToMonth && (this.displayedMonth != d.getMonth() || this.displayedYear != d.getFullYear())) {
 					this.setDisplayedMonth(d.getMonth(), d.getFullYear(), true);
 				}
-				this.selectedDates[d.toString()] = v;
+				this.selectedDates[d.asString()] = v;
 				this.numSelected += v ? 1 : -1;
-				var selectorString = 'td.' +( d.getMonth() == this.displayedMonth ? 'current-month' : 'other-month');
+				var selectorString = 'td.' + (d.getMonth() == this.displayedMonth ? 'current-month' : 'other-month');
 				var $td;
 				$(selectorString, this.context).each(
 					function()
@@ -727,14 +729,14 @@
 			},
 			isSelected : function(d)
 			{
-				return this.selectedDates[d.toString()];
+				return this.selectedDates[d.asString()];
 			},
 			getSelected : function()
 			{
 				var r = [];
 				for(s in this.selectedDates) {
 					if (this.selectedDates[s] == true) {
-						r.push(Date.parse(s));
+						r.push(Date.fromString(s));
 					}
 				}
 				return r;
@@ -937,7 +939,6 @@
 						}
 					}
 				);
-				
 				if (c.isSelected(d)) {
 					$td.addClass('selected');
 					if (c.settings.selectWeek)
@@ -1078,7 +1079,8 @@
 								function()
 								{
 									var $this = $(this);
-									if (Number($this.text()) > d) {
+									var cellDay = Number($this.text());
+									if (cellDay < 13 && cellDay > d) {
 										$this.addClass('disabled');
 									}
 								}
@@ -1135,7 +1137,7 @@
 		HEADER_FORMAT		:	'mmmm yyyy'
 	};
 	// version
-	$.dpVersion = '$Id: jquery.datePicker.js 70 2009-04-05 19:25:15Z kelvin.luck $';
+	$.dpVersion = '$Id: jquery.datePicker.js 84 2009-08-05 17:54:35Z kelvin.luck@gmail.com $';
 
 	$.fn.datePicker.defaults = {
 		month				: undefined,

@@ -370,7 +370,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
         <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
         <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
-        <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker-2.1.2.js"></script>
+        <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
         <script type="text/javascript">
             Date.format = 'yyyy-mm-dd';
             $(function(){    
