@@ -16,10 +16,12 @@
 		       './HelveticaNeueFontFiles/HelveticaNeueUltraLight',
 		       './HelveticaNeueFontFiles/HelveticaNeueUltraLightItalic'
 		      );
-    
-    function MakeFontWrapper($name, $fonts) {
+
+    MakeFontWrapper($fontArray);
+
+    function MakeFontWrapper($fonts) {
 	foreach ($fonts AS $font) {
-	    MakeFont($name . '.ttf', $name . '.afm');
+	    MakeFont($font . '.ttf', $font . '.afm');
 	}
     }
 ?>
