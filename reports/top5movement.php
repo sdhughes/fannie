@@ -6,7 +6,7 @@ mysqli_select_db($db_slave, 'is4c_log');
 if (isset($_POST['submitted'])) { // If the form has been submitted.
 
     $department = $_POST['department'];
-    $limit = $_POST['limit'];
+    $limit = (int)$_POST['limit'];
     $subdept_no = array();
     $kind = $_POST['kind'];
     $table = $_POST['table'];
@@ -15,21 +15,21 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
 
     switch ($kind) {
         case "bottom":
-            if ($subtype == 'both') { $order_value = array('Quantity Ascending'=>'Quantity ASC', 'Total Ascending'=>'Total ASC');
-            } elseif ($subtype == 'quantity') { $order_value = array('Quantity Ascending'=>'Quantity ASC');
-            } elseif ($subtype == 'value') { $order_value = array('Total Ascending'=>'Total ASC');
+            if ($subtype == 'both') { $order_value = array("Bottom $limit by Quantity"=>'Quantity ASC', "Bottom $limit by Sales"=>'Total ASC');
+            } elseif ($subtype == 'quantity') { $order_value = array("Bottom $limit by Quantity"=>'Quantity ASC');
+            } elseif ($subtype == 'value') { $order_value = array("Bottom $limit by Sales"=>'Total ASC');
             }
             break;
         case "top":
-            if ($subtype == 'both') { $order_value = array('Quantity Descending'=>'Quantity DESC', 'Total Descending'=>'Total DESC');
-            } elseif ($subtype == 'quantity') { $order_value = array('Quantity Descending'=>'Quantity DESC');
-            } elseif ($subtype == 'value') { $order_value = array('Total Descending'=>'Total DESC');
+            if ($subtype == 'both') { $order_value = array("Top $limit by Quantity"=>'Quantity DESC', "Top $limit by Sales"=>'Total DESC');
+            } elseif ($subtype == 'quantity') { $order_value = array("Top $limit by Quantity"=>'Quantity DESC');
+            } elseif ($subtype == 'value') { $order_value = array("Top $limit by Sales"=>'Total DESC');
             }
             break;
         case "both":
-            if ($subtype == 'both') { $order_value = array('Quantity Ascending'=>'Quantity ASC', 'Total Ascending'=>'Total ASC', 'Quantity Descending'=>'Quantity DESC', 'Total Descending'=>'Total DESC');
-            } elseif ($subtype == 'quantity') { $order_value = array('Quantity Ascending'=>'Quantity ASC', 'Quantity Descending'=>'Quantity DESC');
-            } elseif ($subtype == 'value') { $order_value = array('Total Ascending'=>'Total ASC', 'Total Descending'=>'Total DESC');
+            if ($subtype == 'both') { $order_value = array("Bottom $limit by Quantity"=>'Quantity ASC', "Bottom $limit by Sales"=>'Total ASC', "Top $limit by Quantity"=>'Quantity DESC', "Top $limit by Sales"=>'Total DESC');
+            } elseif ($subtype == 'quantity') { $order_value = array("Bottom $limit by Quantity"=>'Quantity ASC', "Top $limit by Quantity"=>'Quantity DESC');
+            } elseif ($subtype == 'value') { $order_value = array("Bottom $limit by Sales"=>'Total ASC', "Top $limit by Sales"=>'Total DESC');
             }
             break;
     }
@@ -104,13 +104,21 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
 
             $result = mysqli_query($db_slave, $query);
 
-            echo "<p><b>$department_name $subdepartment_name </b>(Sorted by: $order_name)</p>";
+            echo "<h3><strong>$department_name $subdepartment_name </strong>($order_name)</h3>";
             echo "<table border=1 cellpadding=3 cellspacing=3>";
 
             if (mysqli_num_rows($result) == 0) {
                 echo '<p>There are no active products in this sub-department.</p>';
             } else {
-                echo "<tr><td>UPC</td><td>Description</td><td>Quantity Sold</td><td>Total Value</td><td>Average Price</td></tr>";
+                echo "<thead>
+			<tr>
+			    <th>UPC</th>
+			    <th>Description</th>
+			    <th>Quantity Sold</th>
+			    <th>Total Value</th>
+			    <th>Average Price</th>
+			</tr>
+		    </thead>";
 
                 while ($row = mysqli_fetch_array($result)) {
 
