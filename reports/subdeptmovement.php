@@ -4,7 +4,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 
     require_once ('../includes/mysqli_connect.php');
     mysqli_select_db ($db_slave, 'is4c_log');
-    
+
     $subdepartment = $_POST['subdepartment'];
     $query = "SELECT s.subdept_name, d.dept_name, d.dept_no
         FROM is4c_op.subdepts AS s INNER JOIN is4c_op.departments AS d ON (s.dept_ID = d.dept_no)
@@ -14,14 +14,14 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 
     $sort = $_POST['sort'];
     $today = date("l F jS, Y");
-    
+
     $date1 = $_POST['date1'];
     $date2 = $_POST['date2'];
-    
+
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
-    
-    if ($sort == 'PLU') {	
+
+    if ($sort == 'PLU') {
 	$order = "PLU";
     } elseif($sort == 'Quantity') {
 	$order = 'Qty DESC, PLU';
@@ -66,35 +66,31 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
     echo "Sorted by $sort for<br />";
     echo "Sub-department #$subdepartment: $subdept<br />";
     echo "Department #$dept_no: " . ucfirst(strtolower($dept)) . "<br />";
-    
+
     if ($_POST['inUse'] == 1) {
         echo 'Items not in use filtered out.<br />';
         $inUse = 'AND p.inUse = 1';
-        $inUseNum = 5;
-        $inUseHeader = NULL;
     } else {
         $inUse = NULL;
-        $inUseNum = 6;
-        $inUseHeader = '<td align="center"><b>In Use</b></td>';
     }
-        
+
     echo '<br />';
-    
+
     if ($year1 != $year2) {
-        
+
         $grossQ = "SELECT SUM(Total) FROM (";
-        
+
         for ($i = $year1; $i <= $year2; $i++) {
-            
+
             $grossQ .= "SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.trans_$i AS t, is4c_op.products AS p
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
-                    AND t.emp_no <> 9999";            
-                    
+                    AND t.emp_no <> 9999";
+
             if ($i == $year2) {
-                
+
                 if (substr($date2, 0, 10) == date('Y-m-d')) {
                     $grossQ .= " UNION SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.dtransactions AS t, is4c_op.products AS p
@@ -103,47 +99,46 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999";
                 }
-                
+
                 $grossQ .= ") AS yearSpan";
-                
+
             } else $grossQ .= " UNION ";
-            
+
         }
-        
+
     } else {
         if (substr($date2, 0, 10) == date('Y-m-d')) {
-            
+
             $grossQ = "SELECT SUM(Total) FROM (";
-            
+
             $grossQ .= "SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.trans_$year1 AS t, is4c_op.products AS p
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999";
-            
+
             $grossQ .= " UNION SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.dtransactions AS t, is4c_op.products AS p
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999";
-		    
+
 	    $grossQ .= ") AS yearSpan";
-                        
+
         } else {
-            
+
             $grossQ = "SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.trans_$year1 AS t, is4c_op.products AS p
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999";
-            
+
         }
     }
-                
-            
+
     $grossR = mysqli_query($db_slave, $grossQ);
     if ($grossR)
 	list($gross) = mysqli_fetch_row($grossR);
@@ -151,38 +146,38 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 	printf("mySQL Error: %s\nQuery: %s", mysqli_error($db_slave), $grossQ);
 
     echo "<p>Sub-department gross sales: $gross</p><br />";
-    
+
     // Print the row headers.
     echo '<table border="1" class="tablesorter">
             <thead>
                 <tr>
-                    <th>UPC</td>
-                    <th>Description</td>
-                    <th>Current Price</td>
-                    <th>Quantity</td>
-                    <th>Total Value Sold</td>
-                    <th>Scale (Weighed)</td>' . 
-                    $inUseHeader . '
+                    <th>UPC</th>
+                    <th>Description</th>
+                    <th>Current Price</th>
+                    <th>Quantity</th>
+                    <th>Total Value Sold</th>
+                    <th>Scale (Weighed)</th>
+                    <th><b>In Use</b></th>
                 </tr>
             </thead>
             <tfoot>
                 <tr>
-                    <th>UPC</td>
-                    <th>Description</td>
-                    <th>Current Price</td>
-                    <th>Quantity</td>
-                    <th>Total Value Sold</td>
-                    <th>Scale (Weighed)</td>' . 
-                    $inUseHeader . '
+                    <th>UPC</th>
+                    <th>Description</th>
+                    <th>Current Price</th>
+                    <th>Quantity</th>
+                    <th>Total Value Sold</th>
+                    <th>Scale (Weighed)</th>
+                    <th><b>In Use</b></th>
                 </tr>
             </tfoot><tbody>';
     echo "\n";
-    
+
     // Make the query.
     if ($year1 == $year2) { // Simple.
         if (substr($date2, 0, 10) == date('Y-m-d')) {
-            $query = "SELECT * FROM (";
-            $query .= "SELECT 
+            $query = "SELECT PLU, Description, `Current Price`, SUM(Qty) AS Qty, SUM(Total) AS total, Scale, inUse FROM (";
+            $query .= "SELECT
                             p.UPC AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
@@ -195,7 +190,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
-                            $inUse 
+                            $inUse
                             GROUP BY p.upc";
             $query .= " UNION SELECT p.UPC AS PLU,
                             p.description AS Description,
@@ -209,11 +204,11 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
-                            $inUse 
+                            $inUse
                             GROUP BY p.upc";
             $query .= ") AS yearSpan GROUP BY PLU ORDER BY $order";
         } else {
-            $query = "SELECT 
+            $query = "SELECT
                             p.UPC AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
@@ -226,15 +221,15 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
-                            $inUse 
+                            $inUse
                             GROUP BY p.upc
                             ORDER BY $order";
-                        
+
         }
     } else {
-        $query = "SELECT * FROM (";
+        $query = "SELECT PLU, Description, `Current Price`, SUM(Qty) AS Qty, SUM(Total) AS total, Scale, inUse FROM (";
         for ($i = $year1; $i <= $year2; $i++) {
-            $query .= "SELECT 
+            $query .= "SELECT
                             p.UPC AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
@@ -247,13 +242,13 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
-                            $inUse 
+                            $inUse
                             GROUP BY p.upc";
-            
+
             if ($i == $year2) {
-                
+
                 if (substr($date2, 0, 10) == date('Y-m-d')) {
-                    
+
                     $query .= " UNION SELECT p.UPC AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
@@ -266,39 +261,40 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
-                            $inUse 
+                            $inUse
                             GROUP BY p.upc";
                 }
-                
+
                 $query .= ") AS yearSpan GROUP BY PLU ORDER BY $order";
-                
+
             } else $query .= " UNION ";
         }
-                        
+
     }
+
     $result = mysqli_query($db_slave, $query);
 
     while ($row = mysqli_fetch_array($result)) {
         printf('<tr>
                 <td align="center">%s</td>
                 <td align="center">%s</td>
+                <td align="center">$%s</td>
                 <td align="center">%s</td>
-                <td align="center">%s</td>
-                <td align="center">%s</td>
+                <td align="center">$%s</td>
                 <td align="center">%s</td>
                 <td align="center">%s</td>
                 </tr>',
                 '<a href="../item/itemMaint.php?submitted=search&upc=' . $row[0] . '">' . $row[0] . '</a></td>',
                 $row[1],
                 number_format($row[2], 2),
-                number_format($row[3], 2),
-                number_format($row[4], 2),
+                round($row[3], 2),
+                round($row[4], 2),
                 $row[5] == 1 ? 'Yes' : 'No',
                 $row[6] == 1 ? 'Yes' : 'No');
     }
-    
+
     echo "</tbody></table>";
-    
+
     echo '<div id="pager" class="pager">
                 <form>
                     <img src="../includes/javascript/tablesorter/addons/pager/icons/first.png" class="first"/>
@@ -332,7 +328,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
     **/
     require_once("../src/chainedSelectors_modified.php");
     require_once('../includes/mysqli_connect.php');
-    
+
     if (!(mysqli_select_db($db_slave, "is4c_op"))) {
         print("Unable to use the database!<br>\n");
         exit();
@@ -341,11 +337,11 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                            CS_FORM=>"pickSubDepartment",
                            CS_FIRST_SELECTOR=>"department",
                            CS_SECOND_SELECTOR=>"subdepartment");
-    
-    $Query = "SELECT d.dept_no AS dept_no,d.dept_name AS dept_name,s.subdept_no AS subdept_no,s.subdept_name AS subdept_name	
+
+    $Query = "SELECT d.dept_no AS dept_no,d.dept_name AS dept_name,s.subdept_no AS subdept_no,s.subdept_name AS subdept_name
               FROM is4c_op.departments AS d INNER JOIN is4c_op.subdepts AS s ON (d.dept_no = s.dept_ID)
               ORDER BY d.dept_no, s.subdept_no";
-    
+
     if (!($DatabaseResult = mysqli_query($db_slave, $Query))) {
         print("The query failed!<br>\n");
         exit();
@@ -356,12 +352,12 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                                 CS_SOURCE_LABEL=>$row->dept_name,
                                 CS_TARGET_ID=>$row->subdept_no,
                                 CS_TARGET_LABEL=>$row->subdept_name);
-    }            
-    
+    }
+
     $subdept = new chainedSelectors($selectorNames, $selectorData);
     ?>
     <script type="text/javascript" language="JavaScript">
-    
+
     <?php
         $subdept->printUpdateFunction();
     ?>
@@ -373,7 +369,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
         <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
         <script type="text/javascript">
             Date.format = 'yyyy-mm-dd';
-            $(function(){    
+            $(function(){
                 $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
                 .dpSetOffset(0, 125);
             });
@@ -397,7 +393,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                                     <p><b>Date Start</b> </p>
                             <p><b>End</b></p>
                             </td>
-                            <td>			
+                            <td>
                                     <p><input type="text" size="10" autocomplete="off" name="date1" class="datepick" />&nbsp;&nbsp;*</p>
                                     <p><input type="text" size="10" autocomplete="off" name="date2" class="datepick" />&nbsp;&nbsp;*</p>
                             </td>
