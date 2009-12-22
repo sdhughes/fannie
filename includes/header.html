@@ -54,6 +54,10 @@
   <span style="font-size:6px"><br></span>
   <div align="center">
  	<?php
+            if (isset($debug) && $debug == true) {
+                ini_set('display_errors', 'on');
+                ini_set('error_reporting', E_ALL);
+            }
             include('../includes/navbar.html');
 	?>
   <span style="font-size:6px"><br></span>
