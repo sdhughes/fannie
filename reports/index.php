@@ -2,6 +2,7 @@
    $page_title = 'Fannie - Reports Module';
    $header = 'Reports Section Index';
    include ('../includes/header.html');
+
 echo '<body>
 	<a href="/reports/deptSales.php">Department Sales</a></br>
 	Product movements by department or group of departments
@@ -27,8 +28,14 @@ echo '<body>
         <a href="/reports/membershipReport.php">Membership Report</a><br />
         Generates an equity report for membership.
 </br><br />
+        <a href="/reports/boardMembershipReport.php">Board Membership Report</a><br />
+        Generates an membership report with ability to add notes.
+</br><br />
         <a href="/reports/laborHours.php">Labor Hours Report</a><br />
-        Generates a report on labor hourse in a given period.
+        Generates a report on labor hours in a given period.
+</br><br />
+	<a href="/reports/shrinkReport.php">Shrink Report</a><br />
+        Generates a shrink report for a given department.
 <br />';
 
 include('../includes/footer.html');

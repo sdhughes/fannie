@@ -37,6 +37,8 @@ if (isset($_POST['submitted'])) {
     $date1 = $_POST['date1'];
     $date2 = $_POST['date2'];
 
+    $reasons = (isset($_POST['reasons']) ? true : false);
+
     if (is_array($_POST['dept'])) {
         $deptArray = implode(", ", $_POST['dept']);
     } elseif (!is_array($_POST['dept'])) {
@@ -52,13 +54,15 @@ if (isset($_POST['submitted'])) {
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
 
-    $shrinkQ = "SELECT CASE WHEN s.UPC < 1000 THEN SUBSTR(s.UPC, 11, 3) WHEN s.UPC < 10000 THEN SUBSTR(s.UPC, 10, 4) ELSE s.UPC END AS UPC, p.description, s.price, SUM(s.quantity), sr.shrinkReason AS reason
+    $shrinkQ = sprintf("SELECT CASE WHEN s.UPC < 1000 THEN SUBSTR(s.UPC, 11, 3) WHEN s.UPC < 10000 THEN SUBSTR(s.UPC, 10, 4) ELSE s.UPC END AS UPC,
+		       p.description, s.price, SUM(s.quantity), %s
 	FROM is4c_log.shrinkLog AS s
 	    INNER JOIN is4c_op.products AS p ON s.upc = p.upc
 	    INNER JOIN is4c_log.shrinkReasons AS sr ON s.reason = sr.shrinkID
-	WHERE s.department IN ($deptArray)
-	    AND DATE(datetime) BETWEEN '$date1' AND '$date2'
-	GROUP BY s.UPC, reason";
+	WHERE s.department IN (%s)
+	    AND DATE(datetime) BETWEEN '%s' AND '%s'
+	    AND emp_no <> 9999
+	GROUP BY s.UPC %s", ($reasons ? 'sr.shrinkReason AS reason' : 'NULL'), $deptArray, $date1, $date2, ($reasons ? ', reason' : NULL));
 
     $shrinkR = mysqli_query($db_slave, $shrinkQ);
 
@@ -81,11 +85,12 @@ if (isset($_POST['submitted'])) {
 			<th>Price</th>
 			<th>Total Value</th>
 			<th>Total Quantity</th>
-			<th>Shrink Reason</th>
+			%s
 		    </tr>
-		</thead><tbody>');
+		</thead><tbody>', ($reasons ? '<th>Shrink Reason</th>' : NULL));
 	while (list($upc, $description, $price, $quantity, $reason) = mysqli_fetch_row($shrinkR)) {
-	    printf('<tr><td>%s</td><td>%s</td><td>$%s</td><td>$%s</td><td>%s</td><td>%s</td></tr>', $upc, $description, number_format($price, 2), number_format($price * $quantity, 2), $quantity, $reason);
+	    printf('<tr><td>%s</td><td>%s</td><td>$%s</td><td>$%s</td><td>%s</td>%s</tr>',
+		   $upc, $description, number_format($price, 2), number_format($price * $quantity, 2), $quantity, ($reasons ? '<td>' . $reason . '</td>' : NULL));
 	}
 	echo '</tbody></table>';
     }
@@ -170,6 +175,11 @@ EOS;
                     <td colspan=2>
                         <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>
                     </td>
+		</tr>
+		<tr>
+		    <td colspan="2" align="center">
+			<p><input type="checkbox" name="reasons" />Separate By Shrink Reason?</p>
+		    </td>
 		</tr>
 		<tr align="center">
 		    <td><input type="submit" name="submit" value="Submit"></td>
