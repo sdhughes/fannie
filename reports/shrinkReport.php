@@ -145,7 +145,7 @@ EOS;
             <form method="post" action="shrinkReport.php">
 	    <div align="center">
 		<table border="0" cellspacing="3" cellpadding="5">', $msg);
-    $deptQ = "SELECT dept_name, dept_no FROM departments WHERE dept_no <= 18 ORDER BY dept_name ASC";
+    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 ORDER BY dept_name ASC";
     $deptR = mysqli_query($db_slave, $deptQ);
 
     $count = 0;
