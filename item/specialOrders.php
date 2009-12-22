@@ -36,7 +36,7 @@ if (isset($_POST['submitted'])) {
             <table cellspacing="3" cellpadding="3">
                 <thead>
 		<tr>
-		    <th>UPC</th><th>Description</th><th>Price</th><th>Deposit</th><th>Foodstamp</th><th>Scale</th><th>CAP Sale?</th><th>Last Modified (Hover for time)</th>
+		    <th>PLU</th><th>Description</th><th>Price</th><th>Deposit</th><th>Foodstamp</th><th>Scale</th><th>CAP Sale?</th><th>Last Modified (Hover for time)</th>
 		</tr>
 		</thead>';
         while (list($upc, $desc, $price, $fs, $dep, $scale, $disc, $discType, $modified) = mysqli_fetch_array($result)) {
@@ -84,7 +84,7 @@ if (isset($_POST['submitted'])) {
 
 	    $scale = (isset($_POST["scale"]["$upc"])) ? 1 : 0;
 	    $fs = (isset($_POST["foodstamp"]["$upc"])) ? 1 : 0;
-	    $cap = (isset($_POST["capSale"]["$upc"])) ? 'discountType = 0, discount = 0' : 'discountType = 3, discount = 0';
+	    $cap = (isset($_POST["capSale"]["$upc"])) ? 'discountType = 0, discount = 1' : 'discountType = 3, discount = 0';
 	    is_numeric($_POST["price"]["$upc"]) ? $price = $_POST["price"]["$upc"] : $errors["$upc"][] = "Your price wasn't a number.";
 	    !empty($_POST["description"]["$upc"]) ? $description = escape_data($_POST["description"]["$upc"]) : $errors["$upc"][] = "Your description was left empty.";
 	    is_numeric($_POST["deposit"]["$upc"]) ? $deposit = $_POST["deposit"]["$upc"] : $errors["$upc"][] = "Your deposit wasn't a number.";
