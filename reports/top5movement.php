@@ -141,7 +141,8 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
     $query = "SELECT dept_no, dept_name FROM is4c_op.departments WHERE dept_no < 19 AND dept_no <> 17 ORDER BY dept_no ASC";
     $result = mysqli_query($db_slave, $query);
 
-    echo '<h3>Top and Bottom Movers</h3>
+    ?>
+    <h3>Top and Bottom Movers</h3>
         <p>Warning: This will be a slow report, give it a few minutes to complete.</p><br />
         <form name="top5movement" action="top5movement.php" method="post" target="_blank">
         <p>What kind of report?
@@ -152,11 +153,14 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
             </select>
         </p>
         <p>What department?
-            <select name="department">';
+            <select name="department">
+	    <?php
             while ($row = mysqli_fetch_array($result)) {
                 echo "<option value=\"$row[0]\">$row[1]</option>";
             }
-        echo '</select></p>
+	    ?>
+	    </select>
+	</p>
         <p>How many results would you like?
             <select name="limit">
                 <option value="5">5</option>
@@ -175,16 +179,25 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         </p>
         <p>What kind of report?
             <select name="table">
-                <option value="YTD_2008" selected="selected">Year-To-Date (2008)</option>
-                <option value="YTD_2009" selected="selected">Year-To-Date (2009)</option>
-                <option value="1stquarter">First Quarter \'08</option>
-                <option value="2ndquarter">Second Quarter \'08</option>
-                <option value="3rdquarter">Third Quarter \'08</option>
-                <option value="4thquarter">Fourth Quarter \'08</option>
-                <option value="1stquarter_2009">First Quarter \'09</option>
-                <option value="2ndquarter_2009">Second Quarter \'09</option>
-                <option value="3rdquarter_2009">Third Quarter \'09</option>
-                <option value="4thquarter_2009">Fourth Quarter \'09</option>
+	    <?php
+		$quarters = array(
+				  array('short' => '1st', 'long' => 'First'),
+				  array('short' => '2nd', 'long' => 'Second'),
+				  array('short' => '3rd', 'long' => 'Third'),
+				  array('short' => '4th', 'long' => 'Fourth')
+				 );
+		for ($year = 2008; $year <= date('Y'); $year++) {
+		    printf('<option value="YTD_%u">Year-To-Date (%u)</option>' . "\n", $year, $year);
+		    if ($year != date('Y')) {
+			foreach ($quarters AS $qtr => $qtrname)
+			    printf('<option value="%squarter_%u">%s Quarter %u</option>' . "\n", $qtrname['short'], $year, $qtrname['long'], $year);
+		    } else {
+			for ($i = 0; $i <= (int) (date('m') / 3); $i++) {
+			    printf('<option value="%squarter_%u">%s Quarter %u</option>' . "\n", $quarters[$i]['short'], $year, $quarters[$i]['long'], $year);
+			}
+		    }
+		}
+	    ?>
             </select>
         </p>
         <p>Order by quantity sold, value sold, or both?
@@ -196,7 +209,8 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         </p>
         <input type="hidden" name="submitted" value="TRUE" />
         <input type="submit" name="submit" value="Submit" />
-        </form>';
+        </form>
+	<?php
         include ('../includes/footer.html');
 }
 ?>
