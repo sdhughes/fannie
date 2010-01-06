@@ -53,7 +53,7 @@ $trans_array = explode('-',$t_id);
         if ($year . '-' . $month . '-' . $day == DATE('Y-m-d')) {
                 $transtable = 'dtransactions';
         } else {
-                $transtable = 'transarchive';
+                $transtable = "trans_$year";
         }
 
 $query = "SELECT * FROM $transtable
