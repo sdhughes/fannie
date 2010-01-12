@@ -7,16 +7,16 @@ DEFINE(FTP_USER, 'alb_gr');
 DEFINE(FTP_PASS, 'alb540*');
 
 /////////  O P T I O N S 	//////////////////
-//	Pick a year	
+//	Pick a year
 //	(leave blank for current)
-// $year = "";								
-if (!$year) {$year = date('Y');}				
+// $year = "";
+if (!$year) {$year = date('Y');}
 //	Options for reporting:
 //		## == enter a week tag number
 //		YY == output entire year (slow!)
 //		(leave blank for current output)
-//$week_tag = "12";
-if (!$week_tag) $week_tag = date('W') - 1;
+//$week_tag = "1";
+if (!$week_tag) $week_tag = date('W');
 
 //	format datetime
 $timestamp = date('Y-m-d H:i:s');
@@ -24,13 +24,12 @@ $timestamp = date('Y-m-d H:i:s');
 $log_file = '/pos/fannie/logs/spins.log';
 //	Which SPINS table will we use?
 $SPINS = "SPINS_" . $year;
-//	Which dlog archive will we use?	
-$table = "trans_" . $year;
+
 //	Directory to put .csv files into
-//	(make sure this already exists)	
+//	(make sure this already exists)
 $outpath = "/pos/fannie/SPINS/" . $year . "/";
 //	filename prefix (incl _wk)
-$prefix = "alb_wk";	
+$prefix = "alb_wk";
 ///////////////////////////////////////////////
 
 
@@ -41,14 +40,19 @@ if (!$week_tag) {
                 ORDER BY week_tag DESC LIMIT 1";
 } else {
         $query = "SELECT * FROM is4c_log.$SPINS
-                WHERE week_tag = $week_tag";	
+                WHERE week_tag = $week_tag";
 }
 
 $result = mysqli_query($db_slave, $query);
 $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+
 //	fill vars to use in main query
 $start_date = $row['start_date'];
 $end_date = $row['end_date'];
+
+$start_year = substr($start_date, 0, 4);
+$end_year = substr($end_date, 0, 4);
+
 $tag = str_pad($row['week_tag'], 2, "0", STR_PAD_LEFT);
 
 //	Echo the matched week data
@@ -62,13 +66,34 @@ error_log("[$timestamp] -- File path and name set.  \$outfile = $outfile\n",3,$l
 mysqli_free_result($result);
 
 //	The main query
-$query = "SELECT upc, description, SUM(quantity) AS qty, SUM(total) AS total
+if ($start_year == $end_year) {
+    //	Which dlog archive will we use?
+    $table = "trans_" . $year;
+
+    $query = "SELECT upc, description, SUM(quantity) AS qty, SUM(total) AS total
         FROM is4c_log.$table
         WHERE DATE(datetime) BETWEEN '$start_date' AND '$end_date'
-        AND upc > 99999 AND scale = 0 
+        AND upc > 99999 AND scale = 0
         AND emp_no <> 9999 AND trans_status <> 'X'
         GROUP BY upc HAVING qty > 0";
-// echo $query;
+} else {
+    $query = "SELECT upc, description, SUM(quantity) AS qty, SUM(total) AS total
+	FROM (";
+    $query .= "SELECT upc, description, quantity, total
+	FROM is4c_log.trans_$start_year
+	WHERE DATE(datetime) BETWEEN '$start_date' AND '$end_date'
+        AND upc > 99999 AND scale = 0
+        AND emp_no <> 9999 AND trans_status <> 'X'";
+    $query .= " UNION SELECT upc, description, quantity, total
+	FROM is4c_log.trans_$end_year
+	WHERE DATE(datetime) BETWEEN '$start_date' AND '$end_date'
+        AND upc > 99999 AND scale = 0
+        AND emp_no <> 9999 AND trans_status <> 'X')
+	AS yearSpan
+        GROUP BY upc HAVING qty > 0";
+}
+
+//echo $query;
 $result = mysqli_query($db_slave, $query);
 $num = mysqli_num_rows($result);
 
@@ -81,7 +106,7 @@ if ($num == 0) {
 } else {
         while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                 $output .= $row['upc'] . "|\"" . $row['description'] . "\"|" . $row['qty'] . "|" . $row['total'] . "\n";
-        }	
+        }
 
         if (fwrite($write, $output) === FALSE) {
         error_log("[$timestamp] ** Error: Cannot write to file $outfile.  Exiting\n",3,$log_file);
@@ -104,19 +129,19 @@ $size = filesize($infile);
 if ( ($ftp = ftp_connect(FTP_SERVER)) && (ftp_login($ftp, FTP_USER, FTP_PASS)) && (ftp_pasv($ftp, TRUE)) && (ftp_put($ftp, $ftpPath . $outfile, $infile, FTP_BINARY)) ) {
     $dir = ftp_rawlist($ftp, "/data");
     ftp_close($ftp);
-    
+
     $items=array();
-    
+
     foreach($dir as $_) {
         preg_replace(
-        
+
         '`^(.{10}+)(\s*)(\d{1})(\s*)(\d*|\w*)'.
         '(\s*)(\d*|\w*)(\s*)(\d*)\s'.
         '([a-zA-Z]{3}+)(\s*)([0-9]{1,2}+)'.
         '(\s*)([0-9]{2}+):([0-9]{2}+)(\s*)(.*)$`Ue',
-        
+
         '$items["$17"]="$9"',
-        
+
         $_) ; # :p
     }
     $ftpSize = $items[" $outfile"];
