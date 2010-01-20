@@ -14,7 +14,7 @@ function drawSearchForm($error = NULL) {
 function drawDetailsPage($upc, $rowItem = NULL) {
     global $db_master;
     if ($rowItem) {
-        $query = "SELECT brand, product, distributor, pack_size, order_no, ingredients, certification, bitField
+        $query = "SELECT brand, product, distributor, pack_size, order_no, ingredients, certification, bitField, cost, margin, net_weight, origin, special
             FROM product_details WHERE upc={$rowItem['upc']}";
         $result = mysqli_query($db_master, $query);
         $detailRow = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -73,6 +73,21 @@ function drawDetailsPage($upc, $rowItem = NULL) {
     if ($rowItem["end_date"] != 0 && $rowItem["special_price"] != 0) {
         echo '<center><font color="green">Item is on sale at $' . number_format($rowItem["special_price"], 2) . ' through ' . $rowItem["end_date"] . '.</font></center>';
     }
+
+    // Define bulk row if necessary...
+    if ($rowItem["department"] == 2) {
+	$bulkRows = '<tr>
+		    <td align="left"><strong>Origin</strong></td>
+		    <td align="left" colspan="3"><input type="text" name="origin" size="50" maxlength="75" value="' . $detailRow["origin"] . '" /></td>
+		</tr>
+		<tr>
+		    <td align="left"><strong>Special?</strong></td>
+		    <td align="left" colspan="3"><input type="text" name="special" size="50" maxlength="500" value="' . $detailRow["special"] . '" /></td>
+		</tr>';
+    } else {
+	$bulkRows = NULL;
+    }
+
     // Now Subdept, dept, checkboxes, etc.
     echo    '<br />
             <table cellspacing="2" cellpadding="2" width="100%">
@@ -128,17 +143,23 @@ function drawDetailsPage($upc, $rowItem = NULL) {
                 <tr>
                     <td align="left"><b>Distributor</b></td>
                     <td align="left"><input type="text" name="distributor" size="20" maxlength="20" value="' . $detailRow["distributor"] . '" /></td>
-                    <td align="left"><b>Local?</b></td>
-                    <td align="left">
-                        <select name="local" disabled="true">
-                            <option>Coming soon...stay tuned.</option>
-                            <option value="0">Is it special?</option>
-                            <option value="1">Regional</option>
-                            <option value="2">Local</option>
-                            <option value="3">Superlocal</option>
-                        </select>
-                    </td>
-                </tr><tr id="bitField"></tr>
+                    <td align="left"><strong>Net Wt (in oz)</strong></td>
+		    <td align="left"><input type="text" name="net_weight" size="10" maxlength="10" value="' . $detailRow["net_weight"] . '" /></td>
+                </tr>
+		<tr>
+		    <td align="left"><strong>Cost</strong></td>
+		    <td align="left"><input type="text" name="cost" size="10" maxlength="10" value="' . $detailRow["cost"] . '" /></td>
+		    <td align="left"><strong>Margin</strong></td>
+		    <td align="left"><input type="text" name="margin" size="5" maxlength="5" value="' . $detailRow["margin"] . '" /></td>
+		</tr>
+		<tr>
+		    <td align="left"><strong>Recommended Price</strong></td>
+		    <td align="left"><strong>$' . number_format($detailRow["cost"] / (1 - ($detailRow["margin"]/100)), 2) . '</strong></td>
+		    <td align="left"><strong>Current Markup</strong></td>
+		    <td align="left"></strong>' . number_format((($rowItem['normal_price'] - $detailRow['cost'])/$rowItem['normal_price']) * 100,2) . '%</strong></td>
+		</tr>
+		<tr id="bitField"></tr>' . $bulkRows . '
+
                 <tr class="extraDetail">
                     <td align="left" colspan="2"><b>Ingredients</b></td>
                     <td align="left"><b>Certification</b></td>
@@ -161,6 +182,19 @@ function drawDetailsPage($upc, $rowItem = NULL) {
         elseif (!isset($detailRow)) echo '<input type="hidden" name="subAction" value="insert" />' . "\n";
         echo '</div>
         </form>';
+
+	/* Local drop down...
+	    <td align="left"><b>Local?</b></td>
+	    <td align="left">
+		<select name="local" disabled="true">
+		    <option>Coming soon...stay tuned.</option>
+		    <option value="0">Is it special?</option>
+		    <option value="1">Regional</option>
+		    <option value="2">Local</option>
+		    <option value="3">Superlocal</option>
+		</select>
+	    </td>
+	*/
 
 }
 

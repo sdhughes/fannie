@@ -7,6 +7,7 @@
 
 $page_title = 'Fannie - Item Maintanence';
 $header = 'Item Maintanence';
+//$debug = true;
 include('../includes/header.html');
 echo '<script type="text/javascript" src="../includes/javascript/jquery.js"></script>';
 require_once('../includes/itemFunction.php');
@@ -69,7 +70,6 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
             } else { // No match, new product.
                 drawDetailsPage($upc);
-
             }
 
         } else {
@@ -81,7 +81,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
     } else { // Throw an error, quit the script.
 
-    drawSearchForm('You left the search box empty.');
+	drawSearchForm('You left the search box empty.');
 
     }
 
@@ -110,12 +110,12 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         if (is_numeric($_POST['subdepartment'])) $subdepartment = escape_data($_POST['subdepartment']);
         else $errors[] = "Seriously, what are you doing?";
 
-        $SPO = ($_POST['SPO'] == "on") ? 3 : 0;
-        $fs = ($_POST['FS'] == "on") ? 1 : 0;
-        $scale = ($_POST['scale'] == "on") ? 1 : 0;
-        $qty = ($_POST['quantity'] == "on") ? 1 : 0;
-        $nodisc = ($_POST['nodisc'] == "on") ? 0 : 1;
-        $inUse = ($_POST['inUse'] == "on") ? 1 : 0;
+        $SPO = (isset($_POST['SPO']) && $_POST['SPO'] == "on") ? 3 : 0;
+        $fs = (isset($_POST['FS']) && $_POST['FS'] == "on") ? 1 : 0;
+        $scale = (isset($_POST['scale']) && $_POST['scale'] == "on") ? 1 : 0;
+        $qty = (isset($_POST['quantity']) && $_POST['quantity'] == "on") ? 1 : 0;
+        $nodisc = (isset($_POST['nodisc']) && $_POST['nodisc'] == "on") ? 0 : 1;
+        $inUse = (isset($_POST['inUse']) && $_POST['inUse'] == "on") ? 1 : 0;
 
         $mainQ = "INSERT INTO products (upc, description, normal_price, pricemethod, groupprice, quantity, special_price, specialpricemethod, specialgroupprice, specialquantity, start_date, end_date, department, size, tax, foodstamp, scale, mixmatchcode, modified, advertised, tareweight, discount, discounttype, unitofmeasure, wicable, deposit, qttyEnforced, inUse, subdept) VALUES
                 ($upc, '$description', $price, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, $department, 0, 0, $fs, $scale, 0, now(), 0, 0, $nodisc, $SPO, 0, 0, $deposit, $qty, $inUse, $subdepartment)";
@@ -140,12 +140,12 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         if (is_numeric($_POST['subdepartment'])) $subdepartment = escape_data($_POST['subdepartment']);
         else $errors[] = "Seriously, what are you doing?";
 
-        $SPO = ($_POST['SPO'] == "on") ? ' discounttype = 3, ' : NULL;
-        $fs = ($_POST['FS'] == "on") ? 1 : 0;
-        $scale = ($_POST['scale'] == "on") ? 1 : 0;
-        $qty = ($_POST['quantity'] == "on") ? 1 : 0;
-        $nodisc = ($_POST['nodisc'] == "on") ? 0 : 1;
-        $inUse = ($_POST['inUse'] == "on") ? 1 : 0;
+        $SPO = (isset($_POST['SPO']) && $_POST['SPO'] == "on") ? ' discounttype = 3, ' : NULL;
+        $fs = (isset($_POST['FS']) && $_POST['FS'] == "on") ? 1 : 0;
+        $scale = (isset($_POST['scale']) && $_POST['scale'] == "on") ? 1 : 0;
+        $qty = (isset($_POST['quantity']) && $_POST['quantity'] == "on") ? 1 : 0;
+        $nodisc = (isset($_POST['nodisc']) && $_POST['nodisc'] == "on") ? 0 : 1;
+        $inUse = (isset($_POST['inUse']) && $_POST['inUse'] == "on") ? 1 : 0;
 
         $mainQ = "UPDATE products SET
                     description = '$description',
@@ -193,8 +193,23 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 	    }
 	}
 
-        $detailQ = "INSERT INTO product_details (upc, brand, product, distributor, pack_size, order_no, ingredients, certification) VALUES
-                    ($upc, $brand, $product, $distributor, $pack_size, $order_no, $ingredients, $cert)";
+	if (!empty($_POST['origin'])) $origin = "'" . escape_data($_POST['origin']) . "'";
+        else $origin = 'NULL';
+
+	if (!empty($_POST['special'])) $special = "'" . escape_data($_POST['special']) . "'";
+        else $special = 'NULL';
+
+	if (!empty($_POST['cost']) && is_numeric($_POST['cost'])) $cost = escape_data($_POST['cost']);
+        else $cost = 'NULL';
+
+	if (!empty($_POST['margin']) && is_numeric($_POST['margin'])) $margin = escape_data($_POST['margin']);
+        else $margin = 'NULL';
+
+	if (!empty($_POST['net_weight']) && is_numeric($_POST['net_weight'])) $net_weight = escape_data($_POST['net_weight']);
+        else $net_weight = 'NULL';
+
+        $detailQ = "INSERT INTO product_details (upc, brand, product, distributor, pack_size, order_no, ingredients, certification, origin, special, cost, margin, net_weight) VALUES
+                    ($upc, $brand, $product, $distributor, $pack_size, $order_no, $ingredients, $cert, $origin, $special, $cost, $margin, $net_weight)";
 
     } elseif (isset($_POST['subAction']) && $_POST['subAction'] == 'update') {
         // Error checking...data validation...
@@ -219,6 +234,21 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         if (is_numeric($_POST['cert'])) $cert = (int)$_POST['cert'];
         else $cert = 'NULL';
 
+	if (!empty($_POST['origin'])) $origin = "'" . escape_data($_POST['origin']) . "'";
+        else $origin = 'NULL';
+
+	if (!empty($_POST['special'])) $special = "'" . escape_data($_POST['special']) . "'";
+        else $special = 'NULL';
+
+	if (!empty($_POST['cost']) && is_numeric($_POST['cost'])) $cost = escape_data($_POST['cost']);
+        else $cost = 'NULL';
+
+	if (!empty($_POST['margin']) && is_numeric($_POST['margin'])) $margin = escape_data($_POST['margin']);
+        else $margin = 'NULL';
+
+	if (!empty($_POST['net_weight']) && is_numeric($_POST['net_weight'])) $net_weight = escape_data($_POST['net_weight']);
+        else $net_weight = 'NULL';
+
 	$bitField = 0;
 
 	if (isset($_POST['bitField']) && isset($_POST['bitCount'])) {
@@ -236,7 +266,12 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
                         order_no = $order_no,
                         ingredients = $ingredients,
                         certification = $cert,
-			bitField = $bitField
+			bitField = $bitField,
+			origin = $origin,
+			special = $special,
+			cost = $cost,
+			margin = $margin,
+			net_weight = $net_weight
                     WHERE upc = $upc";
 
     }
