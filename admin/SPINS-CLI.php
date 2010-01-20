@@ -84,7 +84,7 @@ if ($start_year == $end_year) {
 	WHERE DATE(datetime) BETWEEN '$start_date' AND '$end_date'
         AND upc > 99999 AND scale = 0
         AND emp_no <> 9999 AND trans_status <> 'X'";
-    $query .= " UNION SELECT upc, description, quantity, total
+    $query .= " UNION ALL SELECT upc, description, quantity, total
 	FROM is4c_log.trans_$end_year
 	WHERE DATE(datetime) BETWEEN '$start_date' AND '$end_date'
         AND upc > 99999 AND scale = 0
