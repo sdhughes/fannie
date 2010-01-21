@@ -14,7 +14,7 @@ function drawSearchForm($error = NULL) {
 function drawDetailsPage($upc, $rowItem = NULL) {
     global $db_master;
     if ($rowItem) {
-        $query = "SELECT brand, product, distributor, pack_size, order_no, ingredients, certification, bitField, cost, margin, net_weight, origin, special
+        $query = "SELECT brand, product, distributor, pack_size, order_no, ingredients, certification, bitField, cost, margin, net_weight, origin, special, tag_type
             FROM product_details WHERE upc={$rowItem['upc']}";
         $result = mysqli_query($db_master, $query);
         $detailRow = mysqli_fetch_array($result, MYSQLI_ASSOC);
@@ -76,9 +76,20 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 
     // Define bulk row if necessary...
     if ($rowItem["department"] == 2) {
+	$bulkQ = "SELECT tagIndex, name FROM is4c_op.tagTypes WHERE department = 2";
+	$bulkR = mysqli_query($db_master, $bulkQ);
+
 	$bulkRows = '<tr>
 		    <td align="left"><strong>Origin</strong></td>
-		    <td align="left" colspan="3"><input type="text" name="origin" size="50" maxlength="75" value="' . $detailRow["origin"] . '" /></td>
+		    <td align="left"><input type="text" name="origin" size="25" maxlength="75" value="' . $detailRow["origin"] . '" /></td>
+		    <td align="left"><strong>Tag Type</strong></td>
+		    <td align="left"><select name="tagType">';
+
+	while (list($no, $name) = mysqli_fetch_row($bulkR)) {
+	    $bulkRows .= sprintf('<option value="%u" %s>%s</option>' . "\n", $no, ($detailRow["tag_type"] == $no ? ' SELECTED="SELECTED"' : NULL), $name);
+	}
+
+	    $bulkRows .= '</select></td>
 		</tr>
 		<tr>
 		    <td align="left"><strong>Special?</strong></td>

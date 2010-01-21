@@ -7,7 +7,7 @@
 
 $page_title = 'Fannie - Item Maintanence';
 $header = 'Item Maintanence';
-//$debug = true;
+$debug = true;
 include('../includes/header.html');
 echo '<script type="text/javascript" src="../includes/javascript/jquery.js"></script>';
 require_once('../includes/itemFunction.php');
@@ -208,8 +208,11 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 	if (!empty($_POST['net_weight']) && is_numeric($_POST['net_weight'])) $net_weight = escape_data($_POST['net_weight']);
         else $net_weight = 'NULL';
 
-        $detailQ = "INSERT INTO product_details (upc, brand, product, distributor, pack_size, order_no, ingredients, certification, origin, special, cost, margin, net_weight) VALUES
-                    ($upc, $brand, $product, $distributor, $pack_size, $order_no, $ingredients, $cert, $origin, $special, $cost, $margin, $net_weight)";
+	if (!empty($_POST['tagType']) && is_numeric($_POST['tagType'])) $tagType = escape_data($_POST['tagType']);
+	else $tagType = 'NULL';
+
+        $detailQ = "INSERT INTO product_details (upc, brand, product, distributor, pack_size, order_no, ingredients, certification, origin, special, cost, margin, net_weight, tag_type) VALUES
+                    ($upc, $brand, $product, $distributor, $pack_size, $order_no, $ingredients, $cert, $origin, $special, $cost, $margin, $net_weight, $tagType)";
 
     } elseif (isset($_POST['subAction']) && $_POST['subAction'] == 'update') {
         // Error checking...data validation...
@@ -249,6 +252,9 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 	if (!empty($_POST['net_weight']) && is_numeric($_POST['net_weight'])) $net_weight = escape_data($_POST['net_weight']);
         else $net_weight = 'NULL';
 
+	if (!empty($_POST['tagType']) && is_numeric($_POST['tagType'])) $tagType = escape_data($_POST['tagType']);
+	else $tagType = 'NULL';
+
 	$bitField = 0;
 
 	if (isset($_POST['bitField']) && isset($_POST['bitCount'])) {
@@ -271,7 +277,8 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 			special = $special,
 			cost = $cost,
 			margin = $margin,
-			net_weight = $net_weight
+			net_weight = $net_weight,
+			tag_type = $tagType
                     WHERE upc = $upc";
 
     }
