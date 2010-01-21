@@ -55,7 +55,7 @@ if ($year_start == $year_end) {
             GROUP BY d.card_no";
 } else {
     $query = "SELECT card_no, SUM(charges) FROM (";
-    
+
     for ($year = $year_start; $year <= $year_end; $year++) {
         $query .= "SELECT card_no, ROUND(SUM(total),2) as charges
             FROM is4c_log.trans_$year
@@ -64,13 +64,13 @@ if ($year_start == $year_end) {
             AND emp_no <> 9999 AND trans_status <> 'X'
             AND card_no NOT IN (9999, 99999)
             GROUP BY card_no";
-            
+
         if ($year == $year_end)
             $query .= ") AS yearSpan GROUP BY card_no";
         else
-            $query .= " UNION ";
+            $query .= " UNION ALL ";
     }
-    
+
 }
 
 $queryR = mysqli_query($db_slave, $query);
@@ -123,7 +123,7 @@ printf('</tbody><tfoot>
 
 echo "<table width=100% border=0><tr><td colspan='3' height='1' bgcolor='cccccc'></td></tr></table>";
 
-$query = "SELECT * FROM is4c_log.payperiods WHERE periodEnd <= curdate() ORDER BY periodEnd DESC LIMIT 45"; 
+$query = "SELECT * FROM is4c_log.payperiods WHERE periodEnd <= curdate() ORDER BY periodEnd DESC LIMIT 45";
 $results = mysqli_query($db_slave, $query) or
 	die("<li>errorno=".mysqli_errno($db_slave)
 		."<li>error=" .mysqli_error($db_slave)
@@ -135,7 +135,7 @@ echo "<h3>Select another pay period</h3> \n";
 echo "</td></tr><tr><td align=center> \n";
 echo "<form method=POST action=charges.php>";
 echo "<select name=period id=period> \n";
-while ($row = mysqli_fetch_array($results, MYSQLI_ASSOC)) {  
+while ($row = mysqli_fetch_array($results, MYSQLI_ASSOC)) {
 	echo "<option value=" .$row["periodID"] . ">";
 	echo strftime('%D', strtotime($row["periodStart"])). " --> " .strftime('%D', strtotime($row["periodEnd"]));
   	echo "</option> \n";

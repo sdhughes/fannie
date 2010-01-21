@@ -25,34 +25,34 @@ if ($year_start == $year_end) {
 	WHERE d.card_no = c.CardNo
 	AND datetime BETWEEN '$ps' AND '$pe'
 	AND d.card_no = $cn
-	AND c.staff IN(1,2) 
+	AND c.staff IN(1,2)
 	AND d.trans_subtype = 'MI'
 	AND d.emp_no <> 9999 AND d.trans_status <> 'X'
 	AND c.CardNo <> 9999
 	GROUP BY CONCAT(d.emp_no, '-', d.trans_no, '-', d.register_no, '-', date(d.datetime))
 	ORDER BY date(d.datetime)";
-        
+
 } else {
     $query = "SELECT date, SUM(charges) FROM (";
-    
+
     for ($year = $year_start; $year <= $year_end; $year++) {
         $query .= "SELECT date(d.datetime) as date, -1 * ROUND(SUM(d.total),2) as charges
             FROM is4c_op.custdata AS c, is4c_log.trans_$year AS d
             WHERE d.card_no = c.CardNo
             AND datetime BETWEEN '$ps' AND '$pe'
             AND d.card_no = $cn
-            AND c.staff IN(1,2) 
+            AND c.staff IN(1,2)
             AND d.trans_subtype = 'MI'
             AND d.emp_no <> 9999 AND d.trans_status <> 'X'
             AND c.CardNo <> 9999
             GROUP BY CONCAT(d.emp_no, '-', d.trans_no, '-', d.register_no, '-', date(d.datetime))";
-            
+
         if ($year == $year_end)
             $query .= ") AS yearSpan GROUP BY date, charges ORDER BY date";
         else
-            $query .= " UNION ";
+            $query .= " UNION ALL ";
     }
-    
+
 }
 
 $result = mysqli_query($db_slave, $query);

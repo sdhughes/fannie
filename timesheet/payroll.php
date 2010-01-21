@@ -165,14 +165,14 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
 		    AND d.card_no = $cn
 		    AND d.emp_no <> 9999 AND d.trans_status <> 'X'";
 
-		$houseChargeQ .= " UNION SELECT ROUND(SUM(d.total),2) AS Total
+		$houseChargeQ .= " UNION ALL SELECT ROUND(SUM(d.total),2) AS Total
 		    FROM is4c_log.trans_$yearEnd AS d
 		    WHERE d.datetime BETWEEN '$periodStart' AND '$periodEnd'
 		    AND d.trans_subtype = 'MI'
 		    AND d.card_no = $cn
 		    AND d.emp_no <> 9999 AND d.trans_status <> 'X') AS yearSpan";
 	    }
-	    
+
             $weekoneR = mysqli_query($db_slave, $weekoneQ);
             $weektwoR = mysqli_query($db_slave, $weektwoQ);
             $vacationR = mysqli_query($db_slave, $vacationQ);

@@ -9,12 +9,12 @@ if (isset($_POST['submitted'])) {
     $date1 = $_POST['date1'];
     $date2 = $_POST['date2'];
     $dept = $_POST['department'];
-    
+
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
-    
+
     $query = "SELECT ROUND(SUM(total),2), date FROM (";
-    
+
     for ($year = $year1; $year <= $year2; $year++) {
         $query .= "SELECT ROUND(SUM(total), 2) AS total, DATE(datetime) AS `date` FROM is4c_log.trans_$year
             WHERE DATE(datetime) BETWEEN '$date1' AND '$date2'
@@ -22,10 +22,10 @@ if (isset($_POST['submitted'])) {
             AND trans_status <> 'X'
             AND emp_no <> 9999
             GROUP BY `date`";
-        
+
         if ($year == $year2) {
             if (date('Y-m-d') == $date2) {
-                $query .= " UNION SELECT ROUND(SUM(total), 2) AS total, DATE(datetime) AS `date` FROM is4c_log.dtransactions
+                $query .= " UNION ALL SELECT ROUND(SUM(total), 2) AS total, DATE(datetime) AS `date` FROM is4c_log.dtransactions
                     WHERE DATE(datetime) BETWEEN '$date1' AND '$date2'
                     AND department = $dept
                     AND trans_status <> 'X'
@@ -34,11 +34,11 @@ if (isset($_POST['submitted'])) {
             }
             $query .= ") AS yearSpan GROUP BY date";
         } else {
-            $query .= " UNION ";
+            $query .= " UNION ALL ";
         }
-        
+
     }
-    
+
     $sales = 0.00;
     $result = mysqli_query($db_slave, $query);
     echo '<table cellpadding="3" border="1" cellspacing="3"><thead><tr><th align="left">Date</th><th align="right">Daily Total</th></tr></thead><tbody>';
@@ -48,12 +48,12 @@ if (isset($_POST['submitted'])) {
         $sales += $row[0];
     }
     echo '</tbody><tfoot><tr><td align="left"><b>Total</b></td><td align="right"><b>$' . number_format($sales, 2) . '</b></td></tr></tfoot></table>';
-    
+
     $query = "SELECT (DATEDIFF('$date2', '$date1')+1)";
     $result = mysqli_query($db_slave, $query);
-    
+
     list($datediff) = mysqli_fetch_row($result);
-    
+
     echo "<p>The average daily sales for $datediff days were $" . number_format($sales / $datediff, 2) . ".</p>";
     //echo "<p>The total sales were $" . number_format($sales, 2) . ".</p>";
 
@@ -72,7 +72,7 @@ echo '<link href="../style.css"
 <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
 <script type="text/javascript">
     Date.format = 'yyyy-mm-dd';
-    $(function(){    
+    $(function(){
         $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
         .dpSetOffset(0, 125);
     });

@@ -124,7 +124,7 @@ if (isset($upc)) {
 
                 if ($i == $year2) {
                     if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                        $query .= " UNION SELECT DISTINCT
+                        $query .= " UNION ALL SELECT DISTINCT
                             p.upc AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS Current,
@@ -145,7 +145,7 @@ if (isset($upc)) {
 
                     $query .= ") AS yearSpan  GROUP BY yearSpan.PLU, Price ORDER BY Price";
 
-                } else $query .= " UNION ";
+                } else $query .= " UNION ALL ";
             }
 
         } elseif (!is_numeric($upc)) {
@@ -170,7 +170,7 @@ if (isset($upc)) {
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                 if ($i == $year2) {
                     if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                        $query .= "UNION SELECT DISTINCT
+                        $query .= "UNION ALL SELECT DISTINCT
                                 p.upc AS PLU,
                                 p.description AS Description,
                                 ROUND(p.normal_price,2) AS Current,
@@ -191,7 +191,7 @@ if (isset($upc)) {
 
                     $query .= ") AS yearSpan GROUP BY yearSpan.PLU, Price ORDER BY Price";
 
-               } else $query .= " UNION ";
+               } else $query .= " UNION ALL ";
             }
         }
 

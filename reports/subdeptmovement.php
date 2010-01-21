@@ -92,7 +92,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
             if ($i == $year2) {
 
                 if (substr($date2, 0, 10) == date('Y-m-d')) {
-                    $grossQ .= " UNION SELECT ROUND(SUM(t.total), 2) AS Total
+                    $grossQ .= " UNION ALL SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.dtransactions AS t, is4c_op.products AS p
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
@@ -102,7 +102,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 
                 $grossQ .= ") AS yearSpan";
 
-            } else $grossQ .= " UNION ";
+            } else $grossQ .= " UNION ALL ";
 
         }
 
@@ -118,7 +118,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999";
 
-            $grossQ .= " UNION SELECT ROUND(SUM(t.total), 2) AS Total
+            $grossQ .= " UNION ALL SELECT ROUND(SUM(t.total), 2) AS Total
                 FROM is4c_log.dtransactions AS t, is4c_op.products AS p
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
@@ -192,7 +192,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             AND t.trans_status <> 'X'
                             $inUse
                             GROUP BY p.upc";
-            $query .= " UNION SELECT p.UPC AS PLU,
+            $query .= " UNION ALL SELECT p.UPC AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
                             SUM(t.ItemQtty) AS Qty,
@@ -249,7 +249,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 
                 if (substr($date2, 0, 10) == date('Y-m-d')) {
 
-                    $query .= " UNION SELECT p.UPC AS PLU,
+                    $query .= " UNION ALL SELECT p.UPC AS PLU,
                             p.description AS Description,
                             ROUND(p.normal_price,2) AS 'Current Price',
                             SUM(t.ItemQtty) AS Qty,
@@ -267,7 +267,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 
                 $query .= ") AS yearSpan GROUP BY PLU ORDER BY $order";
 
-            } else $query .= " UNION ";
+            } else $query .= " UNION ALL ";
         }
 
     }

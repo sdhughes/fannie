@@ -60,7 +60,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2) {
                 $memCountQ .= ") AS yearSpan";
             } else {
-                $memCountQ .= " UNION ";
+                $memCountQ .= " UNION ALL ";
             }
 
         }
@@ -83,7 +83,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2) {
                 $CountQ .= ") AS yearSpan";
             } else {
-                $CountQ .= " UNION ";
+                $CountQ .= " UNION ALL ";
             }
 
         }
@@ -108,7 +108,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2)
                 $memSalesQ .= ") AS yearSpan";
             else
-                $memSalesQ .= " UNION ";
+                $memSalesQ .= " UNION ALL ";
 
         }
 
@@ -129,7 +129,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2)
                 $SalesQ .= ") AS yearSpan";
             else
-                $SalesQ .= " UNION ";
+                $SalesQ .= " UNION ALL ";
         }
 
         $SalesR = mysqli_query($db_slave, $SalesQ);
@@ -152,7 +152,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2)
                 $memSalesByHourQ .= ") AS yearSpan GROUP BY hour";
             else
-                $memSalesByHourQ .= " UNION ";
+                $memSalesByHourQ .= " UNION ALL ";
 
         }
 
@@ -176,7 +176,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2)
                 $SalesByHourQ .= ") AS yearSpan GROUP BY hour";
             else
-                $SalesByHourQ .= " UNION ";
+                $SalesByHourQ .= " UNION ALL ";
 
         }
 
@@ -202,7 +202,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2)
                 $memCountByHourQ .= ") AS yearSpan GROUP BY hour";
             else
-                $memCountByHourQ .= " UNION ";
+                $memCountByHourQ .= " UNION ALL ";
 
         }
 
@@ -226,7 +226,7 @@ if (isset($_POST['submitted'])) {
             if ($year == $year2)
                 $CountByHourQ .= ") AS yearSpan GROUP BY hour";
             else
-                $CountByHourQ .= " UNION ";
+                $CountByHourQ .= " UNION ALL ";
 
         }
 

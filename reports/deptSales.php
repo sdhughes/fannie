@@ -116,7 +116,7 @@ if (isset($_POST['submitted'])) {
 
             if ($i == $year2) {
                 if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                    $query1 .= " UNION SELECT d.dept_name,ROUND(SUM(t.total),2) AS total
+                    $query1 .= " UNION ALL SELECT d.dept_name,ROUND(SUM(t.total),2) AS total
                         FROM is4c_op.departments AS d, is4c_log.dtransactions AS t
                         WHERE d.dept_no = t.department
                             AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
@@ -128,7 +128,7 @@ if (isset($_POST['submitted'])) {
 
                 $query1 .= ") AS yearSpan";
 
-            } else $query1 .= " UNION ";
+            } else $query1 .= " UNION ALL ";
 
         }
 
@@ -171,7 +171,7 @@ if (isset($_POST['submitted'])) {
 
             if ($i == $year2) {
                 if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                    $query2 .= " UNION SELECT d.dept_name AS Department,ROUND(SUM(t.total),2) AS open_dept, d.dept_no AS Dept_No
+                    $query2 .= " UNION ALL SELECT d.dept_name AS Department,ROUND(SUM(t.total),2) AS open_dept, d.dept_no AS Dept_No
                         FROM is4c_op.departments AS d,is4c_log.dtransactions AS t
                         WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                             AND t.trans_status <> 'X'
@@ -184,7 +184,7 @@ if (isset($_POST['submitted'])) {
 
                 $query2 .= ") AS yearSpan";
 
-            } else $query2 .= " UNION ";
+            } else $query2 .= " UNION ALL ";
         }
 
 
@@ -273,7 +273,7 @@ if (isset($_POST['submitted'])) {
 
                     if ($i == $year2) {
                         if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                            $query3 .= "UNION SELECT DISTINCT
+                            $query3 .= "UNION ALL SELECT DISTINCT
                                     p.upc AS PLU,
                                     p.description AS Description,
                                     ROUND(p.normal_price,2) AS 'Current Price',
@@ -294,7 +294,7 @@ if (isset($_POST['submitted'])) {
                                 GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                         }
                         $query3 .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
-                    } else $query3 .= " UNION ";
+                    } else $query3 .= " UNION ALL ";
                 }
             }
 
@@ -371,7 +371,7 @@ if (isset($_POST['submitted'])) {
 
                     if ($i == $year2) {
                         if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                            $query3 .= " UNION SELECT DISTINCT
+                            $query3 .= " UNION ALL SELECT DISTINCT
                                 p.upc AS PLU,
                                 p.description AS Description,
                                 ROUND(p.normal_price,2) AS 'Current Price',
@@ -391,7 +391,7 @@ if (isset($_POST['submitted'])) {
                         }
 
                         $query3 .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
-                    } else $query3 .= " UNION ";
+                    } else $query3 .= " UNION ALL ";
                 }
             }
 
