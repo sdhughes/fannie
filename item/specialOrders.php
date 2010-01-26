@@ -60,7 +60,7 @@ if (isset($_POST['submitted'])) {
 		$upc, $upc, // Hidden input #2
 		$upc, ($fs == 1 ? ' CHECKED="CHECKED"' : NULL), $upc, // Foodstamp checkbox
 		$upc, ($scale == 1 ? ' CHECKED="CHECKED"' : NULL), $upc,  // Scale checkbox
-		$upc, ($disc == 0 && $discType == 0 ? ' CHECKED="CHECKED"' : NULL), $upc, // checkbox
+		$upc, ($disc == 1 && $discType == 0 ? ' CHECKED="CHECKED"' : NULL), $upc, // checkbox
 		substr($modified, 11, 11), substr($modified, 11, 11), substr($modified, 0, 10) // Modified cell
 		);
         }
