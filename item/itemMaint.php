@@ -208,7 +208,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 	if (!empty($_POST['net_weight']) && is_numeric($_POST['net_weight'])) $net_weight = escape_data($_POST['net_weight']);
         else $net_weight = 'NULL';
 
-	if ($_POST['tagType'] === 0 || is_numeric($_POST['tagType'])) $tagType = escape_data($_POST['tagType']);
+	if (isset($_POST['tagType']) && ($_POST['tagType'] === 0 || is_numeric($_POST['tagType']))) $tagType = escape_data($_POST['tagType']);
 	else $tagType = 'NULL';
 
         $detailQ = "INSERT INTO product_details (upc, brand, product, distributor, pack_size, order_no, ingredients, certification, origin, special, cost, margin, net_weight, tag_type) VALUES
@@ -252,7 +252,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 	if (!empty($_POST['net_weight']) && is_numeric($_POST['net_weight'])) $net_weight = escape_data($_POST['net_weight']);
         else $net_weight = 'NULL';
 
-	if ($_POST['tagType'] === 0 || is_numeric($_POST['tagType'])) $tagType = escape_data($_POST['tagType']);
+	if (isset($_POST['tagType']) && ($_POST['tagType'] === 0 || is_numeric($_POST['tagType']))) $tagType = escape_data($_POST['tagType']);
 	else $tagType = 'NULL';
 
 	$bitField = 0;
