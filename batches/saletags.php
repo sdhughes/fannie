@@ -85,82 +85,212 @@ if (!isset($_POST['tags']) || !isset($_POST['batchID'])) { // Accessed in error.
 	if ($type == 1) {
 	    $endDate = 'on sale thru ' . $endDate;
 	    $image = '/pos/fannie/batches/SaleS_M.png';
+	    $pdf=new FPDF('L', 'mm', 'Letter');
+
+	    // Add special fonts.
+	    $pdf->AddFont('Helvetica', '', 'Helvetica.php');
+	    $pdf->AddFont('Helvetica', 'B', 'HelveticaBold.php');
+	    $pdf->AddFont('HelveticaNeue', 'CB', 'HelveticaNeueCondensedBold.php');
+	    $pdf->AddFont('HelveticaNeue', 'L', 'HelveticaNeueLight.php');
+	    $pdf->AddFont('HelveticaNeue', 'LI', 'HelveticaNeueLightItalic.php');
+
+	    $pdf->SetMargins($left ,$top);
+	    $pdf->SetAutoPageBreak('off', 0);
+	    $pdf->AddPage('L');
+
+	    // Set up location starts...
+	    $x = $xStart;
+	    $y = $yStart;
+
+	    // Go through the items...
+	    while ($row = mysqli_fetch_array($result)) {
+
+		// Make pretties out of the fields...
+		$product = ucwords(strtolower($row['description']));
+		$brand = strtoupper($row['brand']);
+		$nprice = '$' . number_format($row['nprice'],2);
+		$sprice = '$' . number_format($row['sprice'],2);
+
+		// Debugging outline...
+		$pdf->SetLineWidth(.2);
+		$pdf->Rect($x, $y, $width, $height);
+
+
+		// Brand...
+		$pdf->SetFont('Helvetica','',10);
+		$pdf->SetXY($x, $y + $brandTop);
+		$pdf->Cell($width, 8, substr($brand, 0, 21), 0, 0, 'C');
+
+		// Product...
+		$pdf->SetFont('HelveticaNeue', 'CB', 15);
+		$pdf->SetXY($x, $y + $productTop);
+		$pdf->Cell($width, 3, substr($product, 0, 22), 0, 0, 'C');
+
+		// Sale Price...
+		$pdf->SetFont('Helvetica', 'B', 40);
+		$pdf->SetXY($x ,$y + $spriceTop);
+		$pdf->Cell($width, 4, $sprice, 0, 0, 'C');
+
+		// Normal Price...
+		$pdf->SetFont('HelveticaNeue', 'L', 10);
+		$pdf->SetXY($x, $y + $npriceTop);
+		$pdf->Cell($width, 3,'Regular Price ' . $nprice,0,0,'C');
+
+		// End Date...
+		$pdf->SetFont('HelveticaNeue', 'LI', 10);
+		$pdf->SetXY($x, $y + $endDateTop);
+		$pdf->Cell($width, 3, $endDate, 0, 0, 'C');
+
+		// Increment to the right...
+		$x += $xShift;
+
+		// If we're at the end of a row, move down a row and reset $x
+		if ($x > $xMax) {
+		    $y += $yShift;
+		    $x = $xStart;
+		}
+
+		// If we're at the end of the page, add a new page and reset $x and $y
+		if ($y > $yMax) {
+		      $pdf->AddPage('L');
+		      $y = $yStart;
+		      $x = $xStart;
+		}
+	    }
 	} elseif ($type == 2) {
 	    $endDate = 'while supplies last';
 	    $image = '/pos/fannie/batches/discoTag.png';
-	}
+	    /**
+	    * begin to create PDF file using fpdf functions
+	    **/
+	     $h = 63.5;
+	     $w = 79.375;
+	     $top = 15;
+	     $left = 6;
+	     $x = 15;
+	     $y = 15;
 
-	$pdf=new FPDF('L', 'mm', 'Letter');
+	   $pdf=new FPDF('P', 'mm', 'Letter');
+	   $pdf->SetMargins($left ,$top);
+	   $pdf->SetAutoPageBreak('off',0);
+	   $pdf->AddPage('P');
+	   $pdf->SetFont('Arial','',10);
 
-	// Add special fonts.
-	$pdf->AddFont('Helvetica', '', 'Helvetica.php');
-	$pdf->AddFont('Helvetica', 'B', 'HelveticaBold.php');
-	$pdf->AddFont('HelveticaNeue', 'CB', 'HelveticaNeueCondensedBold.php');
-	$pdf->AddFont('HelveticaNeue', 'L', 'HelveticaNeueLight.php');
-	$pdf->AddFont('HelveticaNeue', 'LI', 'HelveticaNeueLightItalic.php');
+	   /**
+	    * set up location variable starts
+	    **/
 
-	$pdf->SetMargins($left ,$top);
-	$pdf->SetAutoPageBreak('off', 0);
-	$pdf->AddPage('L');
+	   $brandTop = 24.4;
+	   $productTop = 31;
+	   $priceLeft = $x + 12.7;
+	   $spriceTop = 43;
+	   $npriceTop = 54;
+	   $endDateTop = 60;
+	   $tagCount = 0;
+	   $down = 60;
+	   $LeftShift = 80;
+	   /*
+	     $lineStartX = $x + 10;
+	     $lineStopX = $x + $w - 10;
+	     $lineStartY = 38;
+	     $lineStopY = 38;
+	   */
 
-	// Set up location starts...
-	$x = $xStart;
-	$y = $yStart;
+	   /**
+	    * increment through items in query
+	    **/
 
-	// Go through the items...
-	while ($row = mysqli_fetch_array($result)) {
+	   while ($row = mysqli_fetch_array($result)) {
+	      /**
+	       * check to see if we have made 8 tags.
+	       * if we have start a new page....
+	       */
 
-	    // Make pretties out of the fields...
-	    $product = ucwords(strtolower($row['description']));
-	    $brand = strtoupper($row['brand']);
-	    $nprice = '$' . number_format($row['nprice'],2);
-	    $sprice = '$' . number_format($row['sprice'],2);
+	      if ($tagCount == 8) {
+		 $pdf->AddPage('P');
+		 $y = 15;
+		 $x = 15;
+		 $brandTop = 24.4;
+		 $productTop = 31;
+		 $priceLeft = $x + 12.7;
+		 $spriceTop = 43;
+		 $npriceTop = 54;
+		 $endDateTop = 60;
+		 $tagCount = 0;
+		 /*
+		  $lineStartX = $x + 10;
+		 $lineStopX = $x + $w - 10;
+		 $lineStartY = 38;
+		 $lineStopY = 38;
+		 */
+	      }
 
-	    // Debugging outline...
-	    $pdf->SetLineWidth(.2);
-	    $pdf->Rect($x, $y, $width, $height);
+	      /**
+	       * check to see if we have reached the right most label
+	       * if we have reset all left hands back to initial values
+	       */
+	      if ($x > 165) {
+		 $y = $y + $down;
+		 $x = 15;
+		 $brandTop = $brandTop + $down;
+		 $lineStartX = $x + 10;
+		 $lineStopX = $x + $w - 10;
+		 $lineStartY = $lineStartY + $down;
+		 $lineStopY = $lineStopY + $down;
+		 $priceLeft = $x + 12.7;
+		 $spriceTop = $spriceTop + $down;
+		 $npriceTop = $npriceTop + $down;
+		 $productTop = $productTop + $down;
+		 $endDateTop = $endDateTop + $down;
 
+	      }
 
-	    // Brand...
-	    $pdf->SetFont('Helvetica','',10);
-	    $pdf->SetXY($x, $y + $brandTop);
-	    $pdf->Cell($width, 8, substr($brand, 0, 21), 0, 0, 'C');
+	   /**
+	    * instantiate variables for printing on barcode from
+	    * $testQ query result set
+	    */
+	      $product = ucwords(strtolower($row['description']));
+	      $brand = ucwords(strtolower($row['brand']));
+	      $nprice = '$' . number_format($row['nprice'],2);
+	      $sprice = '$' . number_format($row['sprice'],2);
 
-	    // Product...
-	    $pdf->SetFont('HelveticaNeue', 'CB', 15);
-	    $pdf->SetXY($x, $y + $productTop);
-	    $pdf->Cell($width, 3, substr($product, 0, 22), 0, 0, 'C');
+	   /**
+	    * begin creating tag
+	    */
+	   $pdf->SetLineWidth(.2);
+	   $pdf->Rect($x, $y, $w, $h-4);
+	   $pdf->Image($image, $x, $y, $w, $h-4);
+	   $pdf->SetFont('Arial','',13);
+	   $pdf->SetXY($x, $brandTop);
+	   $pdf->Cell($w,8,$brand,0,0,'C');
+	   // $pdf->SetLineWidth(.4);
+	   // $pdf->Line($lineStartX, $lineStartY, $lineStopX, $lineStopY);
+	   $pdf->SetFont('Arial','B',42);
+	   $pdf->SetXY($priceLeft,$spriceTop);
+	   // $pdf->Cell($w-25.4,4,'Sale Price',0,0,'L');
+	   // $pdf->SetXY($priceLeft,$spriceTop);
+	   $pdf->Cell($w-25.4,4,$sprice,0,0,'C');
+	   $pdf->SetFont('Arial','',14);
+	   $pdf->SetXY($priceLeft,$npriceTop);
+	   $pdf->Cell($w-25.4,4,'Regular Price  ' . $nprice,0,0,'C');
+	   // $pdf->SetXY($priceLeft,$npriceTop);
+	   // $pdf->Cell($w-25.4,4,$nprice,0,0,'R');
+	   $pdf->SetFont('Arial','B',16);
+	   $pdf->SetXY($x, $productTop);
+	   $pdf->Cell($w,6,substr($product,0,26),0,0,'C');
+	   $pdf->SetFont('Arial','I',10);
+	   $pdf->SetXY($x, $endDateTop);
+	   $pdf->Cell($w,3,$endDate,0,0,'C');
 
-	    // Sale Price...
-	    $pdf->SetFont('Helvetica', 'B', 40);
-	    $pdf->SetXY($x ,$y + $spriceTop);
-	    $pdf->Cell($width, 4, $sprice, 0, 0, 'C');
-
-	    // Normal Price...
-	    $pdf->SetFont('HelveticaNeue', 'L', 10);
-	    $pdf->SetXY($x, $y + $npriceTop);
-	    $pdf->Cell($width, 3,'Regular Price ' . $nprice,0,0,'C');
-
-	    // End Date...
-	    $pdf->SetFont('HelveticaNeue', 'LI', 10);
-	    $pdf->SetXY($x, $y + $endDateTop);
-	    $pdf->Cell($width, 3, $endDate, 0, 0, 'C');
-
-	    // Increment to the right...
-	    $x += $xShift;
-
-	    // If we're at the end of a row, move down a row and reset $x
-	    if ($x > $xMax) {
-		$y += $yShift;
-		$x = $xStart;
-	    }
-
-	    // If we're at the end of the page, add a new page and reset $x and $y
-	    if ($y > $yMax) {
-		  $pdf->AddPage('L');
-		  $y = $yStart;
-		  $x = $xStart;
-	    }
+	   /**
+	    * increment label parameters for next label
+	    */
+	     $x = $x + $LeftShift;
+	     $priceLeft = $priceLeft + $LeftShift;
+	     $lineStartX = $lineStartX + $LeftShift;
+	     $lineStopX = $lineStopX + $LeftShift;
+	     $tagCount++;
+	   }
 	}
 
 	// Write the PDF...
