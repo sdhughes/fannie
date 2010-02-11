@@ -1,6 +1,8 @@
 <?php
 
 if (isset($_POST['submitted'])) {
+    //ini_set('display_errors', 'on');
+    //ini_set('error_reporting', E_ALL);
     /**
      * fpdf is the pdf creation class doc
      * manual and tutorial can be found in fpdf dir
@@ -38,7 +40,7 @@ if (isset($_POST['submitted'])) {
 
     $_SESSION['deptArray'] = 0;
 
-    if ($_POST['allDepts'] == 1) {
+    if (isset($_POST['allDepts']) && $_POST['allDepts'] == 1) {
         $dArray = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,40";
     } else {
         $allDepts = 0;
@@ -52,7 +54,7 @@ if (isset($_POST['submitted'])) {
         if ($deptno == 7 || $deptno == 3 || $deptno == 4 || $deptno == 16) {$small = 'SMALL';}
     }
 
-    if ($small != 'SMALL') {$small = 'LARGE';}
+    if (isset($small) && $small != 'SMALL') {$small = 'LARGE';}
 
     /**
      * connect to mysql server and then
@@ -385,15 +387,6 @@ if (isset($_POST['submitted'])) {
 	// Dynamic initial settings
 	$page = 0;
 
-	$testingArray = array(
-	    array('Organic', 'Choice', 'Bancha Green Tea', 'Green tea leaves', 491, 31.70),
-	    array('Non-Organic', 'Starwest', 'Chai Tea Blend', 'Black tea, cinnamon, assam tea, cardamom seed, cloves, ginger root, black pepper', 205, 21.60),
-	    array('Wildcrafted', 'A Tea Cup Dropped', 'Jasmine Green Tea', 'Gunpowder green tea, jasmine flowers', 345, 69.70),
-	    array('Organic', 'Dragonfly Chai', 'English Breakfast Tea', 'Black tea, cinnamon, assam tea, cardamom seed, cloves, ginger root, black pepper, Black tea, cinnamon, assam tea, cardamom seed, cloves, ginger root, black pepper', 491, 31.70),
-	    array('Non-Organic', 'Frontier', 'Bancha Green Tea', 'Green tea leaves', 491, 31.70),
-	    array('Wildcrafted', 'Woodstock Farms', 'Bancha Green Tea', 'Green tea leaves', 491, 31.70),
-	);
-
 	$query = "SELECT d.certification, d.brand, d.product, d.ingredients,
 	    CASE WHEN p.upc BETWEEN 0 AND 999 THEN SUBSTR(p.upc,11,3) WHEN p.upc BETWEEN 1000 AND 9999 THEN SUBSTR(p.upc, 10,4) ELSE p.upc END AS upc, p.normal_price
 	    FROM is4c_op.products AS p
@@ -617,6 +610,146 @@ if (isset($_POST['submitted'])) {
 	} else {
 	    drawForm(sprintf('Query: %s<br />Error: %s', $mainQ, mysqli_error($db_slave)));
 	}
+    } elseif ($_POST['type'] == 'BULK') {
+	$tagCert = (int) $_POST['tagCert'];
+	$tagType = (int) $_POST['tagSize'];
+
+	$bulkQ = sprintf("SELECT IF(pd.brand IS NULL,'',SUBSTRING(pd.brand,1,20)) AS brand,
+            IF(pd.order_no IS NULL,'', pd.order_no) AS order_no,
+            IF(pd.pack_size IS NULL,'',pd.pack_size) AS size,
+            CASE WHEN pd.upc IS NULL THEN '' WHEN pd.upc < 1000 THEN SUBSTRING(pd.upc, 11, 3) WHEN pd.upc < 10000 THEN SUBSTRING(pd.upc, 10, 4) ELSE '' END AS upc,
+            IF(pd.product IS NULL, SUBSTRING(p.description,1,25),SUBSTRING(pd.product,1,25)) AS description,
+            RIGHT(p.upc,12) AS pid,
+            IF(pd.distributor IS NULL, 'Misc', pd.distributor) AS vendor,
+            ROUND(normal_price,2) AS price,
+	    IF(pd.ingredients IS NULL, '', pd.ingredients) AS ingredients,
+	    IF(pd.origin IS NULL, '', pd.origin) AS origin,
+	    IF(pd.special IS NULL, '', pd.special) AS special
+        FROM products AS p LEFT OUTER JOIN product_details AS pd ON p.upc = pd.upc
+        WHERE p.department IN (%s)
+
+        AND p.inUse = 1
+        AND p.discounttype <> 3
+	AND p.upc NOT BETWEEN 10000 AND 15000
+	AND pd.certification = %u
+	AND pd.tag_type = %u
+        AND DATE(modified) BETWEEN '%s' AND '%s'
+        ORDER BY department", $dArray, $tagCert, $tagType, $date1, $date2);
+
+	$bulkR = mysqli_query($db_slave, $bulkQ);
+
+	if (!$bulkR) printf('Query: %s, Error: %s', $bulkQ, mysqli_error($db_slave));
+
+	$pdf=new PDF('P', 'mm', 'Letter');
+
+	// Add special fonts.
+	$pdf->AddFont('Helvetica', '', 'Helvetica.php');
+	$pdf->AddFont('Helvetica', 'B', 'HelveticaBold.php');
+	$pdf->AddFont('HelveticaNeue', '', 'HelveticaNeue.php');
+	$pdf->AddFont('HelveticaNeue', 'B', 'HelveticaNeueBold.php');
+	$pdf->AddFont('HelveticaNeue', 'BI', 'HelveticaNeueBoldItalic.php');
+	$pdf->AddFont('HelveticaNeue', 'CBl', 'HelveticaNeueCondensedBlack.php');
+	$pdf->AddFont('HelveticaNeue', 'CB', 'HelveticaNeueCondensedBold.php');
+	$pdf->AddFont('HelveticaNeue', 'I', 'HelveticaNeueItalic.php');
+	$pdf->AddFont('HelveticaNeue', 'L', 'HelveticaNeueLight.php');
+	$pdf->AddFont('HelveticaNeue', 'LI', 'HelveticaNeueLightItalic.php');
+	$pdf->AddFont('HelveticaNeue', 'UL', 'HelveticaNeueUltraLight.php');
+	$pdf->AddFont('HelveticaNeue', 'ULI', 'HelveticaNeueUltraLightItalic.php');
+
+	switch ($tagType) {
+	    case 0: // Wide
+		$height = 76;
+		$width = 127;
+		$left = 9.5;
+		$top = 12.5;
+		$right = 9;
+		$x = $left;
+		$y = $top;
+		$rightShift = $width + 6;
+		$downShift = $height + 15.5;
+		$orientation = 'L';
+		$xMax = 160;
+		$yMax = 120;
+
+		// Set up feach field...
+		$tagFields[] = array('height' => 7, 'width' => 120, 'x-offset' => 3, 'y-offset' => 23.5, 'justify' => 'C', 'field' => 'description', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 16, 'type' => 'cell');
+		$tagFields[] = array('height' => 4, 'width' => 120, 'x-offset' => 3, 'y-offset' => 37.5, 'justify' => 'L', 'field' => 'ingredients', 'font' => 'HelveticaNeue', 'font-weight' => '', 'font-size' => 10, 'type' => 'multicell');
+		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 57, 'y-offset' => 8, 'justify' => 'C', 'field' => 'upc', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 35, 'type' => 'cell');
+		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 91, 'y-offset' => 8, 'justify' => 'C', 'field' => 'price', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 25, 'type' => 'cell');
+		$tagFields[] = array('height' => 4.5, 'width' => 17, 'x-offset' => 23.5, 'y-offset' => 69, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
+		$tagFields[] = array('height' => 11, 'width' => 52, 'x-offset' => 3, 'y-offset' => 57, 'justify' => 'C', 'field' => 'origin', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'cell');
+		$tagFields[] = array('height' => 4.5, 'width' => 17, 'x-offset' => 106.5, 'y-offset' => 69, 'justify' => 'C', 'field' => 'size', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 12, 'type' => 'cell');
+		$tagFields[] = array('height' => 11, 'width' => 68, 'x-offset' => 58, 'y-offset' => 57, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
+
+		break;
+
+	    case 1: // Narrow
+
+		$height = 100;
+		$width = 98;
+		$left = 7;
+		$right = 5;
+		$top = 32;
+		$x = $left;
+		$y = $top;
+		$rightShift = $width + 6.5;
+		$downShift = $height + 16;
+		$orientation = 'P';
+		$xMax = 140;
+		$yMax = 180;
+
+		// Set up feach field...
+		$tagFields[] = array('height' => 7.5, 'width' => 90, 'x-offset' => 5, 'y-offset' => 21, 'justify' => 'C', 'field' => 'description', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 16, 'type' => 'cell');
+		$tagFields[] = array('height' => 5, 'width' => 90, 'x-offset' => 5, 'y-offset' => 34, 'justify' => 'L', 'field' => 'ingredients', 'font' => 'HelveticaNeue', 'font-weight' => '', 'font-size' => 10, 'type' => 'multicell');
+		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 4, 'y-offset' => 60, 'justify' => 'C', 'field' => 'upc', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 35, 'type' => 'cell');
+		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 40, 'y-offset' => 60, 'justify' => 'C', 'field' => 'price', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 25, 'type' => 'cell');
+		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 79.5, 'y-offset' => 61, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
+		$tagFields[] = array('height' => 5.5, 'width' => 70, 'x-offset' => 5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'origin', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'cell');
+		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 79.5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'size', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 12, 'type' => 'cell');
+		$tagFields[] = array('height' => 11, 'width' => 90, 'x-offset' => 5, 'y-offset' => 87, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
+
+		break;
+
+	default:
+		drawForm('You need to select a tag type.');
+		break;
+	}
+
+	$pdf->SetMargins($left, $top, $right);
+	$pdf->SetAutoPageBreak('off', 0);
+	$pdf->AddPage($orientation);
+
+	while ($tagRow = mysqli_fetch_array($bulkR, MYSQLI_ASSOC)) {
+	    if ($x > $xMax) {
+		$x = $left;
+		$y += $downShift;
+	    }
+
+	    if ($y > $yMax) {
+		$pdf->AddPage($orientation);
+		$x = $left;
+		$y = $top;
+	    }
+
+	    foreach ($tagFields AS $field) {
+		$pdf->SetFont($field['font'], $field['font-weight'], $field['font-size']);
+		$pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
+
+		if ($field['field'] == 'ingredients') {
+		    $W = 250;
+		    while ($pdf->WordWrap(substr($tagRow['ingredients'], 0, $W), $field['width'] - 2) > 3)
+			$W--;
+		    $tagRow['ingredients'] = ($W == 250 ? $tagRow['ingredients'] : substr($tagRow['ingredients'], 0, $W - 3) . '...');
+		}
+
+		if ($field['type'] == 'cell')
+		    $pdf->Cell($field['width'], $field['height'], $tagRow[$field['field']], 0, 0, $field['justify']);
+		elseif ($field['type'] == 'multicell')
+		    $pdf->MultiCell($field['width'], $field['height'], $tagRow[$field['field']], 0, $field['justify']);
+	    }
+
+	    $x += $rightShift;
+	}
     }
 
     /**
@@ -636,10 +769,25 @@ function drawForm($error = NULL) {
     ?><link href="../style.css" rel="stylesheet" type="text/css" />
     <script src="../src/CalendarControl.js" language="javascript"></script>
     <script src="../src/putfocus.js" language="javascript"></script>
+    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     </head>
     <body onLoad="putFocus(0,0);">
     <link href="../style.css" rel="stylesheet" type="text/css">
     <script src="../src/CalendarControl.js" language="javascript"></script>
+    <script type="text/javascript">
+	$(document).ready(function() {
+	    $('#tagType').change(function() {
+		val = $('#tagType').val();
+		if (val == 'BULK') {
+		    $('.bulkOptions').show();
+		} else {
+		    $('.bulkOptions').hide();
+		}
+	    });
+
+	    $('.bulkOptions').hide();
+	});
+    </script>
 
     <form method="post" action="shelftags.php" target="_blank">
 
@@ -653,14 +801,22 @@ function drawForm($error = NULL) {
     <table border="0" cellspacing="3" cellpadding="3">
         <tr>
             <th align="center"> <p><b>Select Department(s)</b></p></th>
-            <th><p><b>for to make pretty tags.</b></p></th>
-            <th><p><b>Select A Tag Style: <select name="type">
+            <th><p><b>Select A Tag Style: <select name="type" id="tagType">
                 <option value="TINY">HABA Style</option>
                 <option value="BIG" SELECTED>Standard Style</option>
 		<option value="CIRCLE">Bulk Herbs Tags</option>
 		<option value="WINE">Wine Tags</option>
+		<option value="BULK">Bulk Tags</option>
             </select></b></p></th>
+	    <th class="bulkOptions">
+		<p><strong>Tag Type: <select name="tagSize"><option value="0">Wide</option><option value="1">Standard</option></select></strong></p>
+	    </th>
+	    <th class="bulkOptions">
+		<p><strong>Tag Cert: <select name="tagCert"><option value="1">Organic</option><option value="2">Non-Organic</option></select></strong></p>
+	    </th>
         </tr>
+    </table>
+    <table border="0" cellspacing="3" cellpadding="3">
         <tr>
             <td><font size="-1"><p>
                 <input type="checkbox" value=1 name="allDepts"><b>All Departments</b><br>
@@ -669,8 +825,6 @@ function drawForm($error = NULL) {
                 <input type="checkbox" name="dept[]" value="3">Perishable<br>
                 <input type="checkbox" name="dept[]" value="4">Dairy<br>
                 <input type="checkbox" name="dept[]" value="7">Cheese<br>
-                <input type="checkbox" name="dept[]" value="15">Deli<br>
-                <input type="checkbox" name="dept[]" value="16">Bread & Juice<br>
                 <input type="checkbox" name="dept[]" value="14">Beer<br>
                 <input type="checkbox" name="dept[]" value="5">Wine<br>
                 </p></font>
@@ -683,8 +837,6 @@ function drawForm($error = NULL) {
                 <input type="checkbox" name="dept[]" value="10">NF-General<br>
                 <input type="checkbox" name="dept[]" value="9">Bulk Herbs<br>
                 <input type="checkbox" name="dept[]" value="13">NF-Pet<br>
-                <input type="checkbox" name="dept[]" value="17">Floral<br>
-                <input type="checkbox" name="dept[]" value="40">Tri-Met
                 </p></font>
             </td>
         </tr>
