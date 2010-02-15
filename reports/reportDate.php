@@ -42,8 +42,6 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
             $db_date = date('Y-m-d', mktime(0, 0, 0, $dateArray[1], $dateArray[2], $dateArray[0]));
         }
 
-        echo "Report run " .date('Y-m-d'). " for ";
-
         require_once('../includes/mysqli_connect.php');
         require_once('../includes/selectToTable.php');
         mysqli_select_db($db_slave, 'is4c_log');
@@ -80,7 +78,9 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         /**
          * sales of inventory departments
          */
-
+	/**
+	 * replaced with better groupings
+	 *
         $inventoryDeptQ = "SELECT t.dept_no AS Department ,t.dept_name AS 'Department Name',ROUND(sum(d.total),2) AS 'Department Total'
                 FROM $transtable AS d RIGHT JOIN is4c_op.departments AS t
                 ON d.department = t.dept_no
@@ -91,12 +91,64 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 AND d.emp_no <> 9999
                 GROUP BY t.dept_no
                 ORDER BY t.dept_no";
+	*/
 
-        $dept_subtotalQ = "SELECT ROUND(SUM(d.total),2) AS 'Department Subtotal'
+	$deptArray = array(
+	    array('name' => 'Grocery', 'depts' => '1, 13, 28, 30'),
+	    array('name' => 'Bulk', 'depts' => '2, 31'),
+	    array('name' => 'Perishables', 'depts' => '3, 15, 16, 32'),
+	    array('name' => 'Dairy', 'depts' => '4'),
+	    array('name' => 'Wine', 'depts' => '5, 29'),
+	    array('name' => 'Frozen', 'depts' => '6'),
+	    array('name' => 'Cheese', 'depts' => '7'),
+	    array('name' => 'Produce', 'depts' => '8, 33'),
+	    array('name' => 'Supplements', 'depts' => '9, 12, 35'),
+	    array('name' => 'Non-Foods', 'depts' => '10, 34'),
+	    array('name' => 'Personal Care', 'depts' => '11'),
+	    array('name' => 'Beer', 'depts' => '14'),
+	    array('name' => 'Marketing', 'depts' => '18'),
+	    array('name' => 'Tri-Met', 'depts' => '40'),
+	    array('name' => 'Bottle Return', 'depts' => '41'),
+	    array('name' => 'Bottle Deposit', 'depts' => '42, 43'),
+	    array('name' => 'Gift Card Sales', 'depts' => '44'),
+	    array('name' => 'Member Equity', 'depts' => '45')
+	);
+
+	$dept_subtotalQ = "SELECT ROUND(SUM(d.total),2) AS 'Department Subtotal'
                 FROM $transtable d
                 WHERE date(d.datetime) = '".$db_date."'
                 AND d.department <= 45 AND d.department <> 0 AND d.trans_subtype <> 'MC'
                 AND d.emp_no <> 9999 AND d.trans_status <> 'X'";
+
+	$dept_subtotalR = mysqli_query($db_slave, $dept_subtotalQ);
+	list($dept_subtotal) = mysqli_fetch_row($dept_subtotalR);
+
+	$deptTable = '<table>';
+
+	foreach ($deptArray AS $dept) {
+	    $deptQ = "SELECT ROUND(sum(d.total),2) AS 'Department Total'
+                FROM $transtable AS d
+                WHERE
+		    date(d.datetime) = '$db_date'
+		    AND d.department IN ({$dept['depts']})
+		    AND d.trans_status <> 'X'
+		    AND d.trans_subtype <> 'MC'
+		    AND d.emp_no <> 9999";
+	    $deptR = mysqli_query($db_slave, $deptQ);
+	    if (!$deptR) printf('Query: %s, Error: %s', $deptQ, mysqli_error($db_slave));
+	    else {
+		list($deptTotal) = mysqli_fetch_row($deptR);
+		$deptTable .= sprintf('<tr align="left">
+				      <td width="225" align="right"><font size = "2.5">%s</font></td>
+				      <td width="225" align="right"><font size = "2.5">%s</font></td>
+				      </tr>', $dept['name'], number_format(is_null($deptTotal) ? 0.00 : $deptTotal, 2));
+	    }
+	}
+	$deptTable .= sprintf('<tr>
+				<th width="225" align="right"><font size = "2.5">Department Subtotal</font></th>
+				<th width="225" align="right"><font size = "2.5">%s</font></th>
+				</tr>
+			    </font></table>', number_format($dept_subtotal, 2));
 
         /*
          * pull tender report.
@@ -110,6 +162,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 		AND d.trans_subtype <> 'MI'
                 AND d.emp_no <> 9999
                 GROUP BY t.TenderName";
+	$tendersR = mysqli_query($db_slave, $tendersQ);
 
         $storeChargeQ = "SELECT COUNT(total) AS 'Store Charge Count', ROUND(-SUM(d.total),2) AS 'Store Charge Total'
                 FROM $transtable AS d
@@ -118,6 +171,8 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 AND d.trans_status <> 'X'
                 AND date(d.datetime) = '".$db_date."'
                 AND d.emp_no <> 9999";
+	$storeChargeR = mysqli_query($db_slave, $storeChargeQ);
+	list($storeCount, $storeTotal) = mysqli_fetch_row($storeChargeR);
 
         $houseChargeQ = "SELECT COUNT(total) AS 'House Charge Count', ROUND(-SUM(d.total),2) AS 'House Charge Total'
                 FROM $transtable AS d
@@ -126,6 +181,8 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 AND d.trans_status <> 'X'
                 AND date(d.datetime) = '".$db_date."'
                 AND d.emp_no <> 9999";
+	$houseChargeR = mysqli_query($db_slave, $houseChargeQ);
+	list($houseCount, $houseTotal) = mysqli_fetch_row($houseChargeR);
 
         ////////////////////////////
         //
@@ -135,10 +192,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         //
         ////////////////////////////
 
-
-        echo $db_date . '<br>';
-        echo '<font size = 2>';
-        echo '<h4>Sales - Gross & NET</h4>';
+        printf('<h3>Sales - Gross & NET (Report run %s for %s)</h3>', date('Y-m-d'), $db_date);
 
        // Haus edit 08-06-07
        $gross2Q = "SELECT ROUND(SUM(total),2) AS 'Gross Sales'
@@ -345,42 +399,112 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                list($totalDisc) = mysqli_fetch_row($totalDiscR);
 
        // Haus edit...checking (08-06-07)
-       echo "<table border=0><tr><td>Gross Total</td><td align=right>".money_format('%n',$gross2)."</td></tr>";
-       echo "<tr><td>Total Discount</td><td align=right>".money_format('%n',$totaldiscount2)."</td></tr>";
-       echo "<tr><td>Instore Coupons</td><td align=right>".money_format('%n',$coupons2)."</td></tr>";
-       echo "<tr><b><td><b>Net Total</b></td><td align=right><b>".money_format('%n',$net2)."</b></td></tr></table>";
+       printf('<table border="0">
+		<tr>
+		    <td width="225" align="right"><font size="2.5">Gross Total</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
+		<tr>
+		    <td width="225" align="right"><font size="2.5">Total Discount</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
+		<tr>
+		    <td width="225" align="right"><font size="2.5">Instore Coupons</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
+		<tr>
+		    <td width="225" align="right"><font size="2.5"><strong>Net Total</strong></font></td>
+		    <td width="225" align="right"><font size="2.5"><strong>%s</strong></font></td>
+		</tr>
+	      </table>', number_format($gross2, 2), number_format($totaldiscount2, 2), number_format($coupons2, 2), number_format($net2, 2));
 
        // End haus edit.
 
-        echo '<h4>Sales by Inventory Dept.</h4>';
-        select_to_table($db_slave, $inventoryDeptQ,0,'FFCC99');
+        echo '<p>Sales by Inventory Dept.</p>';
+        //select_to_table($db_slave, $inventoryDeptQ,0,'FFCC99');
+	echo $deptTable;
         // Haus add 08-03-2007
-        select_to_table($db_slave, $dept_subtotalQ,0,'FFCC99');
+        //select_to_table($db_slave, $dept_subtotalQ,0,'FFCC99');
         // end Haus add 08-03-2007
 
-        echo '<h4>Tender Report</h4>';
-        select_to_table($db_slave, $tendersQ,0,'FFCC99');									// sales by tender type
-        select_to_table($db_slave, $storeChargeQ,0,'FFCC99');								// store charges
-        select_to_table($db_slave, $houseChargeQ,0,'FFCC99');								// house charges
-        echo '<h4>Discount Totals</h4>';
+        echo '<p>Tender Report</p>
+		<table border="0">';
+
+	while (list($name, $total, $count) = mysqli_fetch_row($tendersR)) {
+	    printf('<tr>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>',
+			$name, number_format($total, 2), $count);
+	}
+
+	//select_to_table($db_slave, $tendersQ,0,'FFCC99');									// sales by tender type
+        //select_to_table($db_slave, $storeChargeQ,0,'FFCC99');								// store charges
+	printf('<tr>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>', 'Store Charge', number_format(is_null($storeTotal) ? 0.00 : $storeTotal, 2), $storeCount);
+        //select_to_table($db_slave, $houseChargeQ,0,'FFCC99');								// house charges
+	printf('<tr>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>', 'House Charge', number_format(is_null($houseTotal) ? 0.00 : $houseTotal, 2), $houseCount);
+
+	echo '</table>';
+
+
+	echo '<p>Discount Totals</p>';
         echo "<table border=0><font size=2>";
 
         // Specialize reporting based upon whether it is a Member Appreciation Day or not.
         if ($MAD == true) {
-            echo "<tr><td>Member Total</td><td align=right>".money_format('%n',$mem_total + $wm_total)."</td></tr>";
-            echo "<tr><td>Staff Total</td><td align=right>".money_format('%n',$staff_total)."</td></tr>";
-            echo "<tr><td>Working Member Total</td><td align=right>".money_format('%n',0)."</td></tr>";
+            printf('<tr>
+			<td width="225" align="right"><font size="2.5">Member Total</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>
+		    <tr>
+			<td width="225" align="right"><font size="2.5">Staff Total</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>
+		    <tr>
+			<td width="225" align="right"><font size="2.5">Working Member Total</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>', number_format($mem_total + $wm_total, 2), number_format($staff_total, 2), number_format(0, 2));
         } elseif ($MAD == false) {
-            echo "<tr><td>Member Total</td><td align=right>".money_format('%n',$mem_total)."</td></tr>";
-            echo "<tr><td>Staff Total</td><td align=right>".money_format('%n',$staff_total)."</td></tr>";
-            echo "<tr><td>Working Member Total</td><td align=right>".money_format('%n',$wm_total)."</td></tr>";
+            printf('<tr>
+			<td width="225" align="right"><font size="2.5">Member Total</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>
+		    <tr>
+			<td width="225" align="right"><font size="2.5">Staff Total</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>
+		    <tr>
+			<td width="225" align="right"><font size="2.5">Working Member Total</font></td>
+			<td width="225" align="right"><font size="2.5">%s</font></td>
+		    </tr>', number_format($mem_total, 2), number_format($staff_total, 2), number_format($wm_total, 2));
         }
 
-        echo "<tr><td>Board Member Total</td><td align=right>".money_format('%n',$board)."</td></tr>";
-        echo "<tr><td>Sister Organizations Total</td><td align=right>".money_format('%n',$sister_org)."</td></tr>";
-        echo "<tr><td>Non-owner Total</td><td align=right>".money_format('%n',$non_total)."</td></tr>";
-        echo "<tr><td><b>Total Discount</b></td><td align=right><b>".money_format('%n',$totalDisc)."</b></td></tr></font></table><br />";
-        echo '</font>';
+        printf('<tr>
+		    <td width="225" align="right"><font size="2.5">Board Member Total</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
+		<tr>
+		    <td width="225" align="right"><font size="2.5">Sister Organizations Total</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
+		<tr>
+		    <td width="225" align="right"><font size="2.5">Non-owner Total</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
+	        <tr>
+		    <td width="225" align="right"><font size="2.5"><strong>Total Discount</strong></font></td>
+		    <td width="225" align="right"><font size="2.5"><strong>%s</strong></font></td>
+		</tr>
+		</table>', number_format($board, 2), number_format($sister_org, 2), number_format($non_total, 2), number_format($totalDisc, 2));
 
 
 
