@@ -3,7 +3,8 @@
 //
 // Copyright (C) 2007
 // authors: Christof Van Rabenau - Whole Foods Cooperative,
-// Joel Brock - People's Food Cooperative
+// Joel Brock - People's Food Cooperative,
+// Matthaus Litteken - Alberta Cooperative Grocery
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -84,7 +85,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         $inventoryDeptQ = "SELECT t.dept_no AS Department ,t.dept_name AS 'Department Name',ROUND(sum(d.total),2) AS 'Department Total'
                 FROM $transtable AS d RIGHT JOIN is4c_op.departments AS t
                 ON d.department = t.dept_no
-                AND date(d.datetime) = '".$db_date."'
+                AND date(d.datetime) = '$db_date'
                 AND d.department <> 0
                 AND d.trans_status <> 'X'
                 AND d.trans_subtype <> 'MC'
@@ -116,7 +117,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 
 	$dept_subtotalQ = "SELECT ROUND(SUM(d.total),2) AS 'Department Subtotal'
                 FROM $transtable d
-                WHERE date(d.datetime) = '".$db_date."'
+                WHERE date(d.datetime) = '$db_date'
                 AND d.department <= 45 AND d.department <> 0 AND d.trans_subtype <> 'MC'
                 AND d.emp_no <> 9999 AND d.trans_status <> 'X'";
 
@@ -157,7 +158,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         $tendersQ = "SELECT t.TenderName as 'Tender Type',ROUND(-sum(d.total),2) as Total,COUNT(*) as Count
                 FROM $transtable as d,is4c_op.tenders as t
                 WHERE d.trans_subtype = t.TenderCode
-                AND date(d.datetime) = '".$db_date."'
+                AND date(d.datetime) = '$db_date'
                 AND d.trans_status <> 'X'
 		AND d.trans_subtype <> 'MI'
                 AND d.emp_no <> 9999
@@ -169,7 +170,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 WHERE d.trans_subtype = 'MI'
                 AND card_no = 9999
                 AND d.trans_status <> 'X'
-                AND date(d.datetime) = '".$db_date."'
+                AND date(d.datetime) = '$db_date'
                 AND d.emp_no <> 9999";
 	$storeChargeR = mysqli_query($db_slave, $storeChargeQ);
 	list($storeCount, $storeTotal) = mysqli_fetch_row($storeChargeR);
@@ -179,7 +180,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 WHERE d.trans_subtype = 'MI'
                 AND card_no != 9999
                 AND d.trans_status <> 'X'
-                AND date(d.datetime) = '".$db_date."'
+                AND date(d.datetime) = '$db_date'
                 AND d.emp_no <> 9999";
 	$houseChargeR = mysqli_query($db_slave, $houseChargeQ);
 	list($houseCount, $houseTotal) = mysqli_fetch_row($houseChargeR);
@@ -224,18 +225,35 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        //
        $staffQ = "SELECT (SUM(d.unitPrice)) AS 'Staff Total'
                FROM $transtable AS d
-               WHERE date(d.datetime) = '".$db_date."'
+               WHERE date(d.datetime) = '$db_date'
                AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.staff IN (1,2,5)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
 
-               $staffR = mysqli_query($db_slave, $staffQ);
-               list($staff_total) = mysqli_fetch_row($staffR);
+	$staffR = mysqli_query($db_slave, $staffQ);
+	list($staff_total) = mysqli_fetch_row($staffR);
 
-               if (is_null($staff_total)) {
-                       $staff_total = 0;
-               }
+	if (is_null($staff_total)) {
+		$staff_total = 0;
+	}
+
+	$staffMADQ = "SELECT (SUM(d.unitPrice)) AS 'Staff Total'
+               FROM $transtable AS d
+               WHERE date(d.datetime) = '$db_date'
+               AND d.upc = 'MADISCOUNT'
+               AND d.staff IN (1,2,5)
+               AND d.trans_status <> 'X'
+               AND d.emp_no <> 9999";
+
+	$staffMADR = mysqli_query($db_slave, $staffMADQ);
+	list($staff_mad) = mysqli_fetch_row($staffMADR);
+
+	if (is_null($staff_mad)) {
+		$staff_mad = 0;
+	}
+
+	$staff_total -= $staff_mad;
 
        //
        //	END STAFF_TOTAL
@@ -246,46 +264,74 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        //
        $memQ = "SELECT SUM(d.total) as 'Member'
                FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
+               WHERE date(d.datetime) = '$db_date'
                AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.memType IN (1,2,3,4,5)
                AND d.staff = 0
                AND d.emp_no <> 9999
                AND d.trans_status <> 'X'";
 
-               $memR = mysqli_query($db_slave, $memQ);
-               list($mem_total) = mysqli_fetch_row($memR);
+	$memR = mysqli_query($db_slave, $memQ);
+	list($mem_total) = mysqli_fetch_row($memR);
 
-               if(is_null($mem_total)) {
-                       $mem_total = 0;
-               }
+	if(is_null($mem_total)) {
+		$mem_total = 0;
+	}
+
+	$memMADQ = "SELECT SUM(d.total) as 'Member'
+               FROM $transtable d
+               WHERE date(d.datetime) = '$db_date'
+               AND d.upc = 'MADISCOUNT'
+               AND d.memType IN (1,2,3,4,5)
+               AND d.staff <> 0
+               AND d.emp_no <> 9999
+               AND d.trans_status <> 'X'";
+
+	$memMADR = mysqli_query($db_slave, $memMADQ);
+	list($mem_mad) = mysqli_fetch_row($memMADR);
+
+	if(is_null($mem_mad)) {
+		$mem_mad = 0;
+	}
+
+	$mem_total += $mem_mad;
+
        //
        //	BEGIN WM_TOTAL
        //
        $wmQ = "SELECT SUM(d.unitPrice) AS 'Working Member'
                FROM $transtable AS d
-               WHERE date(d.datetime) = '".$db_date."'
+               WHERE date(d.datetime) = '$db_date'
                AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.staff IN (3,6)
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
 
-               $wmR = mysqli_query($db_slave, $wmQ);
-               list($wms) = mysqli_fetch_row($wmR);
+	$wmR = mysqli_query($db_slave, $wmQ);
+	list($wm_total) = mysqli_fetch_row($wmR);
 
 
-               if (is_null($wms)) {
-                       $wms = 0;
-               }
+	if (is_null($wm_total)) {
+		$wm_total = 0;
+	}
 
-       $wm_totalQ = "SELECT ($wms) AS hoo_total";
+	$wmMADQ = "SELECT (SUM(d.unitPrice)) AS ' Total'
+               FROM $transtable AS d
+               WHERE date(d.datetime) = '$db_date'
+               AND d.upc = 'MADISCOUNT'
+               AND d.staff IN (3,6)
+               AND d.trans_status <> 'X'
+               AND d.emp_no <> 9999";
 
-               $wm_totalR = mysqli_query($db_slave, $wm_totalQ);
-               list($wm_total) = mysqli_fetch_row($wm_totalR);
+	$wmMADR = mysqli_query($db_slave, $wmMADQ);
+	list($wm_mad) = mysqli_fetch_row($wmMADR);
 
-               if (is_null($wm_total)) {
-                       $wm_total = 0;
-               }
+	if (is_null($wm_mad)) {
+		$wm_mad = 0;
+	}
+
+	$wm_total -= $wm_mad;
+
        //
        //	END WM_TOTAL
        //
@@ -294,20 +340,37 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        //       BOARD DISCOUNT
        //
 
-              $boardQ = "SELECT SUM(d.unitPrice) AS 'Board Member'
+        $boardQ = "SELECT SUM(d.unitPrice) AS 'Board Member'
                FROM $transtable AS d
-               WHERE date(d.datetime) = '".$db_date."'
+               WHERE date(d.datetime) = '$db_date'
                AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.staff = 4
                AND d.trans_status <> 'X'
                AND d.emp_no <> 9999";
 
-               $boardR = mysqli_query($db_slave, $boardQ);
-               list($board) = mysqli_fetch_row($boardR);
+	$boardR = mysqli_query($db_slave, $boardQ);
+	list($board) = mysqli_fetch_row($boardR);
 
-               if (is_null($board)) {
-                       $board = 0;
-               }
+	if (is_null($board)) {
+		$board = 0;
+	}
+
+	$bdMADQ = "SELECT (SUM(d.unitPrice)) AS 'Staff Total'
+               FROM $transtable AS d
+               WHERE date(d.datetime) = '$db_date'
+               AND d.upc = 'MADISCOUNT'
+               AND d.staff = 4
+               AND d.trans_status <> 'X'
+               AND d.emp_no <> 9999";
+
+	$bdMADR = mysqli_query($db_slave, $bdMADQ);
+	list($bd_mad) = mysqli_fetch_row($bdMADR);
+
+	if (is_null($bd_mad)) {
+		$bd_mad = 0;
+	}
+
+	$board -= $bd_mad;
 
 
        //
@@ -319,20 +382,37 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        //
        $nonQ = "SELECT SUM(d.total) as non
                FROM $transtable d
-               WHERE date(d.datetime) = '".$db_date."'
+               WHERE date(d.datetime) = '$db_date'
                AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
-               AND d.memType IN (0, 7)
+               AND d.memType IN (0, 7, 8)
                AND d.staff = 0
                AND d.emp_no <> 9999
                AND d.trans_status <> 'X'";
 
-               $nonR = mysqli_query($db_slave, $nonQ);
-               list($non_total) = mysqli_fetch_row($nonR);
+	$nonR = mysqli_query($db_slave, $nonQ);
+	list($non_total) = mysqli_fetch_row($nonR);
 
-               if(is_null($non_total)) {
-                       $non_total = 0;
-               }
+	if(is_null($non_total)) {
+		$non_total = 0;
+	}
 
+	$nonMADQ = "SELECT (SUM(d.unitPrice)) AS 'Staff Total'
+               FROM $transtable AS d
+               WHERE date(d.datetime) = '$db_date'
+               AND d.upc = 'MADISCOUNT'
+	       AND d.memType IN (0, 7, 8)
+               AND d.staff = 0
+               AND d.trans_status <> 'X'
+               AND d.emp_no <> 9999";
+
+	$nonMADR = mysqli_query($db_slave, $nonMADQ);
+	list($non_mad) = mysqli_fetch_row($nonMADR);
+
+	if (is_null($non_mad)) {
+		$non_mad = 0;
+	}
+
+	$non_total -= $non_mad;
 
 
        //
@@ -340,7 +420,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
        //
        $sisterQ = "SELECT (ROUND(SUM(d.unitPrice),2)) AS 'Sister Orgs'
                FROM $transtable AS d
-               WHERE (date(d.datetime) = '".$db_date."')
+               WHERE (date(d.datetime) = '$db_date')
                AND d.upc IN ('DISCOUNT', 'CASEDISCOUNT')
                AND d.memType = 6
 	       AND d.staff NOT IN (3,6)
@@ -348,20 +428,30 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                AND d.emp_no <> 9999";
 
                $sisterR = mysqli_query($db_slave, $sisterQ);
-               list($sister) = mysqli_fetch_row($sisterR);
-
-               if (is_null($sister)) {
-                       $sister = 0;
-               }
-
-       $sister_orgQ = "SELECT ($sister) AS 'Sister Orgs'";
-
-               $sister_orgR = mysqli_query($db_slave, $sister_orgQ);
-               list($sister_org) = mysqli_fetch_row($sister_orgR);
+               list($sister_org) = mysqli_fetch_row($sisterR);
 
                if (is_null($sister_org)) {
                        $sister_org = 0;
                }
+
+       	$sisterMADQ = "SELECT (SUM(d.unitPrice)) AS 'Staff Total'
+               FROM $transtable AS d
+               WHERE date(d.datetime) = '$db_date'
+               AND d.upc = 'MADISCOUNT'
+	       AND d.memType = 0
+               AND d.staff NOT IN (3,6)
+               AND d.trans_status <> 'X'
+               AND d.emp_no <> 9999";
+
+	$sisterMADR = mysqli_query($db_slave, $sisterMADQ);
+	list($sister_mad) = mysqli_fetch_row($sisterMADR);
+
+	if (is_null($sister_mad)) {
+		$sister_mad = 0;
+	}
+
+	$sister_org -= $sister_mad;
+
        //
        //	END SISTER_ORGS
        //
