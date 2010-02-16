@@ -160,10 +160,19 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 WHERE d.trans_subtype = t.TenderCode
                 AND date(d.datetime) = '$db_date'
                 AND d.trans_status <> 'X'
-		AND d.trans_subtype <> 'MI'
+		AND d.trans_subtype NOT IN ('MI', 'FS', 'EC')
                 AND d.emp_no <> 9999
                 GROUP BY t.TenderName";
 	$tendersR = mysqli_query($db_slave, $tendersQ);
+
+	$ebtQ = "SELECT COUNT(total), ROUND(-SUM(d.total), 2)
+		FROM $transtable as d
+		    WHERE d.trans_subtype IN ('FS', 'EC')
+		    AND date(d.datetime) = '$db_date'
+		    AND d.trans_status <> 'X'
+		    AND d.emp_no <> 9999";
+	$ebtR = mysqli_query($db_slave, $ebtQ);
+	list($ebtCount, $ebtTotal) = mysqli_fetch_row($ebtR);
 
         $storeChargeQ = "SELECT COUNT(total) AS 'Store Charge Count', ROUND(-SUM(d.total),2) AS 'Store Charge Total'
                 FROM $transtable AS d
@@ -529,6 +538,11 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 			$name, number_format($total, 2), $count);
 	}
 
+	printf('<tr>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>', 'EBT', number_format(is_null($ebtTotal) ? 0.00 : $ebtTotal, 2), $ebtCount);
 	//select_to_table($db_slave, $tendersQ,0,'FFCC99');									// sales by tender type
         //select_to_table($db_slave, $storeChargeQ,0,'FFCC99');								// store charges
 	printf('<tr>
