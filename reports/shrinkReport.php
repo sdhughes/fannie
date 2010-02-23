@@ -3,7 +3,10 @@
 require_once ('../includes/mysqli_connect.php');
 mysqli_select_db($db_slave, 'is4c_log');
 
-?>
+
+
+if (isset($_POST['submitted'])) {
+    ?>
 <html>
 <head>
 <link rel="STYLESHEET" type="text/css" href="../includes/javascript/tablesorter/themes/blue/style.css" />
@@ -29,9 +32,6 @@ mysqli_select_db($db_slave, 'is4c_log');
 </head>
 <body>
 <?php
-
-if (isset($_POST['submitted'])) {
-
     $today = date("F d, Y");
 
     $date1 = $_POST['date1'];
@@ -39,9 +39,9 @@ if (isset($_POST['submitted'])) {
 
     $reasons = (isset($_POST['reasons']) ? true : false);
 
-    if (is_array($_POST['dept'])) {
+    if (isset($_POST['dept']) && is_array($_POST['dept'])) {
         $deptArray = implode(", ", $_POST['dept']);
-    } elseif (!is_array($_POST['dept'])) {
+    } elseif (!isset($_POST['dept']) || !is_array($_POST['dept'])) {
 	drawForm('<h2><font color="red">You must select a department.</font></h2>', $_POST);
 	exit();
     }
@@ -88,11 +88,16 @@ if (isset($_POST['submitted'])) {
 			%s
 		    </tr>
 		</thead><tbody>', ($reasons ? '<th>Shrink Reason</th>' : NULL));
+	$shrinkTotal = 0;
+	$shrinkCount = 0;
+	
 	while (list($upc, $description, $price, $quantity, $reason) = mysqli_fetch_row($shrinkR)) {
 	    printf('<tr><td>%s</td><td>%s</td><td>$%s</td><td>$%s</td><td>%s</td>%s</tr>',
 		   $upc, $description, number_format($price, 2), number_format($price * $quantity, 2), $quantity, ($reasons ? '<td>' . $reason . '</td>' : NULL));
+	    $shrinkTotal += ($price * $quantity);
+	    $shrinkCount += $quantity;
 	}
-	echo '</tbody></table>';
+	printf('<thead><tr><th colspan="3">Total Shrink</th><th>$%s</th><th>%s items</th></tr></thead></tbody></table>', $shrinkTotal, $shrinkCount);
     }
     echo '</body></html>';
 
@@ -108,16 +113,17 @@ function drawForm($msg = NULL, $_POST = NULL) {
     echo
     <<<EOS
     <link href="../style.css" rel="stylesheet" type="text/css">
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
     <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
-    <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
     <script type="text/javascript">
         Date.format = 'yyyy-mm-dd';
         $(function(){
-            $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
-            .dpSetOffset(0, 125);
+            $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
         });
 
 	$(document).ready(function() {
@@ -145,7 +151,7 @@ EOS;
             <form method="post" action="shrinkReport.php">
 	    <div align="center">
 		<table border="0" cellspacing="3" cellpadding="5">', $msg);
-    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 ORDER BY dept_name ASC";
+    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) ORDER BY dept_name ASC";
     $deptR = mysqli_query($db_slave, $deptQ);
 
     $count = 0;
