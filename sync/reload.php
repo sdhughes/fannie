@@ -11,7 +11,7 @@ function reloadtable($table) {
     $server = "localhost";
     $opDB = "is4c_op";
     $serveruser = "root";
-    $serverpass = "";
+    $serverpass = "lung*vIa";
 
     $laneuser = "root";
     $lanepass = "";
