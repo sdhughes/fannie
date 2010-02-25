@@ -13,9 +13,8 @@ if (isset($_POST['submitted'])) {
     $date1 = (isset($_POST['date1']) ? $_POST['date1'] : NULL);
     $date2 = (isset($_POST['date2']) ? $_POST['date2'] : NULL);
 
-    $reasons = (isset($_POST['reasons']) ? true : false);
-
     if (isset($_POST['dept']) && is_array($_POST['dept'])) {
+	asort($_POST['dept']);
         $deptArray = implode(", ", $_POST['dept']);
     } elseif (!isset($_POST['dept']) || !is_array($_POST['dept'])) {
 	drawForm('<h2><font color="red">You must select a department.</font></h2>', $_POST);
@@ -60,8 +59,7 @@ function popup(mylink, windowname) {
 <script type="text/javascript">
     $(document).ready(function(){
         $(".tablesorter")
-            .tablesorter({widthFixed: true, debug: false, widgets:['zebra']})
-            .tablesorterPager({container: $("#pager")});
+            .tablesorter({widthFixed: true, debug: false, widgets:['zebra']});
         $(".tablesorter tr").mouseover(function() {$(this).addClass("over");}).mouseout(function() {$(this).removeClass("over");});
     });
 </script>
@@ -73,10 +71,12 @@ function popup(mylink, windowname) {
     //decide what the sort index is and translate from lay person to mySQL table label
     $sort = $_POST['sort'];
     
-    echo "Report sorted by $sort on<br />
-        $today<br />
-        From $date1 to $date2<br />
-        Department range: $deptArray<br /><br />";
+    $report = NULL;
+    
+    $report .= sprintf("Report sorted by %s on<br />
+        %s<br />
+        From %s to %s<br />
+        Department range: %s<br /><br />", $sort, $today, $date1, $date2, $deptArray);
     
 
     if ($sort == 'Department') {
@@ -97,368 +97,361 @@ function popup(mylink, windowname) {
         $inUse = "AND p.inUse IN (0,1)";
     }
 
+    // Gross sales report by department...
+    $salesQ = "SELECT dept, dept_no, SUM(total) FROM (";
+    for ($i = $year1; $i <= $year2; $i++) {
+	$salesQ .= "SELECT d.dept_name AS dept, d.dept_no AS dept_no, ROUND(SUM(t.total),2) AS total
+	    FROM is4c_op.departments AS d, is4c_log.trans_$i AS t
+	    WHERE d.dept_no = t.department
+		AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+		AND t.department IN ($deptArray)
+		AND t.trans_status <> 'X'
+		AND t.emp_no <> 9999
+	    GROUP BY dept";
 
-    if (isset($_POST['salesTotal'])) {
-        $salesQ = "SELECT dept, SUM(total) FROM (";
-        for ($i = $year1; $i <= $year2; $i++) {
-            $salesQ .= "SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total
-                FROM is4c_op.departments AS d, is4c_log.trans_$i AS t
-                WHERE d.dept_no = t.department
-                    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
-                    AND t.department IN ($deptArray)
-                    AND t.trans_status <> 'X'
-                    AND t.emp_no <> 9999
-                GROUP BY dept";
+	if ($i == $year2) {
+	    if ($date2 == date('Y-m-d')) {
+		$salesQ .= " UNION ALL SELECT d.dept_name AS dept, d.dept_no AS dept_no, ROUND(SUM(t.total),2) AS total
+		    FROM is4c_op.departments AS d, is4c_log.dtransactions AS t
+		    WHERE d.dept_no = t.department
+			AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+			AND t.department IN ($deptArray)
+			AND t.trans_status <> 'X'
+			AND t.emp_no <> 9999
+		    GROUP BY dept";
+	    }
 
-            if ($i == $year2) {
-                if ($date2 == date('Y-m-d')) {
-                    $salesQ .= " UNION ALL SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total
-                        FROM is4c_op.departments AS d, is4c_log.dtransactions AS t
-                        WHERE d.dept_no = t.department
-                            AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
-                            AND t.department IN ($deptArray)
-                            AND t.trans_status <> 'X'
-                            AND t.emp_no <> 9999
-                        GROUP BY dept";
-                }
+	    $salesQ .= ") AS yearSpan GROUP BY dept";
 
-                $salesQ .= ") AS yearSpan GROUP BY dept";
-
-            } else $salesQ .= " UNION ALL ";
-
-        }
-	
-        $salesR = mysqli_query($db_slave, $salesQ);
-        echo "<table>\n"; //create table
-        echo "<tr><td>";
-        echo "<b>Department</b></td><td>";
-        echo "<b>Total Sales</b></td></tr>";
-
-        if (!$salesR) {
-            $message  = 'Invalid query: ' . mysqli_error($db_slave) . "\n";
-            $message .= 'Whole query: ' . $salesQ;
-            die($message);
-        }
-
-        while ($myrow = mysqli_fetch_row($salesR)) { //create array from query
-	    printf("<tr><td>%s</td><td>%s</td></tr>\n",$myrow[0], $myrow[1]);
-	    //convert row information to strings, enter in table cells
-	}
-
-	echo "</table>\n";//end table
+	} else $salesQ .= " UNION ALL ";
 
     }
+    
+    $salesR = mysqli_query($db_slave, $salesQ);
+    
+    // If the query fails, draw the form, print an error.
+    if (!$salesR) {
+	$message  = sprintf('Invalid query: %s' . "\n" . 'Whole query: %s', mysqli_error($db_slave), $salesQ);
+	drawForm($message, $_POST);
+	exit();
+    }
+    
+    $reportData = array();
+    
+    // Load the data into a large array for later.
+    while (list($dept, $dept_no, $total) = mysqli_fetch_row($salesR)) { //create array from query
+	$reportData[$dept_no]['sales'] = $total;
+	$reportData[$dept_no]['name'] = $dept;
+    }
+    
+    // Now get open ring summaries for all selected departments...
+    $openQ = "SELECT dept, total, dept_no FROM (";
+    for ($i = $year1; $i <= $year2; $i++) {
+	$openQ .= "SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total, d.dept_no AS dept_no
+	    FROM is4c_op.departments AS d,is4c_log.trans_$i AS t
+	    WHERE DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+		AND t.trans_status <> 'X'
+		AND t.trans_type = 'D'
+		AND t.emp_no <> 9999
+		AND t.department IN ($deptArray)
+		AND d.dept_no = t.department
+	    GROUP BY dept";
 
-    if (isset($openRing)) {
-        //$query2 - Total open dept. ring
-        $query2 = "SELECT * FROM (";
-        for ($i = $year1; $i <= $year2; $i++) {
-            $query2 .= "SELECT d.dept_name AS Department,ROUND(SUM(t.total),2) AS open_dept, d.dept_no AS Dept_No
-                FROM is4c_op.departments AS d,is4c_log.trans_$i AS t
-                WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                    AND t.trans_status <> 'X'
-                    AND t.trans_type = 'D'
-                    AND t.emp_no <> 9999
-                    AND t.department IN ($deptArray)
-                    AND d.dept_no = t.department
-                GROUP BY t.department";
+	if ($i == $year2) {
+	    if ($date2 == date('Y-m-d')) {
+		$openQ .= " UNION ALL SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total, d.dept_no AS dept_no
+		    FROM is4c_op.departments AS d,is4c_log.dtransactions AS t
+		    WHERE DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+			AND t.trans_status <> 'X'
+			AND t.trans_type = 'D'
+			AND t.emp_no <> 9999
+			AND t.department IN ($deptArray)
+			AND d.dept_no = t.department
+		    GROUP BY dept";
+	    }
 
-            if ($i == $year2) {
-                if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                    $query2 .= " UNION ALL SELECT d.dept_name AS Department,ROUND(SUM(t.total),2) AS open_dept, d.dept_no AS Dept_No
-                        FROM is4c_op.departments AS d,is4c_log.dtransactions AS t
-                        WHERE t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                            AND t.trans_status <> 'X'
-                            AND t.trans_type = 'D'
-                            AND t.emp_no <> 9999
-                            AND t.department IN ($deptArray)
-                            AND d.dept_no = t.department
-                        GROUP BY t.department";
-                }
+	    $openQ .= ") AS yearSpan";
 
-                $query2 .= ") AS yearSpan";
-
-            } else $query2 .= " UNION ALL ";
-        }
-
-
-
-        $result2 = mysqli_query($db_slave, $query2);
-                //echo $query;
-        echo "<table>\n"; //create table
-        echo "<tr><td>";
-        echo "<b>Department</b></td><td>";
-        echo "<b>Open Ring</b></td></tr>";
-
-
-        if (!$result2) {
-            $message  = 'Invalid query: ' . mysqli_error($db_slave) . "\n";
-            $message .= 'Whole query: ' . $query2;
-            die($message);
-        }
-
-
-        while ($myrow = mysqli_fetch_row($result2)) { //create array from query
-            $dept = $myrow[2];
-            echo "<tr>
-                <td>{$myrow[0]}</td>
-                <td>{$myrow[1]}&nbsp;
-                    <a href=" . '"openRingDetail.php?date1=' . $date1 . '&date2=' . $date2 . '&dept=' . $dept . '" onClick="return popup(this, \'openRingDetail\')">(Detail)</a></td>
-                </tr>' . "\n";
-            //convert row information to strings, enter in table cells
-
-        }
-        echo "</table><br />\n";//end table
-        // end of $query2
-
-
+	} else $openQ .= " UNION ALL ";
     }
 
-    if (isset($pluReport)) {
-	// $query3 - Sales per PLU
+
+
+    $openR = mysqli_query($db_slave, $openQ);
+    
+    // If the query failed, reload the form with an error.
+    if (!$openR) {
+	$message  = sprintf('Invalid query: %s' . "\n" . 'Whole query: %s', mysqli_error($db_slave), $openQ);
+	drawForm($message, $_POST);
+	exit();
+    }
+    
+    // Load the data into an array.
+    while (list($dept, $total, $dept_no) = mysqli_fetch_row($openR)) { //create array from query
+	$reportData[$dept_no]['open'] = $total;
+	$reportData[$dept_no]['name'] = $dept;
+    }
+    
+    // Get reported shrink totals for the selected departments.
+    $shrinkQ = "SELECT d.dept_name AS dept, ROUND(SUM(s.quantity * s.price), 2) AS total, d.dept_no AS dept_no
+	FROM is4c_op.departments AS d, is4c_log.shrinkLog AS s
+	WHERE DATE(s.datetime) BETWEEN '$date1' AND '$date2'
+	    AND s.emp_no <> 9999
+	    AND s.department IN ($deptArray)
+	    AND d.dept_no = s.department
+	GROUP BY dept";
+
+    $shrinkR = mysqli_query($db_slave, $shrinkQ);
+    
+    // If the query fails, reload the form and show an error.
+    if (!$shrinkR) {
+	$message  = sprintf('Invalid query: %s' . "\n" . 'Whole query: %s', mysqli_error($db_slave), $shrinkQ);
+	drawForm($message, $_POST);
+	exit();
+    }
+    
+    // Load the shrink data into an array.
+    while (list($dept, $total, $dept_no) = mysqli_fetch_row($shrinkR)) { //create array from query
+	$reportData[$dept_no]['shrink'] = $total;
+	$reportData[$dept_no]['name'] = $dept;
+
+    }
+    
+    $report .= sprintf('<table cellspacing="2" cellpadding="3"><tr><th>Department Name</th><th>Gross Sales</th><th>Open Rings</th><th>Shrink</th></tr>');
+    
+    foreach ($reportData AS $dept_no => $data) {
+	$report .= sprintf('<tr>
+				<td>%s</td>
+				<td align="center">$%s</td>
+				<td align="center">$%s&nbsp;<a href="openRingDetail.php?date1=%s&date2=%s&dept=%u" onClick="return popup(this, \'openRingDetail\')">(Detail)</a></td>
+				<td align="center">$%s</td>
+			    </tr>' . "\n",
+			   $data['name'],
+			   number_format(isset($data['sales']) ? $data['sales'] : 0.00, 2),
+			   number_format(isset($data['open']) ? $data['open'] : 0.00, 2),
+			   $date1, $date2, $dept_no,
+			   number_format(isset($data['shrink']) ? $data['shrink'] : 0.00, 2));
+    }
+    
 /*	SELECT DISTINCT p.upc AS PLU, p.description AS Description, ROUND(p.normal_price,2) AS 'Current Price', ROUND(t.unitPrice,2) AS Price, p.department AS Dept, p.subdept AS Subdept, SUM(t.quantity) AS Qty, ROUND(SUM(t.total),2) AS Total, p.scale as Scale FROM is4c_log.dtransactions t, is4c_op.products p WHERE t.upc = p.upc AND t.department IN(8) AND t.datetime >= '2007-08-06 00:00:00' AND t.datetime <= '2007-08-13 23:59:59' AND t.emp_no <> 9999 AND t.trans_status <> 'X' AND t.upc NOT LIKE '%DP%' AND p.inUse = 1 GROUP BY CONCAT(t.upc, '-',t.unitprice) ORDER BY t.upc */
-	if (isset($deptDetails)) {
-            if ($year1 == $year2 && substr($date2a, 0, 10) != date('Y-m-d')) {
+    if (isset($_POST['deptDetails'])) {
+	if ($year1 == $year2 && $date2 != date('Y-m-d')) {
+	    $detailedQ = "SELECT DISTINCT
+		    p.upc AS PLU,
+		    p.description AS Description,
+		    ROUND(p.normal_price,2) AS 'Current Price',
+		    ROUND(t.unitPrice,2) AS Price,
+		    d.dept_name AS Dept,
+		    s.subdept_name AS Subdept,
+		    SUM(t.quantity) AS Qty,
+		    ROUND(SUM(t.total),2) AS Total,
+		    p.scale as Scale
+		    FROM is4c_log.trans_$year1 t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
+		WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+		    AND t.department IN ($deptArray)
+		    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+		    AND t.emp_no <> 9999
+		    AND t.trans_status <> 'X'
+		    AND t.upc NOT LIKE '%DP%'
+		    $inUse
+		GROUP BY CONCAT(t.upc, '-',t.unitprice)
+		ORDER BY $order";
+	} else {
+	    $detailedQ = "SELECT PLU, Description, CurrPrice, Price, Dept, Subdept, SUM(Qty), SUM(Total), Scale FROM (";
+	    for ($i = $year1; $i <= $year2; $i++) {
+		$detailedQ .= "SELECT DISTINCT
+			p.upc AS PLU,
+			p.description AS Description,
+			ROUND(p.normal_price,2) AS CurrPrice,
+			ROUND(t.unitPrice,2) AS Price,
+			d.dept_name AS Dept,
+			s.subdept_name AS Subdept,
+			SUM(t.quantity) AS Qty,
+			ROUND(SUM(t.total),2) AS Total,
+			p.scale as Scale
+			FROM is4c_log.trans_$i t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
+		    WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+			AND t.department IN ($deptArray)
+			AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+			AND t.emp_no <> 9999
+			AND t.trans_status <> 'X'
+			AND t.upc NOT LIKE '%DP%'
+			$inUse
+		    GROUP BY CONCAT(t.upc, '-',t.unitprice)";
 
-                $query3 = "SELECT DISTINCT
-                        p.upc AS PLU,
-                        p.description AS Description,
-                        ROUND(p.normal_price,2) AS 'Current Price',
-                        ROUND(t.unitPrice,2) AS Price,
-                        d.dept_name AS Dept,
-                        s.subdept_name AS Subdept,
-                        SUM(t.quantity) AS Qty,
-                        ROUND(SUM(t.total),2) AS Total,
-                        p.scale as Scale
-                        FROM is4c_log.trans_$year1 t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                    WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                        AND t.department IN ($deptArray)
-                        AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                        AND t.emp_no <> 9999
-                        AND t.trans_status <> 'X'
-                        AND t.upc NOT LIKE '%DP%'
-                        $inUse
-                    GROUP BY CONCAT(t.upc, '-',t.unitprice)
-                    ORDER BY $order";
-
-            } else {
-
-                $query3 = "SELECT * FROM (";
-                for ($i = $year1; $i <= $year2; $i++) {
-                    $query3 .= "SELECT DISTINCT
-                            p.upc AS PLU,
-                            p.description AS Description,
-                            ROUND(p.normal_price,2) AS 'Current Price',
-                            ROUND(t.unitPrice,2) AS Price,
-                            d.dept_name AS Dept,
-                            s.subdept_name AS Subdept,
-                            SUM(t.quantity) AS Qty,
-                            ROUND(SUM(t.total),2) AS Total,
-                            p.scale as Scale
-                            FROM is4c_log.trans_$i t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                        WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                            AND t.department IN ($deptArray)
-                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                            AND t.emp_no <> 9999
-                            AND t.trans_status <> 'X'
-                            AND t.upc NOT LIKE '%DP%'
-                            $inUse
-                        GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-
-                    if ($i == $year2) {
-                        if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                            $query3 .= "UNION ALL SELECT DISTINCT
-                                    p.upc AS PLU,
-                                    p.description AS Description,
-                                    ROUND(p.normal_price,2) AS 'Current Price',
-                                    ROUND(t.unitPrice,2) AS Price,
-                                    d.dept_name AS Dept,
-                                    s.subdept_name AS Subdept,
-                                    SUM(t.quantity) AS Qty,
-                                    ROUND(SUM(t.total),2) AS Total,
-                                    p.scale as Scale
-                                    FROM is4c_log.dtransactions t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
-                                WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                                    AND t.department IN ($deptArray)
-                                    AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                                    AND t.emp_no <> 9999
-                                    AND t.trans_status <> 'X'
-                                    AND t.upc NOT LIKE '%DP%'
-                                    $inUse
-                                GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-                        }
-                        $query3 .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
-                    } else $query3 .= " UNION ALL ";
-                }
-            }
-
-            $scaleRow = 8;
-            $table_header = '<thead>
-                    <tr>
-                        <th>UPC</th>
-                        <th>Description</th>
-                        <th>Current Price</th>
-                        <th>Price Sold At</th>
-                        <th>Department</th>
-                        <th>Subdepartment</th>
-                        <th>Qty</th>
-                        <th>Sales</th>
-                        <th>Scale</th>
-                    </tr>
-                </thead>';
-            $table_footer = '<tfoot>
-                    <tr>
-                        <th>UPC</th>
-                        <th>Description</th>
-                        <th>Current Price</th>
-                        <th>Price Sold At</th>
-                        <th>Department</th>
-                        <th>Subdepartment</th>
-                        <th>Qty</th>
-                        <th>Sales</th>
-                        <th>Scale</th>
-                    </tr>
-                </tfoot><tbody>';
-
-	} elseif (!isset($deptDetails)) {
-
-            if ($year1 == $year2 && substr($date2a, 0, 10) != date('Y-m-d')) {
-
-                $query3 = "SELECT DISTINCT
-                        p.upc AS PLU,
-                        p.description AS Description,
-                        ROUND(p.normal_price,2) AS 'Current Price',
-                        ROUND(t.unitPrice,2) AS Price,
-                        ROUND(SUM(t.quantity),2) AS Qty,
-                        ROUND(SUM(t.total),2) AS Total,
-                        p.scale as Scale
-                    FROM is4c_log.trans_$year1 t, is4c_op.products p
-                    WHERE t.upc = p.upc
-                        AND t.department IN ($deptArray)
-                        AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                        AND t.emp_no <> 9999
-                        AND t.trans_status <> 'X'
-                        AND t.upc NOT LIKE '%DP%'
-                        $inUse
-                    GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-
-            } else {
-                $query3 = "SELECT * FROM (";
-                for ($i = $year1; $i <= $year2; $i++) {
-                    $query3 .= "SELECT DISTINCT
-                            p.upc AS PLU,
-                            p.description AS Description,
-                            ROUND(p.normal_price,2) AS 'Current Price',
-                            ROUND(t.unitPrice,2) AS Price,
-                            ROUND(SUM(t.quantity),2) AS Qty,
-                            ROUND(SUM(t.total),2) AS Total,
-                            p.scale as Scale
-                        FROM is4c_log.trans_$i t, is4c_op.products p
-                        WHERE t.upc = p.upc
-                            AND t.department IN ($deptArray)
-                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                            AND t.emp_no <> 9999
-                            AND t.trans_status <> 'X'
-                            AND t.upc NOT LIKE '%DP%'
-                            $inUse
-                        GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-
-                    if ($i == $year2) {
-                        if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                            $query3 .= " UNION ALL SELECT DISTINCT
-                                p.upc AS PLU,
-                                p.description AS Description,
-                                ROUND(p.normal_price,2) AS 'Current Price',
-                                ROUND(t.unitPrice,2) AS Price,
-                                ROUND(SUM(t.quantity),2) AS Qty,
-                                ROUND(SUM(t.total),2) AS Total,
-                                p.scale as Scale
-                            FROM is4c_log.trans_$i t, is4c_op.products p
-                            WHERE t.upc = p.upc
-                                AND t.department IN ($deptArray)
-                                AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                                AND t.emp_no <> 9999
-                                AND t.trans_status <> 'X'
-                                AND t.upc NOT LIKE '%DP%'
-                                $inUse
-                            GROUP BY CONCAT(t.upc, '-',t.unitprice)";
-                        }
-
-                        $query3 .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
-                    } else $query3 .= " UNION ALL ";
-                }
-            }
-
-            $scaleRow = 6;
-            $table_header = '<thead>
-                    <tr>
-                        <th>UPC</th>
-                        <th>Description</th>
-                        <th>Current Price</th>
-                        <th>Price Sold At</th>
-                        <th>Qty</th>
-                        <th>Sales</th>
-                        <th>Scale</th>
-                    </tr>
-                </thead>';
-            $table_footer = '<tfoot><tr>
-                        <th>UPC</th>
-                        <th>Description</th>
-                        <th>Current Price</th>
-                        <th>Price Sold At</th>
-                        <th>Qty</th>
-                        <th>Sales</th>
-                        <th>Scale</th>
-                    </tr>
-                </tfoot><tbody>';
+		if ($i == $year2) {
+		    if ($date2 == date('Y-m-d')) {
+			$detailedQ .= "UNION ALL SELECT DISTINCT
+				p.upc AS PLU,
+				p.description AS Description,
+				ROUND(p.normal_price,2) AS 'Current Price',
+				ROUND(t.unitPrice,2) AS Price,
+				d.dept_name AS Dept,
+				s.subdept_name AS Subdept,
+				SUM(t.quantity) AS Qty,
+				ROUND(SUM(t.total),2) AS Total,
+				p.scale as Scale
+				FROM is4c_log.dtransactions t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
+			    WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
+				AND t.department IN ($deptArray)
+				AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+				AND t.emp_no <> 9999
+				AND t.trans_status <> 'X'
+				AND t.upc NOT LIKE '%DP%'
+				$inUse
+			    GROUP BY CONCAT(t.upc, '-',t.unitprice)";
+		    }
+		    
+		    $detailedQ .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
+		} else $detailedQ .= " UNION ALL ";
+	    }
 	}
 
-        $result3 = mysqli_query($db_slave, $query3);
+	$scaleRow = 8;
+	$table_header = '<thead>
+		<tr>
+		    <th>UPC</th>
+		    <th>Description</th>
+		    <th>Current Price</th>
+		    <th>Price Sold At</th>
+		    <th>Department</th>
+		    <th>Subdepartment</th>
+		    <th>Qty</th>
+		    <th>Sales</th>
+		    <th>Scale</th>
+		</tr>
+	    </thead>';
+	$table_footer = '<tfoot>
+		<tr>
+		    <th>UPC</th>
+		    <th>Description</th>
+		    <th>Current Price</th>
+		    <th>Price Sold At</th>
+		    <th>Department</th>
+		    <th>Subdepartment</th>
+		    <th>Qty</th>
+		    <th>Sales</th>
+		    <th>Scale</th>
+		</tr>
+	    </tfoot><tbody>';
 
-	echo '<table border="1" cellpadding="3" cellspacing="3" class="tablesorter">';
-	echo $table_header;
-        echo $table_footer;
+    } elseif (!isset($_POST['deptDetails'])) {
 
-	if (!$result3) {
-            $message  = 'Invalid query: ' . mysqli_error($db_slave) . "\n";
-            $message .= 'Whole query: ' . $query3;
-            die($message);
+	if ($year1 == $year2 && substr($date2a, 0, 10) != date('Y-m-d')) {
+
+	    $detailedQ = "SELECT DISTINCT
+		    p.upc AS PLU,
+		    p.description AS Description,
+		    ROUND(p.normal_price,2) AS 'Current Price',
+		    ROUND(t.unitPrice,2) AS Price,
+		    ROUND(SUM(t.quantity),2) AS Qty,
+		    ROUND(SUM(t.total),2) AS Total,
+		    p.scale as Scale
+		FROM is4c_log.trans_$year1 t, is4c_op.products p
+		WHERE t.upc = p.upc
+		    AND t.department IN ($deptArray)
+		    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+		    AND t.emp_no <> 9999
+		    AND t.trans_status <> 'X'
+		    AND t.upc NOT LIKE '%DP%'
+		    $inUse
+		GROUP BY CONCAT(t.upc, '-',t.unitprice)";
+
+	} else {
+	    $detailedQ = "SELECT PLU, Description, CurrPrice, Price, SUM(Qty), SUM(Total), Scale FROM (";
+	    for ($i = $year1; $i <= $year2; $i++) {
+		$detailedQ .= "SELECT DISTINCT
+			p.upc AS PLU,
+			p.description AS Description,
+			ROUND(p.normal_price,2) AS CurrPrice,
+			ROUND(t.unitPrice,2) AS Price,
+			ROUND(SUM(t.quantity),2) AS Qty,
+			ROUND(SUM(t.total),2) AS Total,
+			p.scale as Scale
+		    FROM is4c_log.trans_$i t, is4c_op.products p
+		    WHERE t.upc = p.upc
+			AND t.department IN ($deptArray)
+			AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+			AND t.emp_no <> 9999
+			AND t.trans_status <> 'X'
+			AND t.upc NOT LIKE '%DP%'
+			$inUse
+		    GROUP BY CONCAT(t.upc, '-',t.unitprice)";
+
+		if ($i == $year2) {
+		    if ($date2 == date('Y-m-d')) {
+			$detailedQ .= " UNION ALL SELECT DISTINCT
+			    p.upc AS PLU,
+			    p.description AS Description,
+			    ROUND(p.normal_price,2) AS 'Current Price',
+			    ROUND(t.unitPrice,2) AS Price,
+			    ROUND(SUM(t.quantity),2) AS Qty,
+			    ROUND(SUM(t.total),2) AS Total,
+			    p.scale as Scale
+			FROM is4c_log.trans_$i t, is4c_op.products p
+			WHERE t.upc = p.upc
+			    AND t.department IN ($deptArray)
+			    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+			    AND t.emp_no <> 9999
+			    AND t.trans_status <> 'X'
+			    AND t.upc NOT LIKE '%DP%'
+			    $inUse
+			GROUP BY CONCAT(t.upc, '-',t.unitprice)";
+		    }
+
+		    $detailedQ .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
+		} else $detailedQ .= " UNION ALL ";
+	    }
 	}
 
-
-	while ($myrow = mysqli_fetch_row($result3)) { //create array from query
-            if ($myrow[$scaleRow] == 0) {$myrow[$scaleRow] = 'No';} elseif ($myrow[$scaleRow] == 1) {$myrow[$scaleRow] = 'Yes';}
-            printf('<tr><td><a href="/item/itemMaint.php?submitted=search&upc=%s\">%s</a></td><td>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' . "\n",
-		   $myrow[0], $myrow[0], $myrow[1], $myrow[2], $myrow[3], $myrow[4], $myrow[5], number_format($myrow[6],2), $myrow[7], $myrow[8]);
-            //convert row information to strings, enter in table cells
-	}
-
-	echo "</tbody></table><br /><br />\n";//end table
-        echo '<div id="pager" class="pager">
-                <form>
-                    <img src="../includes/javascript/tablesorter/addons/pager/icons/first.png" class="first"/>
-                    <img src="../includes/javascript/tablesorter/addons/pager/icons/prev.png" class="prev"/>
-                    <input type="text" class="pagedisplay"/>
-                    <img src="../includes/javascript/tablesorter/addons/pager/icons/next.png" class="next"/>
-                    <img src="../includes/javascript/tablesorter/addons/pager/icons/last.png" class="last"/>
-                    <select class="pagesize">
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="25" selected="selected">25</option>
-                            <option value="30">30</option>
-                            <option value="40">40</option>
-                            <option value="50">50</option>
-                            <option value="75">75</option>
-                            <option value="100">100</option>
-                            <option value="250">250</option>
-                            <option value="500">500</option>
-                            <option value="1000">1000</option>
-                    </select>
-                </form>
-            </div>';
-
-
+	$scaleRow = 6;
+	$table_header = '<thead>
+		<tr>
+		    <th>UPC</th>
+		    <th>Description</th>
+		    <th>Current Price</th>
+		    <th>Price Sold At</th>
+		    <th>Qty</th>
+		    <th>Sales</th>
+		    <th>Scale</th>
+		</tr>
+	    </thead>';
+	$table_footer = '<tfoot><tr>
+		    <th>UPC</th>
+		    <th>Description</th>
+		    <th>Current Price</th>
+		    <th>Price Sold At</th>
+		    <th>Qty</th>
+		    <th>Sales</th>
+		    <th>Scale</th>
+		</tr>
+	    </tfoot><tbody>';
     }
+
+    $detailedR = mysqli_query($db_slave, $detailedQ);
+
+    $detailTable = '<table border="1" cellpadding="3" cellspacing="3" class="tablesorter">';
+    $detailTable .= $table_header;
+
+    if (!$detailedR) {
+	$message = sprintf('Invalid query: %s' . "\nWhole query: %s", mysqli_error($db_slave), $detailedQ);
+	drawForm($message, $_POST);
+	exit();
+    }
+
+    while ($myrow = mysqli_fetch_row($detailedR)) { //create array from query
+	if ($myrow[$scaleRow] == 0) {$myrow[$scaleRow] = 'No';} elseif ($myrow[$scaleRow] == 1) {$myrow[$scaleRow] = 'Yes';}
+	$detailTable .= sprintf('<tr><td><a href="/item/itemMaint.php?submitted=search&upc=%s">%s</a></td><td>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' . "\n",
+	       $myrow[0], $myrow[0], $myrow[1], $myrow[2], $myrow[3], $myrow[4], $myrow[5], number_format($myrow[6],2), $myrow[7], $myrow[8]);
+    }
+    
+    $detailTable .= $table_footer;
+
+    $detailTable .= "</tbody></table><br /><br />\n";
+    
+    $report .= $detailTable;
+    
+    echo $report;
 
 } else { // Show the form.
     drawForm();
@@ -507,7 +500,7 @@ EOS;
 	   %s
 	    <h3><strong>Select Department</strong></h3>
 	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
-            <form method="post" action="%s">
+            <form method="post" target="_blank" action="%s">
 	    <div align="center">
 		<table border="0" cellspacing="3" cellpadding="5">', $msg, $_SERVER['PHP_SELF']);
     $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) OR dept_no = 40 ORDER BY dept_name ASC";
@@ -542,12 +535,11 @@ EOS;
                     </td>
 		</tr>
 		<tr>
-		    <td colspan="2" align="left"><input type="checkbox" name="salesTotal" checked="CHECKED" /><strong>Sales totals</strong></td>
+		    <td colspan="2" align="left"><input type="checkbox" name="inUse" checked="CHECKED" /><strong>Filter not "in use"</strong></td>
 		    <td colspan="2" align="left"><input type="checkbox" name="deptDetails" checked="CHECKED" /><strong>Include department details</strong></td>
 		</tr>
                 <tr>
-		    <td colspan="2" align="left"><input type="checkbox" name="openRing" checked="CHECKED" /><strong>Open ring totals</strong></td>
-		    <td colspan="2" align="center"><strong>Sort by: &nbsp;</strong>
+		    <td colspan="4" align="center"><strong>Sort by: &nbsp;</strong>
                             <select name="sort">
                                 <option name="PLU" selected="selected">PLU</option>
                                 <option name="Qty">Qty</option>
@@ -557,10 +549,6 @@ EOS;
                             </select>
 		    </td>
 		</tr>
-                <tr>
-                    <td colspan="2" align="left"><input type="checkbox" name="inUse" checked="CHECKED" /><strong>Filter not "in use"</strong></td>
-		    <td colspan="2" align="left"><input type="checkbox" name="shrinkReport" checked="CHECKED" /><strong>Include shrink summary</strong></td>
-                </tr>
 		<tr align="center">
 		    <td colspan="4" align="center"><input type="submit" name="submit" value="Submit"></td>
                     <input type="hidden" name="submitted" value="TRUE">
