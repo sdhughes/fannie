@@ -3,9 +3,35 @@
 require_once ('../includes/mysqli_connect.php');
 mysqli_select_db($db_slave, 'is4c_log');
 
+ini_set('display_errors', 'on');
+ini_set('error_reporting', E_ALL);
+
+if (isset($_POST['submitted'])) {
+    
+    $today = date("F d, Y");
+
+    $date1 = (isset($_POST['date1']) ? $_POST['date1'] : NULL);
+    $date2 = (isset($_POST['date2']) ? $_POST['date2'] : NULL);
+
+    $reasons = (isset($_POST['reasons']) ? true : false);
+
+    if (isset($_POST['dept']) && is_array($_POST['dept'])) {
+        $deptArray = implode(", ", $_POST['dept']);
+    } elseif (!isset($_POST['dept']) || !is_array($_POST['dept'])) {
+	drawForm('<h2><font color="red">You must select a department.</font></h2>', $_POST);
+	exit();
+    }
+
+    if (empty($date1) || empty($date2) || !checkdate(substr($date1, 5, 2), substr($date1, 8, 2), substr($date1, 0, 4)) || !checkdate(substr($date1, 5, 2), substr($date1, 8, 2), substr($date1, 0, 4))) {
+	drawForm('<h2><font color="red">You must enter a valid date.</font></h2>', $_POST);
+	exit();
+    }
+
+    $year1 = substr($date1, 0, 4);
+    $year2 = substr($date2, 0, 4);
+
 ?>
-<SCRIPT TYPE="text/javascript">
-<!--
+<script type="text/javascript">
 function popup(mylink, windowname) {
     if (! window.focus)return true;
     var href;
@@ -16,8 +42,7 @@ function popup(mylink, windowname) {
     window.open(href, windowname, 'width=500,height=300,scrollbars=yes,menubar=no,location=no,toolbar=no,dependent=yes');
     return false;
 }
-//-->
-</SCRIPT>
+</script>
 <link rel="STYLESHEET" type="text/css" href="../includes/javascript/tablesorter/themes/blue/style.css" />
 <link rel="STYLESHEET" type="text/css" href="../includes/javascript/tablesorter/addons/pager/jquery.tablesorter.pager.css" />
 <style rel="STYLESHEET" type="text/css">
@@ -44,44 +69,15 @@ function popup(mylink, windowname) {
 </head>
 <body>
 <?php
-
-if (isset($_POST['submitted'])) {
-    foreach ($_POST AS $key => $value) {
-	$$key = $value;
-    }
-
-    $today = date("F d, Y");
-
-    $_SESSION['deptArray'] = 0;
-
-    if($_POST['allDepts'] == 1) {
-        $_SESSION['deptArray'] = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,40";
-        $arrayName = "ALL DEPARTMENTS";
-    } else {
-
-    }
-
-    if (is_array($_POST['dept'])) {
-        $_SESSION['deptArray'] = implode(",",$_POST['dept']);
-        $arrayName = $_SESSION['deptArray'];
-    }
-
-// Following lines creates a header for the report, listing sort option chosen, report date, date and department range.
-
+    // Following lines creates a header for the report, listing sort option chosen, report date, date and department range.
+    //decide what the sort index is and translate from lay person to mySQL table label
+    $sort = $_POST['sort'];
+    
     echo "Report sorted by $sort on<br />
         $today<br />
         From $date1 to $date2<br />
-        Department range: $arrayName<br /><br />";
-
-    $year1 = substr($date1, 0, 4);
-    $year2 = substr($date2, 0, 4);
-
-    $date2a = $date2 . " 23:59:59";
-    $date1a = $date1 . " 00:00:00";
-    //decide what the sort index is and translate from lay person to mySQL table label
-
-    $_SESSION['sort'] = $_POST['sort'];
-    $sort = $_SESSION['sort'];
+        Department range: $deptArray<br /><br />";
+    
 
     if ($sort == 'Department') {
         $order = "Dept";
@@ -95,63 +91,61 @@ if (isset($_POST['submitted'])) {
         $order = 'Subdept';
     }
 
-    if (isset($inUse)) {
-        $inUseA = "AND p.inUse = 1";
+    if (isset($_POST['inUse'])) {
+        $inUse = "AND p.inUse = 1";
     } else {
-        $inUseA = "AND p.inUse IN(0,1)";
+        $inUse = "AND p.inUse IN (0,1)";
     }
 
 
-    if (isset($salesTotal)) {
-        $query1 = "SELECT * FROM (";
+    if (isset($_POST['salesTotal'])) {
+        $salesQ = "SELECT dept, SUM(total) FROM (";
         for ($i = $year1; $i <= $year2; $i++) {
-            $query1 .= "SELECT d.dept_name,ROUND(SUM(t.total),2) AS total
+            $salesQ .= "SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total
                 FROM is4c_op.departments AS d, is4c_log.trans_$i AS t
                 WHERE d.dept_no = t.department
-                    AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                    AND t.department IN(" . $_SESSION['deptArray'] . ")
+                    AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+                    AND t.department IN ($deptArray)
                     AND t.trans_status <> 'X'
                     AND t.emp_no <> 9999
-                GROUP BY t.department";
+                GROUP BY dept";
 
             if ($i == $year2) {
-                if (substr($date2a, 0, 10) == date('Y-m-d')) {
-                    $query1 .= " UNION ALL SELECT d.dept_name,ROUND(SUM(t.total),2) AS total
+                if ($date2 == date('Y-m-d')) {
+                    $salesQ .= " UNION ALL SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total
                         FROM is4c_op.departments AS d, is4c_log.dtransactions AS t
                         WHERE d.dept_no = t.department
-                            AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
-                            AND t.department IN(" . $_SESSION['deptArray'] . ")
+                            AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+                            AND t.department IN ($deptArray)
                             AND t.trans_status <> 'X'
                             AND t.emp_no <> 9999
-                        GROUP BY t.department";
+                        GROUP BY dept";
                 }
 
-                $query1 .= ") AS yearSpan";
+                $salesQ .= ") AS yearSpan GROUP BY dept";
 
-            } else $query1 .= " UNION ALL ";
+            } else $salesQ .= " UNION ALL ";
 
         }
-
-        $result1 = mysqli_query($db_slave, $query1);
-        //echo $query1;
+	
+        $salesR = mysqli_query($db_slave, $salesQ);
         echo "<table>\n"; //create table
         echo "<tr><td>";
         echo "<b>Department</b></td><td>";
         echo "<b>Total Sales</b></td></tr>";
 
-        if (!$result1) {
+        if (!$salesR) {
             $message  = 'Invalid query: ' . mysqli_error($db_slave) . "\n";
-            $message .= 'Whole query: ' . $query1;
+            $message .= 'Whole query: ' . $salesQ;
             die($message);
         }
 
-        while ($myrow = mysqli_fetch_row($result1)) { //create array from query
+        while ($myrow = mysqli_fetch_row($salesR)) { //create array from query
+	    printf("<tr><td>%s</td><td>%s</td></tr>\n",$myrow[0], $myrow[1]);
+	    //convert row information to strings, enter in table cells
+	}
 
-        printf("<tr><td>%s</td><td>%s</td></tr>\n",$myrow[0], $myrow[1]);
-        //convert row information to strings, enter in table cells
-    }
-
-    echo "</table>\n";//end table
+	echo "</table>\n";//end table
 
     }
 
@@ -165,7 +159,7 @@ if (isset($_POST['submitted'])) {
                     AND t.trans_status <> 'X'
                     AND t.trans_type = 'D'
                     AND t.emp_no <> 9999
-                    AND t.department IN(".$_SESSION['deptArray'].")
+                    AND t.department IN ($deptArray)
                     AND d.dept_no = t.department
                 GROUP BY t.department";
 
@@ -177,7 +171,7 @@ if (isset($_POST['submitted'])) {
                             AND t.trans_status <> 'X'
                             AND t.trans_type = 'D'
                             AND t.emp_no <> 9999
-                            AND t.department IN(".$_SESSION['deptArray'].")
+                            AND t.department IN ($deptArray)
                             AND d.dept_no = t.department
                         GROUP BY t.department";
                 }
@@ -238,12 +232,12 @@ if (isset($_POST['submitted'])) {
                         p.scale as Scale
                         FROM is4c_log.trans_$year1 t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
                     WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                        AND t.department IN (".$_SESSION['deptArray'].")
+                        AND t.department IN ($deptArray)
                         AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                         AND t.emp_no <> 9999
                         AND t.trans_status <> 'X'
                         AND t.upc NOT LIKE '%DP%'
-                        $inUseA
+                        $inUse
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)
                     ORDER BY $order";
 
@@ -263,12 +257,12 @@ if (isset($_POST['submitted'])) {
                             p.scale as Scale
                             FROM is4c_log.trans_$i t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
                         WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                            AND t.department IN (".$_SESSION['deptArray'].")
+                            AND t.department IN ($deptArray)
                             AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
                             AND t.upc NOT LIKE '%DP%'
-                            $inUseA
+                            $inUse
                         GROUP BY CONCAT(t.upc, '-',t.unitprice)";
 
                     if ($i == $year2) {
@@ -285,12 +279,12 @@ if (isset($_POST['submitted'])) {
                                     p.scale as Scale
                                     FROM is4c_log.dtransactions t, is4c_op.products p, is4c_op.subdepts s, is4c_op.departments d
                                 WHERE t.upc = p.upc AND s.subdept_no = p.subdept AND t.department = d.dept_no
-                                    AND t.department IN (".$_SESSION['deptArray'].")
+                                    AND t.department IN ($deptArray)
                                     AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                                     AND t.emp_no <> 9999
                                     AND t.trans_status <> 'X'
                                     AND t.upc NOT LIKE '%DP%'
-                                    $inUseA
+                                    $inUse
                                 GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                         }
                         $query3 .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
@@ -340,12 +334,12 @@ if (isset($_POST['submitted'])) {
                         p.scale as Scale
                     FROM is4c_log.trans_$year1 t, is4c_op.products p
                     WHERE t.upc = p.upc
-                        AND t.department IN(".$_SESSION['deptArray'].")
+                        AND t.department IN ($deptArray)
                         AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                         AND t.emp_no <> 9999
                         AND t.trans_status <> 'X'
                         AND t.upc NOT LIKE '%DP%'
-                        $inUseA
+                        $inUse
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)";
 
             } else {
@@ -361,12 +355,12 @@ if (isset($_POST['submitted'])) {
                             p.scale as Scale
                         FROM is4c_log.trans_$i t, is4c_op.products p
                         WHERE t.upc = p.upc
-                            AND t.department IN(".$_SESSION['deptArray'].")
+                            AND t.department IN ($deptArray)
                             AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
                             AND t.upc NOT LIKE '%DP%'
-                            $inUseA
+                            $inUse
                         GROUP BY CONCAT(t.upc, '-',t.unitprice)";
 
                     if ($i == $year2) {
@@ -381,12 +375,12 @@ if (isset($_POST['submitted'])) {
                                 p.scale as Scale
                             FROM is4c_log.trans_$i t, is4c_op.products p
                             WHERE t.upc = p.upc
-                                AND t.department IN(".$_SESSION['deptArray'].")
+                                AND t.department IN ($deptArray)
                                 AND t.datetime >= '$date1a' AND t.datetime <= '$date2a'
                                 AND t.emp_no <> 9999
                                 AND t.trans_status <> 'X'
                                 AND t.upc NOT LIKE '%DP%'
-                                $inUseA
+                                $inUse
                             GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                         }
 
@@ -434,7 +428,8 @@ if (isset($_POST['submitted'])) {
 
 	while ($myrow = mysqli_fetch_row($result3)) { //create array from query
             if ($myrow[$scaleRow] == 0) {$myrow[$scaleRow] = 'No';} elseif ($myrow[$scaleRow] == 1) {$myrow[$scaleRow] = 'Yes';}
-            printf("<tr><td><a href=\"http://192.168.1.102/item/itemMaint.php?submitted=search&upc=%s\">" . $myrow[0] . "</a></td><td>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",$myrow[0], $myrow[1],$myrow[2],$myrow[3],$myrow[4],$myrow[5],number_format($myrow[6],2),$myrow[7], $myrow[8]);
+            printf('<tr><td><a href="/item/itemMaint.php?submitted=search&upc=%s\">%s</a></td><td>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' . "\n",
+		   $myrow[0], $myrow[0], $myrow[1], $myrow[2], $myrow[3], $myrow[4], $myrow[5], number_format($myrow[6],2), $myrow[7], $myrow[8]);
             //convert row information to strings, enter in table cells
 	}
 
@@ -466,61 +461,70 @@ if (isset($_POST['submitted'])) {
     }
 
 } else { // Show the form.
+    drawForm();
+}
 
+function drawForm($msg = NULL, $_POST = NULL) {
+    global $db_slave;
     $page_title = 'Fannie - Reports Module';
     $header = 'Department Movement Report';
     include ('../includes/header.html');
-?>
+    echo
+    <<<EOS
     <link href="../style.css" rel="stylesheet" type="text/css">
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
     <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
-    <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
     <script type="text/javascript">
         Date.format = 'yyyy-mm-dd';
         $(function(){
-            $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
-            .dpSetOffset(0, 125);
+            $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
         });
+
+	$(document).ready(function() {
+	    $('#selectAll').click(function() {
+		if ($(this).text() == 'All Departments') {
+		    $('.deptCheck').attr('checked', true);
+		    $(this).text('Clear Selections');
+		} else {
+		    $('.deptCheck').attr('checked', false);
+		    $(this).text('All Departments');
+		}
+	    });
+
+	    $('.deptCheck').click(function() {
+		$('#selectAll').text('Clear Selections');
+	    });
+	});
+
     </script>
-    <form method="post" action="deptSales.php" target="_blank">
-        <div id="box">
-            <table border="0" cellspacing="3" cellpadding="5">
-                <tr>
-                    <th colspan="2" align="center"> <p><b>Select dept.*</b></p></th>
-                </tr>
-                <tr>
-                    <td>
-                        <font size="-1"><p>
-                        <input type="checkbox" value=1 name="allDepts"><b>All Departments</b><br>
-                        <input type="checkbox" name="dept[]" value="1">Grocery<br>
-                        <input type="checkbox" name="dept[]" value="2">Bulk<br>
-                        <input type="checkbox" name="dept[]" value="3">Perishable<br>
-                        <input type="checkbox" name="dept[]" value="4">Dairy<br>
-                        <input type="checkbox" name="dept[]" value="7">Cheese<br>
-                        <input type="checkbox" name="dept[]" value="15">Deli<br>
-                        <input type="checkbox" name="dept[]" value="16">Bread & Juice<br>
-                        <input type="checkbox" name="dept[]" value="14">Beer<br>
-                        <input type="checkbox" name="dept[]" value="5">Wine<br>
-                        </p></font>
-                    </td>
-                    <td>
-                        <font size="-1"><p>
-                        <input type="checkbox" name="dept[]" value="8">Produce<br>
-                        <input type="checkbox" name="dept[]" value="6">Frozen<br>
-                        <input type="checkbox" name="dept[]" value="12">NF-Supplements<br>
-                        <input type="checkbox" name="dept[]" value="11">NF-Personal Care<br>
-                        <input type="checkbox" name="dept[]" value="10">NF-General<br>
-                        <input type="checkbox" name="dept[]" value="9">Bulk Herbs<br>
-                        <input type="checkbox" name="dept[]" value="13">NF-Pet<br>
-                        <input type="checkbox" name="dept[]" value="17">Floral<br>
-                        <input type="checkbox" name="dept[]" value="40">Tri-Met<br />
-                        <input type="checkbox" name="dept[]" value="18">Marketing
-                        </p></font>
-                    </td>
-                </tr>
-            </table>
+EOS;
+    printf('<div align="center" id="box">
+	   %s
+	    <h3><strong>Select Department</strong></h3>
+	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
+            <form method="post" action="%s">
+	    <div align="center">
+		<table border="0" cellspacing="3" cellpadding="5">', $msg, $_SERVER['PHP_SELF']);
+    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) OR dept_no = 40 ORDER BY dept_name ASC";
+    $deptR = mysqli_query($db_slave, $deptQ);
+
+    $count = 0;
+
+    while (list($name, $no) = mysqli_fetch_row($deptR)) {
+	if ($count % 3 == 0) echo '<tr>';
+	$count++;
+	printf('<td><input type="checkbox" name="dept[]" class="deptCheck" value="%u" %s />%s</td>', $no, (isset($_POST['dept']) && in_array($no, $_POST['dept']) ? 'checked="checked"' : ''), ucfirst(strtolower($name)));
+
+	if ($count % 3 == 0) echo '</tr>';
+    }
+
+    printf('</table>
+	    </div>
         </div>
         <div id="box">
             <table border="0" cellspacing="3" cellpadding="3">
@@ -530,61 +534,40 @@ if (isset($_POST['submitted'])) {
                         <p><b>End</b></p>
                     </td>
                     <td>
-                        <p><input type="text" size="10" autocomplete="off" name="date1" class="datepick">&nbsp;&nbsp;*</p>
-                        <p><input type="text" size="10" autocomplete="off" name="date2" class="datepick">&nbsp;&nbsp;*</p>
+                        <p><input type="text" size="10" autocomplete="off" name="date1" value="%s" class="datepick">&nbsp;&nbsp;*</p>
+                        <p><input type="text" size="10" autocomplete="off" name="date2" value="%s" class="datepick">&nbsp;&nbsp;*</p>
                     </td>
                     <td colspan=2>
                         <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>
                     </td>
-                </tr>
-            </table>
-        </div>
-        <div id="box">
-            <table border="0" cellspacing="3" cellpadding="3">
+		</tr>
+		<tr>
+		    <td colspan="2" align="left"><input type="checkbox" name="salesTotal" checked="CHECKED" /><strong>Sales totals</strong></td>
+		    <td colspan="2" align="left"><input type="checkbox" name="deptDetails" checked="CHECKED" /><strong>Include department details</strong></td>
+		</tr>
                 <tr>
-                    <td align="right"><p><b>Sales totals</b></p></td>
-                    <td><input type="checkbox" value="1" name="salesTotal" CHECKED></td>
-                    <td align="right"><p><b>Include department details</b></p></td>
-                    <td><input type="checkbox" value="1" name="deptDetails" CHECKED /></td>
-                    <td>&nbsp;</td>
-                </tr>
+		    <td colspan="2" align="left"><input type="checkbox" name="openRing" checked="CHECKED" /><strong>Open ring totals</strong></td>
+		    <td colspan="2" align="center"><strong>Sort by: &nbsp;</strong>
+                            <select name="sort">
+                                <option name="PLU" selected="selected">PLU</option>
+                                <option name="Qty">Qty</option>
+                                <option name="Sales">Sales</option>
+                                <option name="Department">Department</option>
+                                <option name="Subdepartment">Subdepartment</option>
+                            </select>
+		    </td>
+		</tr>
                 <tr>
-                    <td align="right"><p><b>Open ring totals</b></p></td>
-                    <td><input type="checkbox" value="1" name="openRing" CHECKED></td>
-                    <td>&nbsp;</td>
+                    <td colspan="2" align="left"><input type="checkbox" name="inUse" checked="CHECKED" /><strong>Filter not "in use"</strong></td>
+		    <td colspan="2" align="left"><input type="checkbox" name="shrinkReport" checked="CHECKED" /><strong>Include shrink summary</strong></td>
                 </tr>
-                <tr>
-                    <td align="right"><p><b>PLU report</b></p></td>
-                    <td><input type="checkbox" value="1" name="pluReport" CHECKED></td>
-                    <td colspan="2" align="center">
-                        <p>Group PLUs by:
-                            <select name="sort" size="1">
-                                <option>PLU</option>
-                                <option>Qty</option>
-                                <option>Sales</option>
-                                <option>Department</option>
-                                <option>Subdepartment</option>
-                            </select></p>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="right"><p><b>In use</b></p></td>
-                    <td><input type="checkbox" value="1" name="inUse" CHECKED></td>
-                    <td><p>Filter out items that are NOT currently in use</p></td>
-                </tr>
-                <tr>
-                    <td colspan="3" align="center"><p>* -- indicates required field</p></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td> <input type=submit name=submit value="Submit"> </td>
-                    <td> <input type=reset name=reset value="Start Over"> </td>
+		<tr align="center">
+		    <td colspan="4" align="center"><input type="submit" name="submit" value="Submit"></td>
                     <input type="hidden" name="submitted" value="TRUE">
                 </tr>
             </table>
         </div>
-    </form>
-<?php
+    </form>', (isset($_POST['date1']) ? $_POST['date1'] : ''), (isset($_POST['date2']) ? $_POST['date2'] : ''));
   include('../includes/footer.html');
 }
 
