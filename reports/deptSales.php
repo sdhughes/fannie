@@ -145,7 +145,7 @@ function popup(mylink, windowname) {
     }
     
     // Now get open ring summaries for all selected departments...
-    $openQ = "SELECT dept, total, dept_no FROM (";
+    $openQ = "SELECT dept, SUM(total), dept_no FROM (";
     for ($i = $year1; $i <= $year2; $i++) {
 	$openQ .= "SELECT d.dept_name AS dept, ROUND(SUM(t.total),2) AS total, d.dept_no AS dept_no
 	    FROM is4c_op.departments AS d,is4c_log.trans_$i AS t
