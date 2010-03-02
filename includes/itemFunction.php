@@ -60,7 +60,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
     elseif (!isset($rowItem) && !is_numeric($upc)) $bodyString = '<input type="text" name="upc" size="8" maxlength="13" /></td><td align = "right"><b>Deposit</b></td><td align="right">$&nbsp;<input type="text" name="deposit" size="3" maxlength="6" value="0.00" /></td></tr>
         <tr><td align="right"><b>Description</b></td><td align="left"><input type="text" name="description" size="30" maxlength="30" value="' . $upc . '" /></td><td align="right"><b>Price</b></td><td align="right">$&nbsp;<input type="text" name="price" size="3" maxlength="6" /></td>';
     else $bodyString = '<font color="red">' . $rowItem["upc"] . '</font><input type="hidden" name="upc" value="' . $rowItem["upc"] . '" /></td><td align = "right"><b>Deposit</b></td><td align="right">$&nbsp;<input type="text" name="deposit" size="3" maxlength="6" value="' . number_format($rowItem["deposit"], 2) . '" /></td></tr>
-        <tr><td align="right"><b>Description</b></td><td align="left"><input type="text" name="description" size="30" maxlength="30" value="' . $rowItem["description"] . '" /></td><td align="right"><b>Price</b></td><td align="right">$&nbsp;<input type="text" name="price" size="3" maxlength="6" value="' . number_format($rowItem["normal_price"], 2) . '" /></td>';
+        <tr><td align="right"><b>Description</b></td><td align="left"><input type="text" name="description" size="30" maxlength="30" value="' . htmlentities($rowItem["description"]) . '" /></td><td align="right"><b>Price</b></td><td align="right">$&nbsp;<input type="text" name="price" size="3" maxlength="6" value="' . number_format($rowItem["normal_price"], 2) . '" /></td>';
     echo '<form action="' . $_SERVER['PHP_SELF'] . '" name="pickSubDepartment" method="post">
         <div id="box">
             <table cellspacing="2" cellpadding="2" width="100%">
@@ -81,7 +81,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 
 	$bulkRows = '<tr>
 		    <td align="left"><strong>Origin</strong></td>
-		    <td align="left"><input type="text" name="origin" size="25" maxlength="75" value="' . $detailRow["origin"] . '" /></td>
+		    <td align="left"><input type="text" name="origin" size="25" maxlength="75" value="' . htmlentities($detailRow["origin"]) . '" /></td>
 		    <td align="left"><strong>Tag Type</strong></td>
 		    <td align="left"><select name="tagType">';
 
@@ -93,7 +93,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 		</tr>
 		<tr>
 		    <td align="left"><strong>Special?</strong></td>
-		    <td align="left" colspan="3"><input type="text" name="special" size="50" maxlength="500" value="' . $detailRow["special"] . '" /></td>
+		    <td align="left" colspan="3"><input type="text" name="special" size="50" maxlength="500" value="' . htmlentities($detailRow["special"]) . '" /></td>
 		</tr>';
     } else {
 	$bulkRows = NULL;
@@ -141,27 +141,27 @@ function drawDetailsPage($upc, $rowItem = NULL) {
             <table cellspacing="2" cellpadding="2">
                 <tr>
                     <td align="left"><b>Brand Name</b></td>
-                    <td align="left"><input type="text" name="brand" size="25" maxlength="30" value="' . $detailRow["brand"] . '" /></td>
+                    <td align="left"><input type="text" name="brand" size="25" maxlength="30" value="' . htmlentities($detailRow["brand"]) . '" /></td>
                     <td align="left"><b>Pack Size</b></td>
-                    <td align="left"><input type="text" name="pack_size" size="15" maxlength="20" value="' . $detailRow["pack_size"] . '" /></td>
+                    <td align="left"><input type="text" name="pack_size" size="15" maxlength="20" value="' . htmlentities($detailRow["pack_size"]) . '" /></td>
                 </tr>
                 <tr>
                     <td align="left"><b>Product Name</b></td>
-                    <td align="left"><input type="text" name="product" size="25" maxlength="25" value="' . $detailRow["product"] . '" /></td>
+                    <td align="left"><input type="text" name="product" size="25" maxlength="25" value="' . htmlentities($detailRow["product"]) . '" /></td>
                     <td align="left"><b>Order Number</b></td>
-                    <td align="left"><input type="text" name="order_no" size="20" maxlength="20" value="' . $detailRow["order_no"] . '" /></td>
+                    <td align="left"><input type="text" name="order_no" size="20" maxlength="20" value="' . htmlentities($detailRow["order_no"]) . '" /></td>
                 </tr>
                 <tr>
                     <td align="left"><b>Distributor</b></td>
-                    <td align="left"><input type="text" name="distributor" size="20" maxlength="20" value="' . $detailRow["distributor"] . '" /></td>
+                    <td align="left"><input type="text" name="distributor" size="20" maxlength="20" value="' . htmlentities($detailRow["distributor"]) . '" /></td>
                     <td align="left"><strong>Net Wt (in oz)</strong></td>
-		    <td align="left"><input type="text" name="net_weight" size="10" maxlength="10" value="' . $detailRow["net_weight"] . '" /></td>
+		    <td align="left"><input type="text" name="net_weight" size="10" maxlength="10" value="' . htmlentities($detailRow["net_weight"]) . '" /></td>
                 </tr>
 		<tr>
 		    <td align="left"><strong>Cost</strong></td>
-		    <td align="left"><input type="text" name="cost" size="10" maxlength="10" value="' . $detailRow["cost"] . '" /></td>
+		    <td align="left"><input type="text" name="cost" size="10" maxlength="10" value="' . htmlentities($detailRow["cost"]) . '" /></td>
 		    <td align="left"><strong>Margin</strong></td>
-		    <td align="left"><input type="text" name="margin" size="5" maxlength="5" value="' . $detailRow["margin"] . '" /></td>
+		    <td align="left"><input type="text" name="margin" size="5" maxlength="5" value="' . htmlentities($detailRow["margin"]) . '" /></td>
 		</tr>
 		<tr>
 		    <td align="left"><strong>Recommended Price</strong></td>
@@ -182,7 +182,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
                     </td>
                 </tr>
                 <tr class="extraDetail">
-                    <td colspan="4"><textarea name="ingredients" cols="80" rows="5">' . $detailRow["ingredients"] . '</textarea></td>
+                    <td colspan="4"><textarea name="ingredients" cols="80" rows="5">' . htmlentities($detailRow["ingredients"]) . '</textarea></td>
                 </tr>
             </table><br />
             <center><button name="submit" type="submit">Submit!</button></center>
