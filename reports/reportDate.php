@@ -21,18 +21,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 //
-echo '<link rel="stylesheet" href="../style.css" type="text/css" />';
-if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 
-        echo '<BODY BGCOLOR = "FFCC99" > <font SIZE=2><link rel="STYLESHEET" href="../reports/style.css" type="text/css">';
+if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         setlocale(LC_MONETARY, 'en_US');
         if (isset($_POST['date'])) {
                 $date = $_POST['date'];
-                //echo "Date entered: ".$date;
         }
         if ((!isset($_POST['date'])) || ($_POST['date'] == '1969-12-31')) {
                 $date = date('Y-m-d');
-                //echo "Date entered: ".$date;
         }
 
         if (strpbrk($date, "-") == false) {
@@ -56,7 +52,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         //////////////////////////////////
 
         if ($db_date == DATE('Y-m-d')) {$transtable = 'dtransactions';}
-        elseif ($db_date > DATE('Y-m-d')) {echo '<p>Error. There is no data for future events.</p>'; exit;}
+        elseif (strtotime($db_date) > strtotime(DATE('Y-m-d'))) {drawForm('<h2 style="color:red;">Error. There is no data for future events.</h2>'); exit;}
         else {$transtable = 'trans_' . substr($db_date, 0, 4);}
 
         $MADQ = "SELECT * FROM is4c_op.MADays WHERE MADate = '$db_date' LIMIT 1";
@@ -82,17 +78,10 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 	/**
 	 * replaced with better groupings
 	 *
-        $inventoryDeptQ = "SELECT t.dept_no AS Department ,t.dept_name AS 'Department Name',ROUND(sum(d.total),2) AS 'Department Total'
-                FROM $transtable AS d RIGHT JOIN is4c_op.departments AS t
-                ON d.department = t.dept_no
-                AND date(d.datetime) = '$db_date'
-                AND d.department <> 0
-                AND d.trans_status <> 'X'
-                AND d.trans_subtype <> 'MC'
-                AND d.emp_no <> 9999
-                GROUP BY t.dept_no
-                ORDER BY t.dept_no";
-	*/
+	 *
+	 */
+        echo '<link rel="stylesheet" href="../style.css" type="text/css" />';
+        echo '<BODY BGCOLOR = "FFCC99" > <font SIZE=2><link rel="STYLESHEET" href="../reports/style.css" type="text/css">';
 
 	$deptArray = array(
 	    array('name' => 'Grocery', 'depts' => '1, 13, 28, 30'),
@@ -613,31 +602,36 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 
 
 } else { // Show the form.
+	drawForm();	
+}
 
+function drawForm($msg = NULL, $_POST = NULL) {
         $page_title = 'Fannie - Reports Module';
         $header = 'Day End Report';
         include('../includes/header.html');
         ?>
-        <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
-        <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
-        <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
-        <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
-        <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
-        <script type="text/javascript">
-            Date.format = 'yyyy-mm-dd';
-            $(function(){
-                $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
-                .dpSetOffset(0, 125);
-            });
+	<link href="../style.css" rel="stylesheet" type="text/css">
+	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+	<script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+	<script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+	<script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+	<script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+	<script type="text/javascript">
+		Date.format = 'yyyy-mm-dd';
+		$(function(){
+		    $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
+		    $('.datepick').focus();
+		});
         </script>
-        <script src="../src/putfocus.js" language="javascript"></script>
-
         </head>
         <body>
 
-        <form action="reportDate.php" name="datelist" method="post" target="_blank">
+        <form action="<?php echo $_SERVER['PHP_SELF'];?>" name="datelist" method="post" target="_blank">
+		<?php echo $msg; ?>
             <p>Pick a date to run that days dayend report</p>
-            <span style="width: 175px !important;float:left;"><input type="text" size="10" name="date" class="datepick" autocomplete="off" /></span>
+            <input type="text" size="10" name="date" class="datepick" autocomplete="off" />
             <br />
 
             <input type="hidden" name="submitted" value="TRUE" />
