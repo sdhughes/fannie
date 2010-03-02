@@ -192,7 +192,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
 			foreach ($quarters AS $qtr => $qtrname)
 			    printf('<option value="%squarter_%u">%s Quarter %u</option>' . "\n", $qtrname['short'], $year, $qtrname['long'], $year);
 		    } else {
-			for ($i = 0; $i <= (int) (date('m') / 3); $i++) {
+			for ($i = 0; $i <= floor((date('m') - 1) / 3); $i++) {
 			    printf('<option value="%squarter_%u">%s Quarter %u</option>' . "\n", $quarters[$i]['short'], $year, $quarters[$i]['long'], $year);
 			}
 		    }
