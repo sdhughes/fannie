@@ -3,4 +3,5 @@ config.php
 *.sql
 *.csv
 *.tsv
+*.txt
 CoMET/*
