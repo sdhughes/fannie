@@ -54,7 +54,7 @@ if (isset($_POST['submitted'])) {
         if ($deptno == 7 || $deptno == 3 || $deptno == 4 || $deptno == 16) {$small = 'SMALL';}
     }
 
-    if (isset($small) && $small != 'SMALL') {$small = 'LARGE';}
+    if (!isset($small) || $small != 'SMALL') {$small = 'LARGE';}
 
     /**
      * connect to mysql server and then
