@@ -661,7 +661,7 @@ if (isset($_POST['submitted'])) {
 		$height = 76;
 		$width = 127;
 		$left = 9.5;
-		$top = 12.5;
+		$top = 14.5;
 		$right = 9;
 		$x = $left;
 		$y = $top;
@@ -687,9 +687,9 @@ if (isset($_POST['submitted'])) {
 
 		$height = 100;
 		$width = 98;
-		$left = 7;
+		$left = 5;
 		$right = 5;
-		$top = 32;
+		$top = 33;
 		$x = $left;
 		$y = $top;
 		$rightShift = $width + 6.5;
