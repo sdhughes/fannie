@@ -706,7 +706,7 @@ if (isset($_POST['submitted'])) {
 		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 80.5, 'y-offset' => 61, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
 		$tagFields[] = array('height' => 5.5, 'width' => 70, 'x-offset' => 5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'origin', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'cell');
 		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 80.5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'size', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 12, 'type' => 'cell');
-		$tagFields[] = array('height' => 11, 'width' => 90, 'x-offset' => 5, 'y-offset' => 87, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
+		$tagFields[] = array('height' => 11, 'width' => 90, 'x-offset' => 5, 'y-offset' => 89, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
 
 		break;
 
