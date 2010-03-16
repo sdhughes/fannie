@@ -1,8 +1,8 @@
 <?php
 
 if (isset($_POST['submitted'])) {
-    //ini_set('display_errors', 'on');
-    //ini_set('error_reporting', E_ALL);
+    ini_set('display_errors', 'on');
+    ini_set('error_reporting', E_ALL);
     /**
      * fpdf is the pdf creation class doc
      * manual and tutorial can be found in fpdf dir
@@ -700,12 +700,12 @@ if (isset($_POST['submitted'])) {
 
 		// Set up feach field...
 		$tagFields[] = array('height' => 7.5, 'width' => 90, 'x-offset' => 5, 'y-offset' => 21, 'justify' => 'C', 'field' => 'description', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 16, 'type' => 'cell');
-		$tagFields[] = array('height' => 5, 'width' => 90, 'x-offset' => 5, 'y-offset' => 34, 'justify' => 'L', 'field' => 'ingredients', 'font' => 'HelveticaNeue', 'font-weight' => '', 'font-size' => 10, 'type' => 'multicell');
+		$tagFields[] = array('height' => 4, 'width' => 90, 'x-offset' => 5, 'y-offset' => 35, 'justify' => 'L', 'field' => 'ingredients', 'font' => 'HelveticaNeue', 'font-weight' => '', 'font-size' => 10, 'type' => 'multicell');
 		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 4, 'y-offset' => 60, 'justify' => 'C', 'field' => 'upc', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 35, 'type' => 'cell');
 		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 40, 'y-offset' => 60, 'justify' => 'C', 'field' => 'price', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 25, 'type' => 'cell');
-		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 79.5, 'y-offset' => 61, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
+		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 80.5, 'y-offset' => 61, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
 		$tagFields[] = array('height' => 5.5, 'width' => 70, 'x-offset' => 5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'origin', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'cell');
-		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 79.5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'size', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 12, 'type' => 'cell');
+		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 80.5, 'y-offset' => 76, 'justify' => 'C', 'field' => 'size', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 12, 'type' => 'cell');
 		$tagFields[] = array('height' => 11, 'width' => 90, 'x-offset' => 5, 'y-offset' => 87, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
 
 		break;
@@ -736,16 +736,28 @@ if (isset($_POST['submitted'])) {
 		$pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
 
 		if ($field['field'] == 'ingredients') {
-		    $W = 250;
-		    while ($pdf->WordWrap(substr($tagRow['ingredients'], 0, $W), $field['width'] - 2) > 3)
-			$W--;
-		    $tagRow['ingredients'] = ($W == 250 ? $tagRow['ingredients'] : substr($tagRow['ingredients'], 0, $W - 3) . '...');
+		    $curSize = $field['font-size'];
+                    $curHeight = $field['height'];
+		    
+                    if (strlen($tagRow['ingredients']) >= 350) {
+                        $curSize -= 5;
+                        $curHeight -= 1;
+                    } elseif (strlen($tagRow['ingredients']) >= 300) {
+                        $curSize -= 4;
+                        $curHeight -= 1;
+                    } elseif (strlen($tagRow['ingredients']) >= 250) {
+                        $curSize -= 3;
+                    } elseif (strlen($tagRow['ingredients']) >= 200) {
+                        $curSize -= 2;
+                    }
+                    
+                    $pdf->SetFont($field['font'], $field['font-weight'], $curSize);
 		}
 
 		if ($field['type'] == 'cell')
 		    $pdf->Cell($field['width'], $field['height'], $tagRow[$field['field']], 0, 0, $field['justify']);
 		elseif ($field['type'] == 'multicell')
-		    $pdf->MultiCell($field['width'], $field['height'], $tagRow[$field['field']], 0, $field['justify']);
+		    $pdf->MultiCell($field['width'], (isset($curHeight) ? $curHeight : $field['height']), $tagRow[$field['field']], 0, $field['justify']);
 	    }
 
 	    $x += $rightShift;
