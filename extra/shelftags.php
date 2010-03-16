@@ -661,7 +661,7 @@ if (isset($_POST['submitted'])) {
 		$height = 76;
 		$width = 127;
 		$left = 9.5;
-		$top = 14.5;
+		$top = 16;
 		$right = 9;
 		$x = $left;
 		$y = $top;
@@ -677,9 +677,9 @@ if (isset($_POST['submitted'])) {
 		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 57, 'y-offset' => 8, 'justify' => 'C', 'field' => 'upc', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 35, 'type' => 'cell');
 		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 91, 'y-offset' => 8, 'justify' => 'C', 'field' => 'price', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 25, 'type' => 'cell');
 		$tagFields[] = array('height' => 4.5, 'width' => 17, 'x-offset' => 23.5, 'y-offset' => 69, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
-		$tagFields[] = array('height' => 11, 'width' => 52, 'x-offset' => 3, 'y-offset' => 57, 'justify' => 'C', 'field' => 'origin', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'cell');
+		$tagFields[] = array('height' => 11, 'width' => 52, 'x-offset' => 3, 'y-offset' => 58, 'justify' => 'C', 'field' => 'origin', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'cell');
 		$tagFields[] = array('height' => 4.5, 'width' => 17, 'x-offset' => 106.5, 'y-offset' => 69, 'justify' => 'C', 'field' => 'size', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 12, 'type' => 'cell');
-		$tagFields[] = array('height' => 11, 'width' => 68, 'x-offset' => 58, 'y-offset' => 57, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
+		$tagFields[] = array('height' => 5.5, 'width' => 68, 'x-offset' => 58, 'y-offset' => 58, 'justify' => 'C', 'field' => 'special', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 12, 'type' => 'multicell');
 
 		break;
 
