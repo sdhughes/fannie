@@ -40,7 +40,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 	    $bitFieldCount = mysqli_num_rows($bitFieldR);
 	    $bitFieldString = '';
 	    while (list($index, $name) = mysqli_fetch_row($bitFieldR)) {
-		$bitFieldString .= sprintf('<td align="center"><input type="hidden" name="bitCount" value="%u" /><b>%s</b><input type="checkbox" name="bitField[%u]" %s /></td>',
+		$bitFieldString .= sprintf('<td align="center"><input type="hidden" name="bitCount" value="%u" /><b>%s</b><br /><input type="checkbox" name="bitField[%u]" %s /></td>',
 					   $bitFieldCount, $name, $index, (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? 'checked="checked"' : '')
 					   );
 	    }
@@ -167,7 +167,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 		    <td align="left"><strong>Recommended Price</strong></td>
 		    <td align="left"><strong>$' . number_format($detailRow["cost"] / (1 - ($detailRow["margin"]/100)), 2) . '</strong></td>
 		    <td align="left"><strong>Current Markup</strong></td>
-		    <td align="left"></strong>' . number_format((($rowItem['normal_price'] - $detailRow['cost'])/$rowItem['normal_price']) * 100,2) . '%</strong></td>
+		    <td align="left"><strong>' . number_format((($rowItem['normal_price'] - $detailRow['cost'])/$rowItem['normal_price']) * 100,2) . '%</strong></td>
 		</tr>
 		<tr id="bitField"></tr>' . $bulkRows . '
 

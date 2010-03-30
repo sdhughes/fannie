@@ -259,9 +259,8 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
 	if (isset($_POST['bitField']) && isset($_POST['bitCount'])) {
 	    for ($i = 0; $i < (int)($_POST['bitCount']); $i++) {
-		$bitField += ($_POST['bitField'][$i] == 'on' ? pow(2, $i) : 0);
+		$bitField += ( (isset($_POST['bitField'][$i]) && $_POST['bitField'][$i] == 'on') ? pow(2, $i) : 0);
 	    }
-	    //echo $bitField;
 	}
 
 	$detailQ = "UPDATE product_details SET
