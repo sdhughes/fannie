@@ -487,45 +487,40 @@ if (isset($_POST['submitted'])) {
 	    }
 	}
     } elseif ($_POST['type'] == 'WINE') {
-	// Basic static settings
-	$top = 12.7;
-	$left = 12.7;
-	$brandTop = 12.7;
-	$varietalTop = 17.9625;
-	$priceTop = 23.8125;
-	$extraTop = 38.10;
-	$bioW = 25.4;
-	$localLeft = $bioW;
-	$localW = 22.225;
-	$veganLeft = $localLeft + $localW;
-	$veganW = 19.05;
-	$orgLeft = $veganLeft + $veganW;
-	$orgW = $localW;
-
-	$xmax = 150;
-	$ymax = 220;
-	$leftShift = 101.6;
-	$downShift = 50.80;
-
-	$x = $left;
-	$y = $top;
-	$w = 88.9;
-	$h = 44.45;
-
+        // Basic layout settings
+        $height = 41.4;
+        $width = 95.5;
+        $left = 7;
+        $top = 19;
+        $right = 5.5;
+        $x = $left;
+        $y = $top;
+        $rightShift = $width + 12.4;
+        $downShift = $height + 6.1;
+        $orientation = 'P';
+        $xMax = 160;
+        $yMax = 245;
+        
 	// Inititialize the object
-	$pdf=new PDF('P', 'mm', 'Letter');
+	$pdf=new PDF($orientation, 'mm', 'Letter');
+        
+        // Add special fonts.
+	$pdf->AddFont('Helvetica', '', 'Helvetica.php');
+	$pdf->AddFont('Helvetica', 'B', 'HelveticaBold.php');
+        
 	$pdf->SetMargins($left ,$top);
-	$pdf->SetAutoPageBreak('off',0);
+	$pdf->SetAutoPageBreak('off', 0);
+        
+        // Set up feach field...
+        $tagFields[] = array('height' => 5.3, 'width' => 20.1, 'x-offset' => 5.3, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'organic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 16.3, 'x-offset' => 25.4, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'vegan', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 26.2, 'x-offset' => 41.7, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'sulfite-free', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 25.4, 'x-offset' => 67.9, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'biodynamic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+                                
+        $tagFields[] = array('height' => 5.3, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 15.7, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 15, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.6, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 21, 'justify' => 'C', 'field' => 'price', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 14, 'type' => 'cell');
 
-	// Include our specific fonts.
-	$pdf->AddFont('Georgia', '', 'georgia.php');
-	$pdf->AddFont('Georgia', 'B', 'georgiab.php');
-	$pdf->AddFont('Georgia', 'I', 'georgiai.php');
-	$pdf->AddFont('Century', '', 'CenturyRegular.php');
-	$pdf->AddFont('Century', 'B', 'CenturyBold.php');
-	$pdf->AddFont('Century', 'I', 'CenturyItalic.php');
-
-	$mainQ = "SELECT d.brand, d.product, p.normal_price, p.department, d.bitField
+	$mainQ = "SELECT CONCAT_WS(' ', d.brand, d.product) AS description, CONCAT('$', ROUND(p.normal_price, 2)) as price, p.department, d.bitField as bit
 	    FROM products AS p
 		INNER JOIN product_details AS d ON p.upc=d.upc
 	    WHERE p.inuse = 1
@@ -540,72 +535,44 @@ if (isset($_POST['submitted'])) {
 	    // Print tags...
 	    $pdf->AddPage('P');
 
-	    while (list($brand, $product, $price, $dept, $bit) = mysqli_fetch_row($mainR)) {
-	    	$bitFieldQ = "SELECT fieldIndex, name FROM bitFields WHERE department = $dept ORDER BY fieldIndex";
+	    while ($tagRow = mysqli_fetch_array($mainR, MYSQLI_ASSOC)) {
+	        if ($x > $xMax) {
+                    $x = $left;
+                    $y += $downShift;
+                }
+    
+                if ($y > $yMax) {
+                    $pdf->AddPage($orientation);
+                    $x = $left;
+                    $y = $top;
+                }
+                
+                $bitFieldQ = "SELECT fieldIndex, LOWER(name) FROM bitFields WHERE department = {$tagRow['department']} ORDER BY fieldIndex";
 		$bitFieldR = mysqli_query($db_slave, $bitFieldQ);
 
-		$bitField = sprintf('%b', (int) $bit);
+		$bitField = sprintf('%b', (int) $tagRow['bit']);
 
 		$bitFieldArray = array();
 
 		for ($i = 1; $i <= strlen($bitField); $i++) {
-		   $bitFieldArray[] = substr($bitField, strlen($output)-$i, 1);
+		   $bitFieldArray[] = substr($bitField, -$i, 1);
 		}
 
 		while (list($index, $name) = mysqli_fetch_row($bitFieldR)) {
-		    $bF[$index] = (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? $name : NULL);
+		    $tagRow[$name] = (isset($bitFieldArray[$index]) && $bitFieldArray[$index] == 1 ? $name : FALSE);
 		}
-
-		//$pdf->Rect($x, $y, $w, $h);
-		// Brand
-		$pdf->SetFont('Century','',16);
-		$pdf->SetXY($x, $y + $brandTop);
-		$pdf->Cell($w,6,$brand,0,0,'C');
-
-		// Varietal
-		$pdf->SetFont('Century','I',13);
-		$pdf->SetXY($x, $y + $varietalTop);
-		$pdf->Cell($w,6,$product,0,0,'C');
-
-		// Price
-		$pdf->SetFont('Arial','',13);
-		$pdf->SetXY($x, $y + $priceTop);
-		$pdf->Cell($w,6,'$' . number_format($price,2),0,0,'C');
-
-		// Extra Bits
-		// Biodynamic
-		$pdf->SetFont('Arial','',10.5);
-		$pdf->SetXY($x, $y + $extraTop);
-		$pdf->Cell($bioW,4,$bF[3],0,0,'C');
-
-		// Local
-		$pdf->SetFont('Arial','',10.5);
-		$pdf->SetXY($x + $localLeft, $y + $extraTop);
-		$pdf->Cell($localW,4,$bF[2],0,0,'C');
-
-		// Vegan
-		$pdf->SetFont('Arial','',10.5);
-		$pdf->SetXY($x + $veganLeft, $y + $extraTop);
-		$pdf->Cell($veganW,4,$bF[1],0,0,'C');
-
-		// Organic
-		$pdf->SetFont('Arial','',10.5);
-		$pdf->SetXY($x + $orgLeft, $y + $extraTop);
-		$pdf->Cell($orgW,4,$bF[0],0,0,'C');
-
-		$x += $leftShift;
-
-		if ($x > $xmax) {
-		    $y += $downShift;
-		    $x = $left;
-		}
-
-		if ($y > $ymax) {
-		    $x = $left;
-		    $y = $top;
-		    $pdf->AddPage('P');
-		}
-
+                
+                foreach ($tagFields AS $field) {
+                    $pdf->SetFont($field['font'], $field['font-weight'], $field['font-size']);
+                    $pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
+    
+                    if ($field['type'] == 'cell')
+                        $pdf->Cell($field['width'], $field['height'], $tagRow[$field['field']], 0, 0, $field['justify']);
+                    elseif ($field['type'] == 'multicell')
+                        $pdf->MultiCell($field['width'], (isset($curHeight) ? $curHeight : $field['height']), $tagRow[$field['field']], 0, $field['justify']);
+                }
+                
+                $x += $rightShift;
 	    }
 	} else {
 	    drawForm(sprintf('Query: %s<br />Error: %s', $mainQ, mysqli_error($db_slave)));
