@@ -512,12 +512,12 @@ if (isset($_POST['submitted'])) {
 	$pdf->SetAutoPageBreak('off', 0);
         
         // Set up feach field...
-        $tagFields[] = array('height' => 5.3, 'width' => 20.1, 'x-offset' => 5.3, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'organic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.3, 'width' => 16.3, 'x-offset' => 25.4, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'vegan', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.3, 'width' => 26.2, 'x-offset' => 41.7, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'sulfite-free', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.3, 'width' => 25.4, 'x-offset' => 67.9, 'y-offset' => 9.4, 'justify' => 'C', 'field' => 'biodynamic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 20.1, 'x-offset' => 5.3, 'y-offset' => 8, 'justify' => 'C', 'field' => 'organic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 16.3, 'x-offset' => 25.4, 'y-offset' => 8, 'justify' => 'C', 'field' => 'vegan', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 26.2, 'x-offset' => 41.7, 'y-offset' => 8, 'justify' => 'C', 'field' => 'sulfite-free', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 25.4, 'x-offset' => 67.9, 'y-offset' => 8, 'justify' => 'C', 'field' => 'biodynamic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
                                 
-        $tagFields[] = array('height' => 5.3, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 15.7, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 15, 'type' => 'cell');
+        $tagFields[] = array('height' => 5.3, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 14.5, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 15, 'type' => 'cell');
         $tagFields[] = array('height' => 5.6, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 21, 'justify' => 'C', 'field' => 'price', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 14, 'type' => 'cell');
 
 	$mainQ = "SELECT CONCAT_WS(' ', d.brand, d.product) AS description, CONCAT('$', ROUND(p.normal_price, 2)) as price, p.department, d.bitField as bit
