@@ -60,9 +60,9 @@ if ((!isset($_POST['submit'])) && (!isset($_POST['upc'])) && (!isset($_GET['upc'
 
 }
 
-$upc = $_REQUEST['upc'];
-$date1 = $_REQUEST['date1'];
-$date2 = $_REQUEST['date2'];
+$upc = (isset($_REQUEST['upc']) ? escape_data($_REQUEST['upc']) : NULL);
+$date1 = (isset($_REQUEST['date1']) ? escape_data($_REQUEST['date1']) : NULL);
+$date2 = (isset($_REQUEST['date2']) ? escape_data($_REQUEST['date2']) : NULL);
 
 ?>
 
@@ -102,7 +102,7 @@ if (isset($upc)) {
         $year2 = substr($date2, 0, 4);
 
         if (is_numeric($upc)) {
-            $query = "SELECT SUM(PLU) AS PLU, Description, Current, Price, Dept, Subdept, SUM(Qty) AS Qty, SUM(Total) AS Total FROM (";
+            $query = "SELECT SUM(PLU) AS PLU, Description, Current, Price, Dept, Subdept, SUM(Qty) AS Qty, SUM(Total) AS Total, Scale AS scale FROM (";
             for ($i = $year1; $i <= $year2; $i++) {
                 $query .= "SELECT DISTINCT
                     p.upc AS PLU,
@@ -123,7 +123,7 @@ if (isset($upc)) {
                 GROUP BY CONCAT(t.upc, '-',t.unitprice)";
 
                 if ($i == $year2) {
-                    if (substr($date2a, 0, 10) == date('Y-m-d')) {
+                    if (substr($date2, 0, 10) == date('Y-m-d')) {
                         $query .= " UNION ALL SELECT DISTINCT
                             p.upc AS PLU,
                             p.description AS Description,
@@ -149,7 +149,7 @@ if (isset($upc)) {
             }
 
         } elseif (!is_numeric($upc)) {
-            $query = "SELECT SUM(PLU) AS PLU, Description, Current, Price, Dept, Subdept, SUM(Qty) AS Qty, SUM(Total) AS Total FROM (";
+            $query = "SELECT SUM(PLU) AS PLU, Description, Current, Price, Dept, Subdept, SUM(Qty) AS Qty, SUM(Total) AS Total, Scale AS scale FROM (";
             for ($i = $year1; $i <= $year2; $i++) {
                 $query .= "SELECT DISTINCT
                         p.upc AS PLU,
@@ -169,7 +169,7 @@ if (isset($upc)) {
                         AND t.description LIKE '%$upc%'
                     GROUP BY CONCAT(t.upc, '-',t.unitprice)";
                 if ($i == $year2) {
-                    if (substr($date2a, 0, 10) == date('Y-m-d')) {
+                    if (substr($date2, 0, 10) == date('Y-m-d')) {
                         $query .= "UNION ALL SELECT DISTINCT
                                 p.upc AS PLU,
                                 p.description AS Description,

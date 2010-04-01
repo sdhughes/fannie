@@ -64,7 +64,7 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
 	$totalHouseCharge = 0;
 	$hours = array();
 
-        $bg=='#eeeeee';
+        $bg = '#eeeeee';
         while ($row = mysqli_fetch_array($result)) {
             $emp_no = $row[1];
             $cn = $row[5];
@@ -196,7 +196,7 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
 
             if (mysqli_num_rows($vacationR) != 0) {
                 list($vacation) = mysqli_fetch_row($vacationR);
-            } elseif (is_null($vacation)) {
+            } elseif (!isset($vacation) || is_null($vacation)) {
                 $vacation = 0;
             } else {
                 $vacation = 0;
@@ -212,14 +212,14 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
                 echo "<p>Payroll Summary for $row[3] to $row[4]:</p>";
                 echo '<table border="1"><thead><tr><th>Employee</th><th>Total Hours Worked</th><th>Previous Pay Periods</th><th>Week One</th><th>Week Two</th><th>Vacation Hours</th><th>House Charges</th><th>Detailed View</th></tr></thead><tbody>';
             }
-            $bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
-            if ($row[0] > 80 || $totalPOT[$emp_no] > 0) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
+            $bg = ($bg == '#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
+            if ($row[0] > 80 || (isset($totalPOT[$emp_no]) && $totalPOT[$emp_no] > 0) ) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
             echo "<tr bgcolor='$bg'><td>$row[2]</td><td align='center'>$fontopen$row[0]";
             if ($oncall > 0) {echo '<font color="red"><br />(On Call: ' . $oncall . ')</font>';}
             echo "$fontclose</td>";
 
-            if ($totalPOT[$emp_no] > 0) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
-            echo "<td align='center'>$fontopen" . ($totalPHours[$emp_no] > 0 ? number_format($totalPHours[$emp_no], 2) : "N/A") . ($totalPOT[$emp_no] > 0 ? "(" . number_format($totalPOT[$emp_no], 2) . ")" : NULL) . "$fontclose</td>";
+            if (isset($totalPOT[$emp_no]) && $totalPOT[$emp_no] > 0) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
+            echo "<td align='center'>$fontopen" . (isset($totalPHours[$emp_no]) && $totalPHours[$emp_no] > 0 ? number_format($totalPHours[$emp_no], 2) : "N/A") . (isset($totalPOT[$emp_no]) && $totalPOT[$emp_no] > 0 ? "(" . number_format($totalPOT[$emp_no], 2) . ")" : NULL) . "$fontclose</td>";
 
             if ($weekone > 40) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
             echo "<td align='center'>$fontopen$weekone$fontclose</td>";
@@ -237,7 +237,7 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
 	    $totalWeekOne += $weekone;
 	    $totalWeekTwo += $weektwo;
 	    $totalVacation += $vacation;
-	    $totalPrevious += $totalPHours[$emp_no];
+	    $totalPrevious += (isset($totalPHours[$emp_no]) ? $totalPHours[$emp_no] : 0);
 	    ++$count;
 	    $totalHouseCharge += $houseCharge;
         }

@@ -1,7 +1,7 @@
 <html>
 <head>
 <Title>House Charge Detail</Title>
-<link rel="stylesheet" href="../style.css" type="text/css" />
+<link rel="stylesheet" href="../includes/style.css" type="text/css" />
 </head>
 <body>
 <?php

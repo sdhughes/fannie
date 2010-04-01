@@ -55,7 +55,7 @@ function popup(mylink, windowname) {
 <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
 <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.js"></script>
 <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.pager.js"></script>
-<script type="text/javascript" src="../includes/javascript/jquery.metadata.min.js"></script>
+<script type="text/javascript" src="../includes/javascript/jquery.metadata.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
         $(".tablesorter")
@@ -464,7 +464,6 @@ function drawForm($msg = NULL, $_POST = NULL) {
     include ('../includes/header.html');
     echo
     <<<EOS
-    <link href="../style.css" rel="stylesheet" type="text/css">
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />

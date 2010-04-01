@@ -432,7 +432,8 @@ if (isset($_POST['submitted'])) {
 	    // Organic, Non-Organic, Wildcrafted
 	    $pdf->SetFont('Georgia','B',14);
 	    $pdf->SetXY($x, $y + $certTop);
-	    $pdf->Cell($r * 2,6,$certification[$cert],0,0,'C');
+	    if (isset($certification[$cert]))
+                $pdf->Cell($r * 2,6,$certification[$cert],0,0,'C');
 
 	    // Brand Name
 	    $pdf->SetFont('Georgia','B',15);
@@ -745,14 +746,12 @@ function drawForm($error = NULL) {
     $page_title = 'Fannie - Administration Module';
     $header = 'Shelftag Generator';
     include ('../includes/header.html');
-    ?><link href="../style.css" rel="stylesheet" type="text/css" />
+    ?>
     <script src="../src/CalendarControl.js" language="javascript"></script>
     <script src="../src/putfocus.js" language="javascript"></script>
     <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     </head>
     <body onLoad="putFocus(0,0);">
-    <link href="../style.css" rel="stylesheet" type="text/css">
-    <script src="../src/CalendarControl.js" language="javascript"></script>
     <script type="text/javascript">
 	$(document).ready(function() {
 	    $('#tagType').change(function() {

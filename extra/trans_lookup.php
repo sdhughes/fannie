@@ -78,6 +78,7 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
         if (isset($_POST['ti']) && $_POST['ti'] == 'ti') {
             if (empty($_POST['trans_id'])) {
                 $error[] = 'You left the transaction number field blank.';
+		$dtn = false;
             } else {
                 $dtn = escape_data($_POST['trans_id']);
                 $having = "HAVING daytrans_no = '$dtn'";
@@ -87,6 +88,7 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
         if (isset($_POST['rn']) && $_POST['rn'] == 'rn') {
             if (empty($_POST['reg_no']) || !is_numeric($_POST['reg_no'])) {
                 $error[] = 'You left the register number field blank or didn\'t enter a number.';
+		$rn = false;
             } else {
                 $rn = escape_data($_POST['reg_no']);
                 $sm .= " AND register_no = $rn";
@@ -96,6 +98,7 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
         if (isset($_POST['cn']) && $_POST['cn'] == 'cn') {
             if (empty($_POST['card_no']) || !is_numeric($_POST['card_no'])) {
                 $error[] = 'You left the member number field blank or didn\'t enter a number.';
+		$cn = false;
             } else {
                 $cn = escape_data($_POST['card_no']);
                 $sm .= " AND card_no = $cn";
@@ -105,98 +108,20 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
         if (isset($_POST['em']) && $_POST['em'] == 'em') {
             if (empty($_POST['cashier'])) {
                 $error[] = 'You didn\'t select a cashier from the list.';
+		$em = false;
             } else {
                 $em = escape_data($_POST['cashier']);
                 $sm .= " AND emp_no = $em";
             }
         }
-    } elseif (isset($_GET['sort'])) {
-        $having = NULL;
-
-        if (!empty($_GET['daytrans_no'])) {
-            $dtn = escape_data($_GET['trans_id']);
-            $having = "HAVING daytrans_no = '$dtn'";
-
-        }
-
-        if (!empty($_GET['reg_no'])) {
-            $rn = escape_data($_GET['reg_no']);
-            $sm .= " AND register_no = $rn";
-        }
-
-        if (!empty($_GET['card_no'])) {
-            $cn = escape_data($_GET['card_no']);
-            $sm .= " AND card_no = $cn";
-        }
-
-        if (!empty($_GET['cashier'])) {
-            $em = escape_data($_GET['cashier']);
-            $sm .= " AND emp_no = $em";
-        }
-
     }
-
+    
     if (empty($errors)) {
         $sm = stripslashes($sm);
 
         // Results!
+	$order_by = 'time DESC';
 
-        $link1 = "{$_SERVER['PHP_SELF']}?sort=tia";
-        $link2 = "{$_SERVER['PHP_SELF']}?sort=ema";
-        $link3 = "{$_SERVER['PHP_SELF']}?sort=cna";
-
-        // Determine the sorting order.
-        if (isset($_GET['sort'])) { // If a non-default sort has been chosen.
-
-            // Use existing sorting order.
-            switch ($_GET['sort']) {
-
-                case 'tia':
-                $order_by = 'time ASC';
-                $link1 = "{$_SERVER['PHP_SELF']}?sort=tid";
-                break;
-
-                case 'tid':
-                $order_by = 'time DESC';
-                $link1 = "{$_SERVER['PHP_SELF']}?sort=tia";
-                break;
-
-                case 'ema':
-                $order_by = 'emp_no ASC';
-                $link2 = "{$_SERVER['PHP_SELF']}?sort=emd";
-                break;
-
-                case 'emd':
-                $order_by = 'emp_no DESC';
-                $link2 = "{$_SERVER['PHP_SELF']}?sort=ema";
-                break;
-
-                case 'cna':
-                $order_by = 'card_no ASC';
-                $link3 = "{$_SERVER['PHP_SELF']}?sort=cnd";
-                break;
-
-                case 'cnd':
-                $order_by = 'card_no DESC';
-                $link3 = "{$_SERVER['PHP_SELF']}?sort=cna";
-                break;
-
-                default:
-                $order_by = 'time DESC';
-                break;
-
-            }
-
-            // $sort will be appended to the pagination links.
-            $sort = $_GET['sort'];
-
-        } else { // Use the default sorting order.
-            $order_by = 'time DESC';
-            $sort = 'tid';
-        }
-
-
-        // Make the query using the LIMIT function and the $start information.
         $query = "SELECT DATE(datetime) AS date,
                 TIME(datetime) AS time,
                 emp_no,
@@ -217,6 +142,7 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
 
         $result = mysqli_query ($db_slave, $query);
         // Display the  number of matches.
+
         if (!$result || mysqli_num_rows($result) == 0) {
             echo '<div id="alert"><p class="error">Your search yielded no results.</p></div>';
         } else {
@@ -229,11 +155,11 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
             // Table header.
             echo '<table align="center" width="100%" cellspacing="0" cellpadding="5">';
             echo '<tr>
-                    <td align="center"><a href="' . $link1 . '&date=' . $da . '&daytrans_no=' . $dtn . '&reg_no=' . $rn . '&card_no=' . $cn . '&cashier=' . $em . '"><b>Time (24hr)</b></a></td>
-                    <td align="center"><b>Trans ID</b></td>
-                    <td align="center"><a href="' . $link2 . '&date=' . $da . '&daytrans_no=' . $dtn . '&reg_no=' . $rn . '&card_no=' . $cn . '&cashier=' . $em . '"><b>Emp No</b></a></td>
-                    <td align="center"><a href="' . $link3 . '&date=' . $da . '&daytrans_no=' . $dtn . '&reg_no=' . $rn . '&card_no=' . $cn . '&cashier=' . $em . '"><b>Member #</a></td>
-                    <td align="center"><b>Subtotal</td>
+                    <th>Time (24hr)</th>
+                    <th>Trans ID</th>
+                    <th>Emp No</th>
+                    <th>Member #</th>
+                    <th><b>Subtotal</th>
                     </tr>';
 
             // Fetch and print all the records.
@@ -267,16 +193,7 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
 
     } // End of if (empty($errors)) IF.
 
-} // End of submit conditional.
-
-// function debug_p($var, $title)
-// {
-//     print "<p>$title</p><pre>";
-//     print_r($var);
-//     print "</pre>";
-// }
-//
-// debug_p($_REQUEST, "all the data coming in");
+}
 
 // Always show the form.
 $query = "SELECT * FROM is4c_op.employees WHERE EmpActive = 1 ORDER BY FirstName ASC";

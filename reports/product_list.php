@@ -21,7 +21,7 @@ if (isset($_POST['submitted'])) {
         <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
         <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.js"></script>
         <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.pager.js"></script>
-        <script type="text/javascript" src="../includes/javascript/jquery.metadata.min.js"></script>
+        <script type="text/javascript" src="../includes/javascript/jquery.metadata.js"></script>
         <script type="text/javascript">
             $(document).ready(function(){
                 $(".tablesorter")
@@ -49,8 +49,8 @@ if (isset($_POST['submitted'])) {
 		$arrayName = $deptArray;
 	}
 	
-	echo "<p>Report sorted by " . $order_name . " on <br />" . $today . "<br />Department range: " . $arrayName . "</p>";
-	if ($inUse==1) {$inUseQ = 'AND inUse = 1';} else {$inUseQ = '';}
+	echo "<p>Department range: " . $arrayName . "</p>";
+	if (isset($inUse) && $inUse==1) {$inUseQ = 'AND inUse = 1';} else {$inUseQ = '';}
 	if (isset($deptDetails)) {
 		$query = "SELECT
                         CASE WHEN p.upc <= 999 THEN SUBSTR(p.upc, 11, 3) WHEN p.upc <= 9999 THEN SUBSTR(p.upc, 10, 4) ELSE p.upc END AS UPC,

@@ -270,7 +270,7 @@ if (isset($_GET['function']) && isset($_GET['emp_no']) && isset($_GET['periodID'
         
         if (mysqli_num_rows($vacationR) != 0) {
             list($vacation, $vacationID) = mysqli_fetch_row($vacationR);
-        } elseif (is_null($vacation)) {
+        } elseif (!isset($vacation) || is_null($vacation)) {
             $vacation = 0;
             $vacationID = 'insert';
         } else {

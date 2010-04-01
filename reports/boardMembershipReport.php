@@ -6,7 +6,7 @@ $months = array(1 => 'January','February','March','April','May','June','July','A
 
 if (!isset($_POST['submitted']) || (!isset($_POST["subType"]) && $_POST["submit"] != "submitSecond")) {
    $page_title = 'Fannie - Reports Module';
-   $header = 'Membership Report';
+   $header = 'Board Membership Report';
    include ('../includes/header.html');
    echo '<form method="post" action="' . $_SERVER["PHP_SELF"] . '" target="_blank">		
       <div id="box">
@@ -62,7 +62,7 @@ if (!isset($_POST['submitted']) || (!isset($_POST["subType"]) && $_POST["submit"
   
    include ('../includes/footer.html');  
 } elseif ($_POST["submit"] == "submitFirst") {
-   session_start();
+   @session_start();
    
    echo '<html><body>';
    
@@ -267,7 +267,7 @@ echo '<textarea name="footText" cols="120" rows="5">Post-Bullet Text</textarea><
       
 
 } elseif ($_POST["submit"] == "submitSecond") {
-   session_start();
+   @session_start();
    require_once ('../src/fpdf/fpdf.php');
    define('FPDF_FONTPATH','font/');
    

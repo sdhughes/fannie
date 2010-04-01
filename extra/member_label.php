@@ -132,8 +132,6 @@ if (isset($_POST['submitted']) && $_POST['submit'] == 'submit') {
 	include_once('../includes/header.html');
 	printf('
             <head>
-            <link href="../style.css"
-                  rel="stylesheet" type="text/css" />
             <script src="../src/CalendarControl.js"
                     language="javascript"></script>
             </head>

@@ -22,7 +22,7 @@ if (isset($_POST['submitted'])) {
 <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
 <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.js"></script>
 <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.pager.js"></script>
-<script type="text/javascript" src="../includes/javascript/jquery.metadata.min.js"></script>
+<script type="text/javascript" src="../includes/javascript/jquery.metadata.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
         $(".tablesorter").tablesorter({widthFixed: true, debug: false, widgets:['zebra']});
@@ -112,7 +112,6 @@ function drawForm($msg = NULL, $_POST = NULL) {
     include ('../includes/header.html');
     echo
     <<<EOS
-    <link href="../style.css" rel="stylesheet" type="text/css">
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
@@ -148,7 +147,7 @@ EOS;
 	   %s
 	    <h3><strong>Select Department</strong></h3>
 	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
-            <form method="post" action="shrinkReport.php">
+            <form method="post" action="shrinkReport.php" target="_blank">
 	    <div align="center">
 		<table border="0" cellspacing="3" cellpadding="5">', $msg);
     $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) ORDER BY dept_name ASC";

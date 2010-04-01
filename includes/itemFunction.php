@@ -81,12 +81,12 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 
 	$bulkRows = '<tr>
 		    <td align="left"><strong>Origin</strong></td>
-		    <td align="left"><input type="text" name="origin" size="25" maxlength="75" value="' . htmlentities($detailRow["origin"]) . '" /></td>
+		    <td align="left"><input type="text" name="origin" size="25" maxlength="75" value="' . htmlentities(isset($detailRow["origin"]) ? $detailRow["origin"] : NULL) . '" /></td>
 		    <td align="left"><strong>Tag Type</strong></td>
 		    <td align="left"><select name="tagType">';
 
 	while (list($no, $name) = mysqli_fetch_row($bulkR)) {
-	    $bulkRows .= sprintf('<option value="%u" %s>%s</option>' . "\n", $no, ($detailRow["tag_type"] == $no ? ' SELECTED="SELECTED"' : NULL), $name);
+	    $bulkRows .= sprintf('<option value="%u" %s>%s</option>' . "\n", $no, (isset($detailRow["tag_type"]) && $detailRow["tag_type"] == $no ? ' SELECTED="SELECTED"' : NULL), $name);
 	}
 
 	    $bulkRows .= '</select></td>

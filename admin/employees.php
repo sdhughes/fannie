@@ -16,7 +16,7 @@ if (isset($_POST['submit'])) {
 
 if (isset($_POST['submit'])) {
 	foreach ($id AS $emp_no) {
-		if ($EmpActive[$emp_no] == 'on') $active = 1; else $active = 0;
+		if (isset($EmpActive[$emp_no]) && $EmpActive[$emp_no] == 'on') $active = 1; else $active = 0;
 		if (empty($CardNo[$emp_no]) || !isset($CardNo[$emp_no])) {$CardNo[$emp_no] = 'NULL';}
 		$updateQ = "UPDATE employees SET
                         FirstName = '" . escape_data($FirstName[$emp_no]) . "',
@@ -30,7 +30,7 @@ if (isset($_POST['submit'])) {
 		if (!$updateR) {echo '<p><font color="red">One or more employees could not be updated. Please try again.</font> Query: ' . $updateQ . '</p>';}
 	}
 	$max = $_POST['add'];
-	if ($EmpActive[$max] == 'on') {
+	if (isset($EmpActive[$max]) && $EmpActive[$max] == 'on') {
 		$insertQ = "INSERT INTO employees VALUES
                     ($max, $max, $max,
                     '" . escape_data($FirstName[$max]) . "',

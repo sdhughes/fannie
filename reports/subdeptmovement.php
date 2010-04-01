@@ -34,7 +34,6 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
         <title>Sub-department Movement Report</title>
         <link rel="STYLESHEET" type="text/css" href="../includes/javascript/tablesorter/addons/pager/jquery.tablesorter.pager.css" />
         <link rel="STYLESHEET" type="text/css" href="../includes/javascript/tablesorter/themes/blue/style.css" />
-        <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datePicker.css" />
         <style rel="STYLESHEET" type="text/css">
             tr.alt td {
                 background: #ecf6fc !important;
@@ -46,8 +45,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
         <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
         <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.js"></script>
         <script type="text/javascript" src="../includes/javascript/jquery.tablesorter.pager.js"></script>
-        <script type="text/javascript" src="../includes/javascript/jquery.metadata.min.js"></script>
-        <script type="text/javascript" src="../includes/javascript/jquery.datePicker.js"></script>
+        <script type="text/javascript" src="../includes/javascript/jquery.metadata.js"></script>
         <script type="text/javascript">
             $(document).ready(function(){
                 $(".tablesorter")
@@ -67,7 +65,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
     echo "Sub-department #$subdepartment: $subdept<br />";
     echo "Department #$dept_no: " . ucfirst(strtolower($dept)) . "<br />";
 
-    if ($_POST['inUse'] == 1) {
+    if (isset($_POST['inUse']) && $_POST['inUse'] == 1) {
         echo 'Items not in use filtered out.<br />';
         $inUse = 'AND p.inUse = 1';
     } else {

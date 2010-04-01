@@ -80,7 +80,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 	 *
 	 *
 	 */
-        echo '<link rel="stylesheet" href="../style.css" type="text/css" />';
+        echo '<link rel="stylesheet" href="../reports/style.css" type="text/css" />';
         echo '<BODY BGCOLOR = "FFCC99" > <font SIZE=2><link rel="STYLESHEET" href="../reports/style.css" type="text/css">';
 
 	$deptArray = array(
@@ -610,7 +610,6 @@ function drawForm($msg = NULL, $_POST = NULL) {
         $header = 'Day End Report';
         include('../includes/header.html');
         ?>
-	<link href="../style.css" rel="stylesheet" type="text/css">
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />

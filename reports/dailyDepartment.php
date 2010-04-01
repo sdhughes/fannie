@@ -60,10 +60,7 @@ if (isset($_POST['submitted'])) {
 
 
 } else { // Show the form
-echo '<link href="../style.css"
-        rel="stylesheet" type="text/css">
-<script src="../src/CalendarControl.js"
-        language="javascript"></script>';
+
 ?>
 <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
 <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />

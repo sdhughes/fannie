@@ -25,11 +25,11 @@ setlocale(LC_MONETARY, 'en_US');
 require_once ('../includes/mysqli_connect.php'); // Connect to the DB.
 mysqli_select_db ($db_slave, 'is4c_log');
 
-if(isset($_POST['submit'])){
+if (isset($_POST['submit'])) {
 	foreach ($_POST AS $key => $value) {
 		$$key = $value;
 	}
-}else{
+} else {
       foreach ($_GET AS $key => $value) {
           $$key = $value;
       }
@@ -61,7 +61,7 @@ $query = "SELECT * FROM $transtable
 	    AND emp_no = $emp_no
 	    AND register_no = $register_no
 	    AND trans_no = $trans_no
-	    AND upc NOT IN ('DISCOUNT', 'CASEDISCOUNT', 'TAX')
+	    AND upc NOT IN ('DISCOUNT', 'CASEDISCOUNT', 'MADISCOUNT', 'TAX')
 	ORDER BY trans_id";
 
 $result = mysqli_query ($db_slave, $query);
