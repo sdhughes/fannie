@@ -54,7 +54,7 @@ $batchInfoW = mysqli_fetch_row($batchInfoR);
 
 $selBItemsQ = "SELECT b.*,p.*  from batchList as b LEFT JOIN 
                products as p ON b.upc = p.upc WHERE batchID = $batchID 
-               ORDER BY b.added, b.listID DESC";
+               ORDER BY b.added DESC, b.listID DESC";
 
 $selBItemsR = mysqli_query($db_master, $selBItemsQ);
 echo '<form action="saletags.php" method="POST" target="_blank">
