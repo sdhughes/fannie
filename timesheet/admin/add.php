@@ -136,7 +136,7 @@ if (isset($_GET['submitted'])) { // If the form has been submitted.
                         } else {
                                 // Start the redirect.
                                 ob_end_clean();
-                                $url = "http://192.168.1.102/timesheet/admin.php?function=view&emp_no=$emp_no&periodID=$periodID";
+                                $url = "/timesheet/admin.php?function=view&emp_no=$emp_no&periodID=$periodID";
                                 header("Location: $url");
                                 exit();
                         }
