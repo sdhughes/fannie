@@ -34,7 +34,8 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
             e.RealFirstName,
             date_format(p.periodStart, '%M %D, %Y'),
             date_format(p.periodEnd, '%M %D, %Y'),
-            e.card_no
+            e.card_no,
+	    e.LastName
         FROM is4c_log.timesheet AS t
             INNER JOIN is4c_op.employees AS e
             ON (t.emp_no = e.emp_no)
@@ -214,7 +215,7 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
             }
             $bg = ($bg == '#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
             if ($row[0] > 80 || (isset($totalPOT[$emp_no]) && $totalPOT[$emp_no] > 0) ) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
-            echo "<tr bgcolor='$bg'><td>$row[2]</td><td align='center'>$fontopen$row[0]";
+            printf("<tr bgcolor='$bg'><td>%s</td><td align='center'>%s%s", $row[2] . " " . substr($row[6], 0, 1), $fontopen, $row[0]);
             if ($oncall > 0) {echo '<font color="red"><br />(On Call: ' . $oncall . ')</font>';}
             echo "$fontclose</td>";
 
