@@ -488,16 +488,18 @@ if (isset($_POST['submitted'])) {
 	    }
 	}
     } elseif ($_POST['type'] == 'WINE') {
+        $check = '../includes/checkmark.png';
+        
         // Basic layout settings
         $height = 41.4;
-        $width = 95.5;
-        $left = 7;
-        $top = 19;
+        $width = 98;
+        $left = 9;
+        $top = 14;
         $right = 5.5;
         $x = $left;
         $y = $top;
-        $rightShift = $width + 12.4;
-        $downShift = $height + 6.1;
+        $rightShift = $width + 6.5;
+        $downShift = $height + 6;
         $orientation = 'P';
         $xMax = 160;
         $yMax = 245;
@@ -513,13 +515,13 @@ if (isset($_POST['submitted'])) {
 	$pdf->SetAutoPageBreak('off', 0);
         
         // Set up feach field...
-        $tagFields[] = array('height' => 5.3, 'width' => 20.1, 'x-offset' => 5.3, 'y-offset' => 8, 'justify' => 'C', 'field' => 'organic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.3, 'width' => 16.3, 'x-offset' => 25.4, 'y-offset' => 8, 'justify' => 'C', 'field' => 'vegan', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.3, 'width' => 26.2, 'x-offset' => 41.7, 'y-offset' => 8, 'justify' => 'C', 'field' => 'sulfite-free', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.3, 'width' => 25.4, 'x-offset' => 67.9, 'y-offset' => 8, 'justify' => 'C', 'field' => 'biodynamic', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => -1.0, 'y-offset' => 10, 'field' => 'organic', 'type' => 'image');
+        $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => 20.5, 'y-offset' => 10, 'field' => 'vegan', 'type' => 'image');
+        $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => 39, 'y-offset' => 10, 'field' => 'sulfite-free', 'type' => 'image');
+        $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => 67.5, 'y-offset' => 10, 'field' => 'biodynamic', 'type' => 'image');
                                 
-        $tagFields[] = array('height' => 5.3, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 14.5, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 15, 'type' => 'cell');
-        $tagFields[] = array('height' => 5.6, 'width' => 95.5, 'x-offset' => 0, 'y-offset' => 21, 'justify' => 'C', 'field' => 'price', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 14, 'type' => 'cell');
+        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 16, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 15, 'type' => 'cell');
+        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 22, 'justify' => 'C', 'field' => 'price', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 14, 'type' => 'cell');
 
 	$mainQ = "SELECT CONCAT_WS(' ', d.brand, d.product) AS description, CONCAT('$', ROUND(p.normal_price, 2)) as price, p.department, d.bitField as bit
 	    FROM products AS p
@@ -564,13 +566,26 @@ if (isset($_POST['submitted'])) {
 		}
                 
                 foreach ($tagFields AS $field) {
-                    $pdf->SetFont($field['font'], $field['font-weight'], $field['font-size']);
-                    $pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
-    
-                    if ($field['type'] == 'cell')
+                    if ($field['type'] == 'cell') {
+                        if (strlen($tagRow[$field['field']]) > 32)
+                            $fSize = $field['font-size'] - 2;
+                        else
+                            $fSize = $field['font-size'];
+                            
+                        $pdf->SetFont($field['font'], $field['font-weight'], $fSize);
+                        $pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
                         $pdf->Cell($field['width'], $field['height'], $tagRow[$field['field']], 0, 0, $field['justify']);
-                    elseif ($field['type'] == 'multicell')
+                    } elseif ($field['type'] == 'multicell') {
+                        $pdf->SetFont($field['font'], $field['font-weight'], $field['font-size']);
+                        $pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
                         $pdf->MultiCell($field['width'], (isset($curHeight) ? $curHeight : $field['height']), $tagRow[$field['field']], 0, $field['justify']);
+                    } elseif ($field['type'] == 'image') {
+                        $pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
+                        if (isset($tagRow[$field['field']]) && $tagRow[$field['field']] == $field['field']) {
+                            $pdf->Image($check, $x + $field['x-offset'], $y + $field['y-offset'], $field['width'], $field['height']);
+                        }
+                    }
+                    
                 }
                 
                 $x += $rightShift;
