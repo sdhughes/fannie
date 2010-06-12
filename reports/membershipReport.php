@@ -373,11 +373,12 @@ if (!isset($_POST['submitted'])) {
    } elseif ($_POST['mainType'] == 'equity') {
       $where = "DATE(datetime) BETWEEN '$date1' AND '$date2' AND d.emp_no <> 9999 AND trans_status <> 'X'";
 
-      $equityQ = "SELECT e.firstname AS 'Cashier', date(d.datetime) AS 'Date', d.card_no AS 'Card Number', ROUND(d.total,2) as 'Payment Amount'
+      $equityQ = "SELECT e.firstname AS 'Cashier', date(d.datetime) AS 'Date', d.card_no AS 'Card Number', ROUND(SUM(d.total),2) as Total
            FROM is4c_log.$transtable AS d JOIN is4c_op.employees AS e ON e.emp_no = d.emp_no
            WHERE $where
            AND d.department = 45
-           AND d.total >= 2
+           GROUP BY DATE(datetime), register_no, d.emp_no, trans_no
+           HAVING Total <> 0
            ORDER BY datetime";
       $equityR = mysqli_query($db_slave, $equityQ);
 
