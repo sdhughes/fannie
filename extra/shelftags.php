@@ -582,7 +582,7 @@ if (isset($_POST['submitted'])) {
                     } elseif ($field['type'] == 'image') {
                         $pdf->SetXY($x + $field['x-offset'], $y + $field['y-offset']);
                         if (isset($tagRow[$field['field']]) && $tagRow[$field['field']] == $field['field']) {
-                            $pdf->Image($check, $x + $field['x-offset'], $y + $field['y-offset'], $field['width'], $field['height']);
+                            //$pdf->Image($check, $x + $field['x-offset'], $y + $field['y-offset'], $field['width'], $field['height']);
                         }
                     }
                     
