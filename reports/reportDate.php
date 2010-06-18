@@ -481,6 +481,8 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                $net2 = $net2 + $coupons2;
        // End haus edit.
 
+ 	   $mem_total += $non_total;
+
        $totalDiscQ = "SELECT ($mem_total + $staff_total + $sister_org + $wm_total + $board + $non_total) as total_discounts";
 
                $totalDiscR = mysqli_query($db_slave, $totalDiscQ);
@@ -589,15 +591,11 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 		    <td width="225" align="right"><font size="2.5">Sister Organizations Total</font></td>
 		    <td width="225" align="right"><font size="2.5">%s</font></td>
 		</tr>
-		<tr>
-		    <td width="225" align="right"><font size="2.5">Non-owner Total</font></td>
-		    <td width="225" align="right"><font size="2.5">%s</font></td>
-		</tr>
-	        <tr>
+	    <tr>
 		    <td width="225" align="right"><font size="2.5"><strong>Total Discount</strong></font></td>
 		    <td width="225" align="right"><font size="2.5"><strong>%s</strong></font></td>
 		</tr>
-		</table>', number_format($board, 2), number_format($sister_org, 2), number_format($non_total, 2), number_format($totalDisc, 2));
+		</table>', number_format($board, 2), number_format($sister_org, 2), number_format($totalDisc, 2));
 
 
 
