@@ -1,6 +1,7 @@
 <?php
 
 require_once ('../includes/mysqli_connect.php');
+require_once ('../includes/dept_picker_generator.php');
 mysqli_select_db($db_slave, 'is4c_log');
 
 
@@ -53,15 +54,16 @@ if (isset($_POST['submitted'])) {
 
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
-
+//2010-12-27 sdh - added emp_no and First name to query and shrink report
     $shrinkQ = sprintf("SELECT CASE WHEN s.UPC < 1000 THEN SUBSTR(s.UPC, 11, 3) WHEN s.UPC < 10000 THEN SUBSTR(s.UPC, 10, 4) ELSE s.UPC END AS UPC,
-		       p.description, s.price, SUM(s.quantity), %s
+		       p.description, s.price, SUM(s.quantity), s.emp_no, e.FirstName, %s
 	FROM is4c_log.shrinkLog AS s
 	    INNER JOIN is4c_op.products AS p ON s.upc = p.upc
 	    INNER JOIN is4c_log.shrinkReasons AS sr ON s.reason = sr.shrinkID
+            INNER JOIN is4c_op.employees AS e ON e.emp_no = s.emp_no
 	WHERE s.department IN (%s)
 	    AND DATE(datetime) BETWEEN '%s' AND '%s'
-	    AND emp_no <> 9999
+	    AND s.emp_no <> 9999
 	GROUP BY s.UPC %s", ($reasons ? 'sr.shrinkReason AS reason' : 'NULL'), $deptArray, $date1, $date2, ($reasons ? ', reason' : NULL));
 
     $shrinkR = mysqli_query($db_slave, $shrinkQ);
@@ -85,15 +87,16 @@ if (isset($_POST['submitted'])) {
 			<th>Price</th>
 			<th>Total Value</th>
 			<th>Total Quantity</th>
+			<th>Who Shrank?</th>
 			%s
 		    </tr>
 		</thead><tbody>', ($reasons ? '<th>Shrink Reason</th>' : NULL));
 	$shrinkTotal = 0;
 	$shrinkCount = 0;
 	
-	while (list($upc, $description, $price, $quantity, $reason) = mysqli_fetch_row($shrinkR)) {
-	    printf('<tr><td>%s</td><td>%s</td><td>$%s</td><td>$%s</td><td>%s</td>%s</tr>',
-		   $upc, $description, number_format($price, 2), number_format($price * $quantity, 2), $quantity, ($reasons ? '<td>' . $reason . '</td>' : NULL));
+	while (list($upc, $description, $price, $quantity,$emp_no, $who, $reason) = mysqli_fetch_row($shrinkR)) {
+	    printf('<tr><td>%s</td><td>%s</td><td>$%s</td><td>$%s</td><td>%s</td><td>%s</td>%s</tr>',
+		   $upc, $description, number_format($price, 2), number_format($price * $quantity, 2), $quantity,$who, ($reasons ? '<td>' . $reason . '</td>' : NULL));
 	    $shrinkTotal += ($price * $quantity);
 	    $shrinkCount += $quantity;
 	}
@@ -122,7 +125,7 @@ function drawForm($msg = NULL, $_POST = NULL) {
     <script type="text/javascript">
         Date.format = 'yyyy-mm-dd';
         $(function(){
-            $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
+            $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd', changeYear: true,changeMonth:true, duration: 0 });
         });
 
 	$(document).ready(function() {
@@ -148,8 +151,8 @@ EOS;
 	    <h3><strong>Select Department</strong></h3>
 	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
             <form method="post" action="shrinkReport.php" target="_blank">
-	    <div align="center">
-		<table border="0" cellspacing="3" cellpadding="5">', $msg);
+	    <div align="center">',$msg);
+/*	printf('	<table border="0" cellspacing="3" cellpadding="5">');
     $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) ORDER BY dept_name ASC";
     $deptR = mysqli_query($db_slave, $deptQ);
 
@@ -163,8 +166,9 @@ EOS;
 	if ($count % 2 == 0) echo '</tr>';
     }
 
-    printf('</table>
-	    </div>
+    printf('</table> */
+dept_picker('dept_tile');
+printf ('</div>  
         </div>
         <div id="box">
             <table border="0" cellspacing="3" cellpadding="3">

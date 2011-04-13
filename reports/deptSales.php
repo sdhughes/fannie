@@ -1,6 +1,7 @@
 <?php
 
 require_once ('../includes/mysqli_connect.php');
+//require_once ('../includes/dept_picker_generator.php');
 mysqli_select_db($db_slave, 'is4c_log');
 
 ini_set('display_errors', 'on');
@@ -137,11 +138,14 @@ function popup(mylink, windowname) {
     }
     
     $reportData = array();
-    
+    $totalSales = 0;
+ 
     // Load the data into a large array for later.
     while (list($dept, $dept_no, $total) = mysqli_fetch_row($salesR)) { //create array from query
 	$reportData[$dept_no]['sales'] = $total;
 	$reportData[$dept_no]['name'] = $dept;
+
+	$totalSales += $total;
     }
     
     // Now get open ring summaries for all selected departments...
@@ -222,9 +226,9 @@ function popup(mylink, windowname) {
     foreach ($reportData AS $dept_no => $data) {
 	$report .= sprintf('<tr>
 				<td>%s</td>
-				<td align="center">$%s</td>
-				<td align="center">$%s&nbsp;<a href="openRingDetail.php?date1=%s&date2=%s&dept=%u" onClick="return popup(this, \'openRingDetail\')">(Detail)</a></td>
-				<td align="center">$%s</td>
+				<td align="right">$%s</td>
+				<td align="right">$%s&nbsp;<a href="openRingDetail.php?date1=%s&date2=%s&dept=%u" onClick="return popup(this, \'openRingDetail\')">(Detail)</a></td>
+				<td align="right">$%s</td>
 			    </tr>' . "\n",
 			   $data['name'],
 			   number_format(isset($data['sales']) ? $data['sales'] : 0.00, 2),
@@ -232,7 +236,21 @@ function popup(mylink, windowname) {
 			   $date1, $date2, $dept_no,
 			   number_format(isset($data['shrink']) ? $data['shrink'] : 0.00, 2));
     }
-    
+  /* 
+	$totalSalesQ = 'SELECT ROUND(SUM(t.total),2) AS total
+            FROM is4c_op.departments AS d, is4c_log.trans_$i AS t
+            WHERE d.dept_no = t.department
+                AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
+                AND t.department IN ($deptArray)
+                AND t.trans_status <> 'X'
+                AND t.emp_no <> 9999
+            GROUP BY dept';
+	$totalSalesR = mysqli_query($db_slave, $totalSalesQ);
+	
+	$totalSales = mysqli_fetch_row($totalSalesR);
+*/
+	$report .= sprintf('</table><br/>Total Sales: %s </br>', $totalSales);
+ 
 /*	SELECT DISTINCT p.upc AS PLU, p.description AS Description, ROUND(p.normal_price,2) AS 'Current Price', ROUND(t.unitPrice,2) AS Price, p.department AS Dept, p.subdept AS Subdept, SUM(t.quantity) AS Qty, ROUND(SUM(t.total),2) AS Total, p.scale as Scale FROM is4c_log.dtransactions t, is4c_op.products p WHERE t.upc = p.upc AND t.department IN(8) AND t.datetime >= '2007-08-06 00:00:00' AND t.datetime <= '2007-08-13 23:59:59' AND t.emp_no <> 9999 AND t.trans_status <> 'X' AND t.upc NOT LIKE '%DP%' AND p.inUse = 1 GROUP BY CONCAT(t.upc, '-',t.unitprice) ORDER BY t.upc */
     if (isset($_POST['deptDetails'])) {
 	if ($year1 == $year2 && $date2 != date('Y-m-d')) {
@@ -337,7 +355,7 @@ function popup(mylink, windowname) {
 
     } elseif (!isset($_POST['deptDetails'])) {
 
-	if ($year1 == $year2 && substr($date2a, 0, 10) != date('Y-m-d')) {
+	if ($year1 == $year2 && substr($date2, 0, 10) != date('Y-m-d')) {
 
 	    $detailedQ = "SELECT DISTINCT
 		    p.upc AS PLU,
@@ -441,7 +459,7 @@ function popup(mylink, windowname) {
 
     while ($myrow = mysqli_fetch_row($detailedR)) { //create array from query
 	if ($myrow[$scaleRow] == 0) {$myrow[$scaleRow] = 'No';} elseif ($myrow[$scaleRow] == 1) {$myrow[$scaleRow] = 'Yes';}
-	$detailTable .= sprintf('<tr><td><a href="/item/itemMaint.php?submitted=search&upc=%s">%s</a></td><td>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' . "\n",
+	$detailTable .= sprintf('<tr><td><a href="/item/itemMaint.php?submitted=search&upc=%s" target="_blank">%s</a></td><td>%s</th><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' . "\n",
 	       $myrow[0], $myrow[0], $myrow[1], $myrow[2], $myrow[3], $myrow[4], $myrow[5], number_format($myrow[6],2), $myrow[7], $myrow[8]);
     }
     
@@ -474,7 +492,7 @@ function drawForm($msg = NULL, $_POST = NULL) {
     <script type="text/javascript">
         Date.format = 'yyyy-mm-dd';
         $(function(){
-            $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
+            $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd', changeYear: true, changeMonth: true, duration: 0 });
         });
 
 	$(document).ready(function() {
@@ -499,10 +517,14 @@ EOS;
 	   %s
 	    <h3><strong>Select Department</strong></h3>
 	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
-            <form method="post" target="_blank" action="%s">
-	    <div align="center">
-		<table border="0" cellspacing="3" cellpadding="5">', $msg, $_SERVER['PHP_SELF']);
-    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) OR dept_no = 40 ORDER BY dept_name ASC";
+            <form method="post" target="_blank" action="%s">', $msg, $_SERVER['PHP_SELF']);
+include_once('../includes/dept_picker_generator.php');
+dept_picker('dept_tile');
+
+	//	<table border="0" cellspacing="3" cellpadding="5">', $msg, $_SERVER['PHP_SELF']);
+
+
+/*    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) OR dept_no = 40 ORDER BY dept_name ASC";
     $deptR = mysqli_query($db_slave, $deptQ);
 
     $count = 0;
@@ -514,9 +536,9 @@ EOS;
 
 	if ($count % 3 == 0) echo '</tr>';
     }
-
-    printf('</table>
-	    </div>
+*/
+//    printf('</table>
+printf ('</div>
         </div>
         <div id="box">
             <table border="0" cellspacing="3" cellpadding="3">
