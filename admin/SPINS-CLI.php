@@ -16,7 +16,7 @@ if (!$year) {$year = date('Y');}
 //		YY == output entire year (slow!)
 //		(leave blank for current output)
 //$week_tag = "1";
-if (!$week_tag) $week_tag = date('W');
+if (!$week_tag) $week_tag = date('W') + 1;
 
 //	format datetime
 $timestamp = date('Y-m-d H:i:s');
@@ -24,6 +24,15 @@ $timestamp = date('Y-m-d H:i:s');
 $log_file = '/pos/fannie/logs/spins.log';
 //	Which SPINS table will we use?
 $SPINS = "SPINS_" . $year;
+
+
+$weekQuery = "SELECT week_tag-1 FROM $SPINS WHERE curdate() BETWEEN start_date AND end_date";
+$weekResult = mysqli_query($db_slave, $weekQuery);
+if ($weekResult) {
+				list($week_tag) = mysqli_fetch_row($weekResult);
+} else {
+				error_log("[$timestamp] -- " . sprintf("Error: %s, Query: %s", mysqli_error($db_slave), $weekQuery) . "\n",3,$log_file);
+}
 
 //	Directory to put .csv files into
 //	(make sure this already exists)
