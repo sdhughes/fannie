@@ -5,11 +5,12 @@
 *
 *********************************************************************************/
 
-$page_title = 'Fannie - Item Maintanence';
+$page_title = 'Fannie - Item Maintenance';
 $header = 'Item Maintanence';
 $debug = true;
 include('../includes/header.html');
 echo '<script type="text/javascript" src="../includes/javascript/jquery.js"></script>';
+echo '<script type="text/javascript" src="../includes/javascript/myquery.js"></script>';
 require_once('../includes/itemFunction.php');
 ?>
 <html>
@@ -42,10 +43,34 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         $upc = $_REQUEST['upc'];
 
         if (is_numeric($upc)) $where = "upc=$upc";
-        else $where = "description LIKE '%$upc%'";
+        else {
+		$where = "description LIKE '%" . mysql_real_escape_string($upc) . "%'";
+	}
 
-        $query = "SELECT upc, description, normal_price, qttyEnforced, foodstamp, deposit, scale, discount, discounttype, inUse, subdept, department, special_price, start_date, DATE_FORMAT(end_date, '%m/%d/%Y') AS end_date
-            FROM products WHERE $where";
+       //2010-11-08 - sdh - added the option to filter by 'in use' 
+        if (isset($_REQUEST['inUse'])) 
+	{	
+		$where = $where . " AND inUse=1";
+		$antiInUse = 0;
+	} else {
+		$antiInUse = 1;
+	}
+
+        //2010-12-09 - sdh - added an advanced dept filter option
+	if (isset($_POST['dept'])) {
+	        $selectedDeptArray = $_POST['dept'];
+
+//      	print_r ($_POST['dept']);
+
+		$selectedDeptString = implode(",", $selectedDeptArray);
+
+        	$where .= " AND department IN ($selectedDeptString)";
+	} else { $selectedDeptArray = array(); }
+
+
+
+        $query = "SELECT p.upc, p.description, p.normal_price, p.qttyEnforced, p.foodstamp, p.deposit, p.scale, p.discount, p.discounttype, p.inUse, p.subdept, p.department, p.special_price, p.start_date, DATE_FORMAT(p.end_date, '%m/%d/%Y') AS end_date, substr(d.dept_name,1,13) as dept_name
+            FROM products as p INNER JOIN departments as d ON p.department = d.dept_no WHERE $where ORDER BY p.department, p.description";
         $result = mysqli_query($db_master, $query);
 
         if ($result) {
@@ -56,17 +81,66 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
             } elseif (mysqli_num_rows($result) > 1) {  // More than one match. List.
 
-                echo "<h3>More than one match found for (<font color='green'>$upc</font>).</h3>
-                    <h3>Choose one of the following:</h3><br />";
+                //2010-11-08 - sdh - changed this to a table instead of just listing them.
+
+	echo "<form action=" . $_SERVER['PHP_SELF'] . " method='post'>";
+        echo "<p><span id='searchTerm'>More than one match found for (<font color='green'>$upc</font>).</span>&nbsp;&nbsp;&nbsp;";
+
+	if (isset($_REQUEST['inUse'])) {	
+		echo " <input type='submit' name='submit' value='Show In Use Items' />"; 
+	} else {
+
+		echo " <input type='submit' name='submit' value='Hide In Use Items' />"; 
+		echo "<input type='hidden' name='inUse' value='$antiInUse' />";
+	}
+
+	echo "<input type='hidden' name='upc' value='$upc' />
+	<input type='hidden' name='submitted' value='search' />";
+
+	foreach ($selectedDeptArray AS $value) {
+		echo "<input type='hidden' name='dept[]' value='$value' />";
+	}
+
+	echo "</form>";
+
+        echo '<form action="changeInUse.php" method="post">'; 
+
+		//2011-02-09 - sdh - added <form> and <inputs> so you can maintain item en masse
+	echo "<div id='itemMaint_toolbar'>
+    <div class='left'>
+        <input type='submit' name='submit' action='changeInUse.php' value='Put In Use' />
+        <input type='submit' name='submit' action='changeInUse.php' value='Take Out of Use' />
+    </div>
+    <div class='right'>
+        <input type='button' name='' id='toggleAll' value='Select All' />
+    </div>
+</div>";
+
+
+		echo '<table id="item_results"><tr><th>UPC/PLU</th><th>Description</th><th>Price</th><th>Dept.</th><th>In Use</th><th>Alter?</th></tr>';
 
                 while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-
-                    echo '<a href="' . $_SERVER['PHP_SELF'] . '?upc=' . $row['upc'] . '&submitted=search">'
-                        . $row['upc'] . '</a> - ' . $row['description'] . ' - $' . number_format($row['normal_price'], 2) . '<br />';
-
+                    echo '<tr><td class="itemMaint_link"><a href="' . $_SERVER['PHP_SELF'] . '?upc=' 
+                        . $row['upc'] . '&submitted=search">'
+                        . $row['upc'] . '</a></td><td class="itemMaint_desc">' 
+                        . $row['description'] . '</td><td class="itemMaint_price">$' 
+                        . number_format($row['normal_price'], 2) . '</td><td class="itemMaint_dept">' 
+                        . $row['dept_name'] . '</td><td class="itemMaint_inUse">'
+                        . $row['inUse'] . '</td>'
+			. "<td class='itemMaint_select'><input class='itemMaint_checkbox' type='checkbox' name='inUse[]' value='" . $row['upc'] . "' /></td>" 
+                        . '</tr>';
+                
                 }
+                echo '</table>';
+                echo "<br />
+<input type='hidden' name='searchTerm' value='$upc' />
+";
+	foreach ($selectedDeptArray as $value) {
 
-                echo '<br />';
+		echo "<input type='hidden' name='dept[]' value='$value' />";
+	}
+
+		echo "</form>";
 
             } else { // No match, new product.
                 drawDetailsPage($upc);

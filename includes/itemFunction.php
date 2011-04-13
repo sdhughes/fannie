@@ -1,11 +1,29 @@
 <?php
 function drawSearchForm($error = NULL) {
-    if (!empty($error)) echo '<h3><font color="red">' . $error . '</font></h3>';
-    echo '<BODY onLoad="putFocus(0,0);">
-       <form action="' . $_SERVER['PHP_SELF'] . '" method="post">
-       <input name="upc" type="text" id="upc" /> Enter UPC/PLU or product name here<br /><br />
-       <input name="submit" type="submit" value="Submit" />
-       <input name="submitted" type="hidden" value="search" />
+
+	require_once('../includes/dept_picker_generator.php');
+
+//require_once('./mysqli_connect.php');
+//$db = mysqli_connect('localhost','cron','cr0n','is4c_op');
+	if (!empty($error)) echo '<h3><font color="red">' . $error . '</font></h3>';
+	
+	echo '<BODY onLoad="putFocus(0,0);">
+		<form action="' . $_SERVER['PHP_SELF'] . '" method="post">
+		<div id="search_box"><input name="upc" type="text" id="upc" /> Enter UPC/PLU or product name</div>';
+        
+	echo '<div id="submit_controls"><label><input type="checkbox" name="inUse">Only "In Use"?</input></label>';
+	echo '<br /><input name="submit" type="submit" value="Submit" /></div>';
+	echo '<div id="adv_search">
+		<div><input id="picker_toggle" type="button" value="Adv. Search" /></div>';
+ 
+	echo '<div id="dept_picker">';
+
+	dept_picker('dept_tile'); //dynamically generate the department picker
+
+	echo '</div></div>';
+
+
+       echo '<input name="submitted" type="hidden" value="search" />
        </form>';
     include ('../includes/footer.html');
     exit();
