@@ -42,7 +42,7 @@ if ($_POST['showinactive'] == 'hide') {
 echo '</form>';
 echo '<form action="volunteers.php" method="POST">';
 echo "<table border=0 width=95% cellspacing=0 cellpadding=5 align=center>";
-echo "<th>Card No<th>Last Name<th>First Name<th>Hours<th>ADD<th>Active?<th>&nbsp;";
+echo "<th>Card No</th><th>Last Name</th><th>First Name</th><th>Hours</th><th>ADD</th><th>Active?</th><th>Updated</th>&nbsp;";
 $bg = '#eeeeee';
 while ($query = mysqli_fetch_row($queryR)) {
 	$existQ = "SELECT * FROM workingMem WHERE id = $query[4]";
@@ -51,9 +51,16 @@ while ($query = mysqli_fetch_row($queryR)) {
                 $addQ = "INSERT INTO workingMem (id, updated, hours) VALUES ($query[4], '2007-01-01 12:31:00', 0.0)";
                 $addR = mysqli_query($db_master, $addQ);
         }
-        $activeQ = "SELECT DATEDIFF(now(), updated) FROM workingMem WHERE id = $query[4]";
+        $activeQ = "SELECT DATEDIFF(now(), updated), DATE_FORMAT(updated, '%a %b %d %Y') FROM workingMem WHERE id = $query[4]";
         $activeR = mysqli_query($db_master, $activeQ);
         $active = mysqli_fetch_row($activeR);
+
+	$activePeriod = 30;
+
+//	$exists = mysqli_fetch_row($db_master,$existR);
+
+//	print_r($exists);
+
         if ($_POST["showinactive"] == "show") {
                 $bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
                 echo "<tr bgcolor='$bg'>";
@@ -62,10 +69,10 @@ while ($query = mysqli_fetch_row($queryR)) {
                 echo "<td>".$query[2]."</td>";
                 echo "<td align=right>".number_format($query[3],2)."</td>";
                 echo "<td align=right><input size=4 name='hours[]' id='hours'></td>";
-                if ($active[0] > 90) {echo "<td align=center><p><font color=red>INACTIVE</font></p></td>";}
-                elseif ($active[0] <= 90) {echo "<td align=center><p><font color=green>ACTIVE</font></p></td>";}
-                echo "<td><input type=hidden name='id[]' value=".$query[4].">&nbsp;</td></tr>";
-        } elseif (($active[0] <= 90) && ($_POST["showinactive"] == "hide")) {
+                if ($active[0] > $activePeriod) {echo "<td align=center><p><font color=red>INACTIVE</font></p></td>";}
+                elseif ($active[0] <= $activePeriod) {echo "<td align=center><p><font color=green>ACTIVE</font></p></td>";}
+                echo "<td><input type=hidden name='id[]' value=".$query[4].">&nbsp;". $active[1] . "</td></tr>";
+        } elseif (($active[0] <= $activePeriod) && ($_POST["showinactive"] == "hide")) {
                 $bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
                 echo "<tr bgcolor='$bg'>";
                 echo "<td>".$query[0]."</td>";
@@ -73,9 +80,9 @@ while ($query = mysqli_fetch_row($queryR)) {
                 echo "<td>".$query[2]."</td>";
                 echo "<td align=right>".number_format($query[3],2)."</td>";
                 echo "<td align=right><input size=4 name='hours[]' id='hours'></td>";
-                if ($active[0] > 90) {echo "<td align=center><p><font color=red>INACTIVE</font></p></td>";}
-                elseif ($active[0] <= 90) {echo "<td align=center><p><font color=green>ACTIVE</font></p></td>";}
-                echo "<td><input type=hidden name='id[]' value=".$query[4].">&nbsp;</td></tr>";
+                if ($active[0] > $activePeriod) {echo "<td align=center><p><font color=red>INACTIVE</font></p></td>";}
+                elseif ($active[0] <= $activePeriod) {echo "<td align=center><p><font color=green>ACTIVE</font></p></td>";}
+                echo "<td><input type=hidden name='id[]' value=".$query[4].">&nbsp;". $active[1]  . "</td></tr>";
         }
 }
 echo '<tr><td><input type="submit" name="submit" value="submit"></td></tr>';
