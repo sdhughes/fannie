@@ -1,4 +1,6 @@
 <?php
+//2010-11-08 sdh - edited queries to include last names too....
+
 require_once('../includes/mysqli_connect.php');
 mysqli_select_db($db_slave, 'is4c_log');
 
@@ -59,7 +61,7 @@ if (isset($_POST['submitted'])) {
             <p>Staff</p>';
 
     $query = "SELECT ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.time_in, t.time_out))/60, 2) AS Hours,
-	e.RealFirstName AS Name, e.emp_no
+	CONCAT(e.RealFirstName, ' ', e.LastName) AS Name, e.emp_no
 	FROM is4c_log.timesheet t INNER JOIN is4c_op.employees e ON t.emp_no=e.emp_no
 	WHERE $where
 	AND t.sub = 0
@@ -109,7 +111,7 @@ if (isset($_POST['submitted'])) {
 
     echo '<p>Subs</p>';
     $query = "SELECT ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.time_in, t.time_out))/60, 2) AS Hours,
-	e.RealFirstName AS Name, e.emp_no
+	CONCAT(e.RealFirstName, ' ', e.LastName) AS Name, e.emp_no
 	FROM is4c_log.timesheet t INNER JOIN is4c_op.employees e ON t.emp_no=e.emp_no
 	WHERE $where
 	AND t.sub = 1
@@ -174,13 +176,13 @@ if (isset($_POST['submitted'])) {
 	echo "<p><b><i>{$row[0]}</b></i></p>";
 	echo '<table border="1" cellpadding="3"><tr><th>Employee</th><th>Hours Worked</th><th>Average Hours Per ' . $type . '</th></tr>';
 	if ($row[1] == 13) {
-                $detailQ = "SELECT e.RealFirstName AS Name, ROUND(SUM(vacation), 2) AS Hours
+                $detailQ = "SELECT (e.RealFirstName , ' ',e.Lastname) AS Name, ROUND(SUM(vacation), 2) AS Hours
                     FROM is4c_log.timesheet t INNER JOIN is4c_op.employees e ON t.emp_no=e.emp_no
                     WHERE $where
                     AND t.area = {$row[1]}
                     GROUP BY t.emp_no";
             } else {
-                $detailQ = "SELECT e.RealFirstName AS Name, ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.time_in, t.time_out))/60, 2) AS Hours
+                $detailQ = "SELECT CONCAT(e.RealFirstName, ' ', e.Lastname) AS Name, ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.time_in, t.time_out))/60, 2) AS Hours
                     FROM is4c_log.timesheet t INNER JOIN is4c_op.employees e ON t.emp_no=e.emp_no
                     WHERE $where
                     AND t.area = {$row[1]}

@@ -1,11 +1,38 @@
-<script src="../src/CalendarControl.js"
-        language="javascript"></script>
-</head>
-<?php
+<?php 
+
+//<script src="../src/CalendarControl.js"
+//        language="javascript"></script>
+//</head>
+
 $_SESSION['batchID'] = 1;
 $header = 'Batch Maintanence';
 $page_title = 'Fannie - Batch Module';
 include ('../includes/header.html');
+?>
+	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+	<script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+	<script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+	<script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+	<script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+	<script type="text/javascript">
+		Date.format = 'yyyy-mm-dd';
+		$(function(){
+		    $('.datepick').datepicker({
+					startDate:'2007-08-01', 
+					endDate: (new Date()).asString(), 
+					clickInput: true, 
+					dateFormat: 'yy-mm-dd', 
+					changeMonth: true, 
+					changeYear: true,
+					duration: 0 
+			});
+		    //$('.datepick').focus();
+		});
+	</script>
+<?php
+
 require_once ('../includes/mysqli_connect.php');
 
 $batchListQ= "SELECT b.batchID,b.batchName,b.batchType,DATE(b.startDate),b.endDate
@@ -49,15 +76,17 @@ echo '</form>';
 				</select>
 			</td>
 			<td><input type=text name=batchName></td>
-	     	<td><input name="startDate" onfocus="showCalendarControl(this);" type="text" size=10></td>
-	     	<td><input name="endDate" onfocus="showCalendarControl(this);" type="text" size=10></td>
+	     	<td><input name="startDate" class="datepick" type="text" size=10></td>
+	     	<td><input name="endDate" class="datepick" type="text" size=10></td>
+	     <!--	<td><input name="startDate" onfocus="showCalendarControl(this);" type="text" size=10></td>
+	     	<td><input name="endDate" onfocus="showCalendarControl(this);" type="text" size=10></td> -->
 	     	<td><input type=submit name=submit value=Add></td>
 		</tr>
 	</table>
 </form>
 
 <?php
-echo "<table border=0 cellspacing=0 cellpadding=5 width=90%>";
+echo "<table border=0 cellspacing=0 cellpadding=5 width=100%>";
 echo "<th>Batch Name<th>Batch Type<th>Start Date<th>End Date<th>Active?";
 $bg = '#eeeeee';
 $date = DATE('Y-m-d');

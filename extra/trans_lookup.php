@@ -28,8 +28,34 @@ include_once ('../includes/header.html');
 require_once ('../includes/mysqli_connect.php'); // Connect to the DB.
 mysqli_select_db($db_slave, 'is4c_log');
 
-echo '<HEAD><script src="../src/CalendarControl.js" language="javascript"></script>
-	<SCRIPT TYPE="text/javascript">
+echo '<HEAD>';
+echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
+    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
+    <script type=\"text/javascript\">
+                Date.format = 'yyyy-mm-dd';
+                $(function(){
+                                $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+                   
+// $('.datepick').focus();
+                });
+    </script>
+";
+	
+echo '
+<SCRIPT TYPE="text/javascript">
 	<!--
 	function popup(mylink, windowname)
 	{
@@ -204,9 +230,7 @@ $result = mysqli_query($db_slave, $query);
 	echo '<h2>Search Transaction History.</h2>
 		<form action="trans_lookup.php" method="post">';
 	echo '<table cellpadding=5 border=0><tr><td>
-		<p>Date: </td><td><input type="text" name="date" size="11" maxlength="11"';
-	if (isset($_POST['date'])) {echo ' value="' . $_POST['date'] . '"';}
-	echo 'onclick="showCalendarControl(this);"> * Required</p></td></tr>';
+		<p>Date: </td><td><input type="text" name="date" class="datepick" size="11" maxlength="11" /> * Required</p></td></tr>';
 	echo '<tr><td><p><input type="checkbox" id="ti" name="ti" value="ti">';
 	echo 'Transaction ID: </input></td><td><input type="text" name="trans_id" size="15" maxlength="15" onfocus="document.getElementById(\'ti\').checked = \'checked\'"';
 	if (isset($_POST['daytrans_no'])) {echo ' value="' . $_POST['daytrans_no'] . '"';}

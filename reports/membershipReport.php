@@ -8,7 +8,31 @@ if (!isset($_POST['submitted'])) {
    $page_title = 'Fannie - Reports Module';
    $header = 'Membership Report';
    include ('../includes/header.html');
-   echo '<script src="../src/CalendarControl.js" language="javascript"></script>
+   echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
+    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
+    <script type=\"text/javascript\">
+                Date.format = 'yyyy-mm-dd';
+                $(function(){
+                                $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+                   
+// $('.datepick').focus();
+                });
+    </script>";
+
+echo '
       <form method="post" action="membershipReport.php" target="_blank">
       <div id="box">
       <table border="0" cellspacing="3" cellpadding="3">
@@ -61,8 +85,8 @@ if (!isset($_POST['submitted'])) {
          </tr>
          <tr>
             <td><input type="radio" id="dates" name="subType" value="dates" /></td>
-            <td align="center" colspan="2"><input type="text" size="10" name=date1 onclick="document.getElementById(\'dates\').checked=\'checked\';" onfocus="showCalendarControl(this);"></td>
-            <td align="center" colspan="2"><input type="text" size="10" name=date2 onclick="document.getElementById(\'dates\').checked=\'checked\';" onfocus="showCalendarControl(this);"></td>
+            <td align="center" colspan="2"><input type="text" size="10" name="date1" class="datepick" /></td>
+            <td align="center" colspan="2"><input type="text" size="10" name="date2" class="datepick" /></td>
          </tr>
       </table>
       <br />
@@ -265,6 +289,8 @@ if (!isset($_POST['submitted'])) {
       $equityR = mysqli_query($db_slave, $equityQ);
       $equity = mysqli_fetch_row($equityR);
 
+      $totalActive = $memTypes[1]['count'] + $memTypes[2]['count'];
+
       echo "<h2>Membership Report From " . date('M jS, Y', strtotime($date1)) . " to " . date('M jS, Y', strtotime($date2)) . "</h2>" .
       '<table cellspacing="15" frame="border">
       <tr>
@@ -316,6 +342,16 @@ if (!isset($_POST['submitted'])) {
       <tr>
 	 <td>Total {$memTypes[5]['desc']}</td>
 	 <td>{$memTypes[5]['count']}</td>
+	 <td>&nbsp;</td>
+	 <td>&nbsp;</td>
+	 <td>&nbsp;</td>
+	 <td>&nbsp;</td>
+	 <td>&nbsp;</td>
+	 <td>&nbsp;</td>
+      </tr>
+      <tr>
+	 <td>Total Active Owners</td>
+	 <td>$totalActive</td>
 	 <td>&nbsp;</td>
 	 <td>&nbsp;</td>
 	 <td>&nbsp;</td>

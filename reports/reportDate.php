@@ -145,8 +145,8 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
          */
 
         $tendersQ = "SELECT t.TenderName as 'Tender Type',ROUND(-sum(d.total),2) as Total,COUNT(*) as Count
-                FROM $transtable as d,is4c_op.tenders as t
-                WHERE d.trans_subtype = t.TenderCode
+                FROM is4c_op.tenders as t LEFT OUTER JOIN $transtable as d
+                ON t.TenderCode = d.trans_subtype
                 AND date(d.datetime) = '$db_date'
                 AND d.trans_status <> 'X'
 		AND d.trans_subtype NOT IN ('MI', 'FS', 'EC')
@@ -183,6 +183,16 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 	$houseChargeR = mysqli_query($db_slave, $houseChargeQ);
 	list($houseCount, $houseTotal) = mysqli_fetch_row($houseChargeR);
 
+// 2011-01-19 - sdh - added customer count to report
+	$customerCountQ = "SELECT COUNT(upc) FROM is4c_log.$transtable
+        WHERE DATE(datetime) = '$db_date'
+        AND upc = 'DISCOUNT'
+        AND emp_no <> 9999
+        AND trans_status <> 'X'
+        AND trans_subtype <> 'LN'";
+	$customerCountR = mysqli_query($db_slave, $customerCountQ);
+	list($customerCount) = mysqli_fetch_row($customerCountR);
+
         ////////////////////////////
         //
         //
@@ -191,7 +201,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
         //
         ////////////////////////////
 
-        printf('<h3>Sales - Gross & NET (Report run %s for %s)</h3>', date('Y-m-d'), $db_date);
+        printf('<br /><h3>Sales - Gross & NET (Report run %s for %s)</h3>', date('Y-m-d'), $db_date);
 
        // Haus edit 08-06-07
        $gross2Q = "SELECT ROUND(SUM(total),2) AS 'Gross Sales'
@@ -489,35 +499,39 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                list($totalDisc) = mysqli_fetch_row($totalDiscR);
 
        // Haus edit...checking (08-06-07)
-       printf('<table border="0">
+       printf('<table>
 		<tr>
 		    <td width="225" align="right"><font size="2.5">Gross Total</font></td>
 		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		   <td width="225" align="right">&nbsp;</td>
 		</tr>
 		<tr>
 		    <td width="225" align="right"><font size="2.5">Total Discount</font></td>
 		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		<td width="255" align="right">Customer Count</td>
 		</tr>
 		<tr>
 		    <td width="225" align="right"><font size="2.5">Instore Coupons</font></td>
 		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		    <td width="225" align="right">%d</td>
 		</tr>
 		<tr>
 		    <td width="225" align="right"><font size="2.5"><strong>Net Total</strong></font></td>
 		    <td width="225" align="right"><font size="2.5"><strong>%s</strong></font></td>
+		    <td width="225" align="right">&nbsp;</td>
 		</tr>
-	      </table>', number_format($gross2, 2), number_format($totaldiscount2, 2), number_format($coupons2, 2), number_format($net2, 2));
+	      </table>', number_format($gross2, 2), number_format($totaldiscount2, 2), number_format($coupons2, 2), $customerCount, number_format($net2, 2));
 
        // End haus edit.
 
-        echo '<p>Sales by Inventory Dept.</p>';
+        echo '<div class="report_heading">&nbsp;&nbsp;Sales by Inventory Dept.&nbsp;&nbsp;</div>';
         //select_to_table($db_slave, $inventoryDeptQ,0,'FFCC99');
 	echo $deptTable;
         // Haus add 08-03-2007
         //select_to_table($db_slave, $dept_subtotalQ,0,'FFCC99');
         // end Haus add 08-03-2007
 
-        echo '<p>Tender Report</p>
+        echo '<div class="report_heading">&nbsp;&nbsp;Tender Report&nbsp;&nbsp;</div>
 		<table border="0">';
 
 	while (list($name, $total, $count) = mysqli_fetch_row($tendersR)) {
@@ -551,7 +565,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 	echo '</table>';
 
 
-	echo '<p>Discount Totals</p>';
+	echo '<div class="report_heading">&nbsp;&nbsp;Discount Totals&nbsp;&nbsp;</div>';
         echo "<table border=0><font size=2>";
 
         // Specialize reporting based upon whether it is a Member Appreciation Day or not.
@@ -591,11 +605,15 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 		    <td width="225" align="right"><font size="2.5">Sister Organizations Total</font></td>
 		    <td width="225" align="right"><font size="2.5">%s</font></td>
 		</tr>
+		<tr>
+		    <td width="225" align="right"><font size="2.5">Non-Owner W-O Total</font></td>
+		    <td width="225" align="right"><font size="2.5">%s</font></td>
+		</tr>
 	    <tr>
 		    <td width="225" align="right"><font size="2.5"><strong>Total Discount</strong></font></td>
 		    <td width="225" align="right"><font size="2.5"><strong>%s</strong></font></td>
 		</tr>
-		</table>', number_format($board, 2), number_format($sister_org, 2), number_format($totalDisc, 2));
+		</table>', number_format($board, 2), number_format($sister_org, 2),number_format($non_total,2), number_format($totalDisc, 2));
 
 
 
@@ -618,8 +636,8 @@ function drawForm($msg = NULL, $_POST = NULL) {
 	<script type="text/javascript">
 		Date.format = 'yyyy-mm-dd';
 		$(function(){
-		    $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
-		    $('.datepick').focus();
+		    $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd',changeYear:true,changeMonth:true, duration: 0});
+		    //$('.datepick').focus();
 		});
         </script>
         </head>

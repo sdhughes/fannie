@@ -42,6 +42,8 @@ if (isset($_POST['submitted'])) {
         drawForm($msg);
         exit();
     }
+
+	$deptBudget = array();
     
     while (list($name, $budget, $deptArray, $deptID) = mysqli_fetch_row($budgetR)) {
         // Divide monthly budgets into # of days in month...
@@ -154,7 +156,7 @@ function drawForm($msg = NULL, $_POST = NULL) {
 	<script type="text/javascript">
 		Date.format = 'yyyy-mm-dd';
 		$(function(){
-		    $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd'});
+		    $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, dateFormat: 'yy-mm-dd',changeYear:true, changeMonth:true});
 		    $('.datepick').focus();
 		});
         </script>

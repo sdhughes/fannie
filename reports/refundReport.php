@@ -3,8 +3,33 @@ $header = "Refund Report";
 $page_title = "Fannie - Reports Module";
 require_once ('../includes/header.html');
 
-echo '<link href="../style.css" rel="stylesheet" type="text/css">
-  <script src="../src/CalendarControl.js" language="javascript"></script>';
+echo '<link href="../style.css" rel="stylesheet" type="text/css">';
+echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
+    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
+    <script type=\"text/javascript\">
+                Date.format = 'yyyy-mm-dd';
+                $(function(){
+                                $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+                   
+// $('.datepick').focus();
+                });
+    </script>
+";
+
+//  <script src="../src/CalendarControl.js" language="javascript"></script>';
 
 if (isset($_POST['submitted'])) {
     
@@ -73,8 +98,10 @@ if (isset($_POST['submitted'])) {
                         <p><b>End</b></p>
                         </td>
                         <td>			
-                                <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
-                                <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                        <!--        <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                                <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p> -->
+                                <p><input type="text" size="10" name="date1" class="datepick" /></p>
+                                <p><input type="text" size="10" name="date2" class="datepick" /></p>
                         </td>
                         <td colspan=2>
                                 <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>

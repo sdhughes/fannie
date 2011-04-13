@@ -316,7 +316,7 @@ if (isset($_POST['submitted'])) {
 
     $days = array('Pick One', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
     ?>
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
+<!--    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
     <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
@@ -327,6 +327,28 @@ if (isset($_POST['submitted'])) {
             $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
             .dpSetOffset(0, 125);
         });
+    </script> -->
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+    <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+    <script type="text/javascript">
+		Date.format = 'yyyy-mm-dd';
+		$(function(){
+		  $('.datepick').datepicker({   startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+
+			//  $('.datepick').focus();
+    		});
     </script>
     <?php
     echo '<form method="post" action="avgDetailedDay.php" target="_blank">

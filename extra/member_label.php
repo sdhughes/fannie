@@ -84,12 +84,36 @@ if (isset($_POST['submitted']) && $_POST['submit'] == 'submit') {
 	$query = "SELECT DATE_FORMAT(MAX(date), '%W %M %D at %r') FROM is4c_log.memberlabels";
 	$result = mysqli_query ($db_master, $query);
 	list($lastprint) = mysqli_fetch_row($result);
-	printf('
-            <head>
+echo '      <head>
             <link href="../style.css"
                   rel="stylesheet" type="text/css" />
-            <script src="../src/CalendarControl.js"
-                    language="javascript"></script>
+';
+echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
+    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
+<!--    <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>-->
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
+    <script type=\"text/javascript\">
+                Date.format = 'yyyy-mm-dd';
+                $(function(){
+                                $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+                   
+// $('.datepick').focus();
+                });
+    </script>
+";
+
+	printf('
             </head>
             <form name="labels" action="member_label.php" method="post">
                     <p>Please select a start and end date for label generation.<br />
@@ -101,8 +125,8 @@ if (isset($_POST['submitted']) && $_POST['submit'] == 'submit') {
                                             <p><b>End</b></p>
                                     </td>
                                     <td>			
-                                            <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
-                                            <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                                            <p><input type="text" size="10" name="date1" class="datepick" /></p>
+                                            <p><input type="text" size="10" name="date2" class="datepick" /></p>
                                     </td>
                                     <td colspan=2>
                                     <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>
@@ -130,10 +154,33 @@ if (isset($_POST['submitted']) && $_POST['submit'] == 'submit') {
 	$page_title = 'Fannie - Membership Module';
 	$header = 'Print Member Labels';
 	include_once('../includes/header.html');
+?>
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+    <script type="text/javascript" src="../includes/javascript/myquery.js"></script>
+    <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+    <script type="text/javascript">
+                Date.format = 'yyyy-mm-dd';
+                //alert('fuck');
+		$(function() {
+                               $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: '2011-03-03', 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+		});
+    </script>
+
+<?php
 	printf('
-            <head>
-            <script src="../src/CalendarControl.js"
-                    language="javascript"></script>
             </head>
             <form name="labels" action="member_label.php" method="post">
                     <p>Please select a start and end date for label generation.<br />
@@ -145,8 +192,8 @@ if (isset($_POST['submitted']) && $_POST['submit'] == 'submit') {
                                             <p><b>End</b></p>
                                     </td>
                                     <td>			
-                                            <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
-                                            <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                                            <p><input type="text" size="10" name="date1" class="datepick" /></p>
+                                            <p><input type="text" size="10" name="date2" class="datepick" /></p>
                                     </td>
                                     <td colspan=2>
                                     <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>
