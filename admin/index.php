@@ -9,8 +9,8 @@ echo '<body>
 	<a href="/admin/subs.php">Substitute Hours</a></br>
 	Enter sub hours worked
 </br></br>
-	<a href="/mem/view_members.php">Membership Management</a></br>
-	Access membership database
+	<a href="/CoMET/">CoMET</a></br>
+	Access Co-op Membership Equity Tracking utility
 </br></br>
 	<a href="/admin/charges.php">Staff Charges</a><br>
 	View staff charge totals
