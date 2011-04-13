@@ -28,6 +28,8 @@ if (isset($_POST['submitted'])) {
      *        Start creation of PDF Document here
      *------------------------------------------------------------*/
 
+    if (!isset($_POST['dept'])) $_POST['dept'] = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,40);
+
     if (isset($_POST['submit'])) {
         foreach ($_POST AS $key => $value) {
             $$key = $value;
@@ -39,12 +41,13 @@ if (isset($_POST['submitted'])) {
     }
 
     $_SESSION['deptArray'] = 0;
-
+    
     if (isset($_POST['allDepts']) && $_POST['allDepts'] == 1) {
         $dArray = "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,40";
     } else {
         $allDepts = 0;
     }
+
 
     if (is_array($_POST['dept'])) {
         $dArray = implode(",",$_POST['dept']);
@@ -490,16 +493,16 @@ if (isset($_POST['submitted'])) {
     } elseif ($_POST['type'] == 'WINE') {
         $check = '../includes/checkmark.png';
         
-        // Basic layout settings
-        $height = 41.4;
-        $width = 98;
-        $left = 9;
-        $top = 14;
-        $right = 5.5;
+        // Basic layout settings ///Old Wine sheets
+        $height = 33; //41.4;
+        $width = 88.9;	//98;
+        $left = 10.9; 	//9;
+        $top = 12.7;	//14;
+        $right = 1.6; //5.5;
         $x = $left;
         $y = $top;
-        $rightShift = $width + 6.5;
-        $downShift = $height + 6;
+        $rightShift = $width + 9.2;	//6.5;
+        $downShift = $height + 3.2;	//6;
         $orientation = 'P';
         $xMax = 160;
         $yMax = 245;
@@ -515,20 +518,29 @@ if (isset($_POST['submitted'])) {
 	$pdf->SetAutoPageBreak('off', 0);
         
         // Set up feach field...
-        $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => -1.0, 'y-offset' => 10, 'field' => 'organic', 'type' => 'image');
+/*        $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => -1.0, 'y-offset' => 10, 'field' => 'organic', 'type' => 'image');
         $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => 20.5, 'y-offset' => 10, 'field' => 'vegan', 'type' => 'image');
         $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => 39, 'y-offset' => 10, 'field' => 'sulfite-free', 'type' => 'image');
         $tagFields[] = array('height' => 2.5, 'width' => 2.5, 'x-offset' => 67.5, 'y-offset' => 10, 'field' => 'biodynamic', 'type' => 'image');
-                                
-        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 16, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 15, 'type' => 'cell');
-        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 22, 'justify' => 'C', 'field' => 'price', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 14, 'type' => 'cell');
+*/                                
+        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 13, 'justify' => 'C', 'field' => 'description', 'font' => 'Helvetica', 'font-weight' => 'B', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 17, 'justify' => 'C', 'field' => 'product', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 11, 'type' => 'cell');
+        $tagFields[] = array('height' => 5, 'width' => 92, 'x-offset' => 3, 'y-offset' => 21, 'justify' => 'C', 'field' => 'price', 'font' => 'Helvetica', 'font-weight' => '', 'font-size' => 11, 'type' => 'cell');
 
-	$mainQ = "SELECT CONCAT_WS(' ', d.brand, d.product) AS description, CONCAT('$', ROUND(p.normal_price, 2)) as price, p.department, d.bitField as bit
+	if (isset($_POST['wineType']) && $_POST['wineType'] == 1 ) {
+		$wineType = $_POST['wineType'];
+	} else {
+		$wineType = '0,2,3,4,5,6';
+	}
+
+	//$mainQ = "SELECT CONCAT_WS(' ', d.brand, d.product) AS description, CONCAT('$', ROUND(p.normal_price, 2)) as price, p.department, d.bitField as bit
+	$mainQ = "SELECT d.brand as description, d.product AS product, CONCAT('$', ROUND(p.normal_price, 2)) as price, p.department, d.bitField as bit
 	    FROM products AS p
 		INNER JOIN product_details AS d ON p.upc=d.upc
 	    WHERE p.inuse = 1
 		AND p.department IN ($dArray)
 		AND p.discounttype <> 3
+                AND d.certification IN ($wineType)
 	        AND DATE(p.modified) BETWEEN '$date1' AND '$date2'
 	    ORDER BY p.modified";
 
@@ -591,7 +603,8 @@ if (isset($_POST['submitted'])) {
                 $x += $rightShift;
 	    }
 	} else {
-	    drawForm(sprintf('Query: %s<br />Error: %s', $mainQ, mysqli_error($db_slave)));
+	    drawForm('Search returned no results.');
+	//sprintf('Query: %s<br />Error: %s', $mainQ, mysqli_error($db_slave)));
 	}
     } elseif ($_POST['type'] == 'BULK') {
 	$tagCert = (int) $_POST['tagCert'];
@@ -762,25 +775,63 @@ function drawForm($error = NULL) {
     $header = 'Shelftag Generator';
     include ('../includes/header.html');
     ?>
-    <script src="../src/CalendarControl.js" language="javascript"></script>
-    <script src="../src/putfocus.js" language="javascript"></script>
+  <!--  <script src="../src/CalendarControl.js" language="javascript"></script> -->
+<!--    <script src="../src/putfocus.js" language="javascript"></script> -->
     <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+   <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+    <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+    <script type="text/javascript">
+                Date.format = 'yyyy-mm-dd';
+                $(function(){
+                                $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                });   
+		// $('.datepick').focus();
+                });
+
+        $(document).ready(function() {
+            $('#tagType').change(function() {
+                val = $('#tagType').val();
+/*                if (val == 'BULK') {
+                    $('.bulkOptions').show();
+                } else   {
+                    $('.bulkOptions').hide();
+                }
+*/
+		//hide all other things
+		$('.wineOptions, .bulkOptions').hide();
+
+		switch (val) {
+			case 'BULK':
+                    		$('.bulkOptions').show();
+				break;
+			case 'WINE':
+                    		$('.wineOptions').show();
+				break;
+			default:
+				$('.bulkOptions, .wineOptions').hide();
+		}
+            });
+
+	    //initially hide the thingies
+            $('.bulkOptions').hide();
+            $('.wineOptions').hide();
+        });
+    </script>
     </head>
     <body onLoad="putFocus(0,0);">
-    <script type="text/javascript">
-	$(document).ready(function() {
-	    $('#tagType').change(function() {
-		val = $('#tagType').val();
-		if (val == 'BULK') {
-		    $('.bulkOptions').show();
-		} else {
-		    $('.bulkOptions').hide();
-		}
-	    });
 
-	    $('.bulkOptions').hide();
-	});
-    </script>
 
     <form method="post" action="shelftags.php" target="_blank">
 
@@ -807,9 +858,14 @@ function drawForm($error = NULL) {
 	    <th class="bulkOptions">
 		<p><strong>Tag Cert: <select name="tagCert"><option value="1">Organic</option><option value="2">Non-Organic</option></select></strong></p>
 	    </th>
+	    <th class="wineOptions">
+		<p><strong>Tag Cert: <select name="wineType"><option value="1">Organic</option><option value="2">Conventional</option></select></strong></p>
+	    </th>
         </tr>
     </table>
-    <table border="0" cellspacing="3" cellpadding="3">
+<?php 
+
+/*    <table border="0" cellspacing="3" cellpadding="3">
         <tr>
             <td><font size="-1"><p>
                 <input type="checkbox" value=1 name="allDepts"><b>All Departments</b><br>
@@ -833,7 +889,14 @@ function drawForm($error = NULL) {
                 </p></font>
             </td>
         </tr>
-    </table>
+ */
+include_once('../includes/dept_picker_generator.php');
+echo '<div id="dept_picker">';
+dept_picker('dept_tile');
+echo '</div>';
+
+//   </table>
+ ?>
     <table border="0" cellspacing="3" cellpadding="3">
     <tr>
             <td align="right">
@@ -841,8 +904,8 @@ function drawForm($error = NULL) {
             <p><b>End</b></p>
             </td>
             <td>
-                    <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
-                    <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                    <p><input type='text' size='10' name='date1' class='datepick' /></p>
+                    <p><input type='text' size='10' name='date2' class='datepick' /></p>
             </td>
             <td colspan=2>
                     <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>
@@ -856,6 +919,7 @@ function drawForm($error = NULL) {
     </tr>
     </table>
     </form>
+	<p class="thinborder">REMINDER: When printing, be sure to change Page Scaling to "None" and uncheck "Auto Rotate and Center" in the Page Handling Section of the Print Options.</p>
     <?php
 
     include('../includes/footer.html');
