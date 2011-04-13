@@ -76,6 +76,7 @@ a:hover {
 
 input {
 	border-width:1;
+	margin: 1px;
 	font-family:monaco;
 	font-size:12px;
 	padding:2px;
@@ -86,12 +87,140 @@ input {
 	background-color:EEEEEE;
 	color:000000;
 }
+.right {
+	text-align: right;
+}
+.left {
+	text-align: left;
+}
+.label {
+    text-align: right;
+    color: black;
+}
+.red {
+	color: red;
+}
 
+.green {
+	color: green;
+}
+.even {
+	background: #ddd;
+}
+.over {
+	background: #aaa;
+}
+table.detailTable .results {
+   bottom-border: 1pt solid black;
+   border-bottom: 1pt solid black;
+}
+p.thinborder {
+    padding: .5em;
+    border: 1pt solid black;
+}
+span#searchTerm {
+	font-size: 1.4em;
+}
+td#itemMaint {
+    color: #121212;
+    line-height: 1.6em;    
+
+}
+#itemMaint_toolbar {
+	margin: 0 auto;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.itemMaint_checkbox {
+
+	height: .7em;
+
+}
+.itemMaint_inUse {
+	width: 4em;
+}
+.itemMaint_select {
+	width: 4em;
+	text-align: center;
+}
+table#item_results td {
+
+    padding-left: .2em;
+    padding-right: .2em;
+}
+table#item_results .itemMaint_link {
+    
+}
+
+table#item_results .itemMaint_desc {
+    
+}
+table#item_results .itemMaint_dept {
+	text-align: right;
+	font-size: .5em;
+}
+table#item_results .itemMaint_price {
+    bottom-border: 1px solid black;
+	text-align: right;
+}
+table#item_results .itemMaint_inUse {
+	text-align: center;
+
+}
+.dept_tile {
+	display: inline-block;
+	width: 9em;
+	text-align: left;
+	margin-left: 1em;	
+
+}
+div#dept_picker {
+	text-align: left;
+	border: 1px solid black;
+	margin: 0px auto;
+	margin-bottom: 1em;
+}
+#search_box {
+	margin-bottom: .8em;
+}
+#adv_search {
+	width: 33em;
+	display: inline-block;
+}
+#submit_controls {
+	vertical-align: top;
+	width: 9em;
+	display: inline-block;
+	text-align: left;
+}
+#picker_toggle:hover {
+
+	color: white;
+	background-color: gray;
+
+}
+#ncga_data {
+
+	text-align: right;
+
+}
 #loading {
 	font:bold 12px Verdana;
 	color:red;
 }
-
+span#owner_search_term {
+	font-size: 1.2em;
+	color:green;
+}
+p#select_department {
+	font-size: 1.4em;
+	font-weight: bold;
+	text-align: center;
+}
+p#select_department table {
+	text-align: center;
+}
 /*									*/
 /*	---	phpMyEdit Styles		---	*/
 /*									*/
@@ -220,3 +349,4 @@ td.pme-stats   { text-align: right;  }
   background-color: #CCC;
   border: 1px solid #FFF;
 }
+

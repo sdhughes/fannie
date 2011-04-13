@@ -49,6 +49,10 @@ body {
 	color:AAAAAA;
 }
 
+table {
+	border: 1px solid black;
+}
+
 td {
 	font-family:courier, monospace;
 	font-size:14px;
@@ -86,12 +90,24 @@ input {
 	background-color:EEEEEE;
 	color:000000;
 }
+div.report_heading {
+        text-decoration: none;
+        font-weight: bold;
+        color: #A0F;
+	text-align: center;
+}
 
 #loading {
 	font:bold 12px Courier;
 	color:red;
 }
+.dept_tile {
 
+	display: inline-block;
+	text-align: left;
+	width: 10em;
+
+}
 /*									*/
 /*	---	phpMyEdit Styles		---	*/
 /*									*/
