@@ -312,19 +312,47 @@ if (isset($_POST['submitted'])) {
 	    }
 	}
     </script>
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
-    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
-    <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
-    <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
-    <script type="text/javascript">
-	Date.format = 'yyyy-mm-dd';
-	$(function(){
-	    $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
-	    .dpSetOffset(0, 125);
-	});
+<?php   
+// <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
+//    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
+//    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+//    <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+//    <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
+//  <script type="text/javascript">
+//	Date.format = 'yyyy-mm-dd';
+//	$(function(){
+//	    $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
+//	    .dpSetOffset(0, 125);
+//	});
+//    </script>
+
+
+echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
+    <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
+    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
+    <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
+    <script type=\"text/javascript\">
+                Date.format = 'yyyy-mm-dd';
+                $(function(){
+                                $('.datepick').datepicker({ 
+                                                startDate:'2007-08-01',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: 'yy-mm-dd', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+                   
+// $('.datepick').focus();
+                });
     </script>
-<?php
+";
+
+
     // Create the form.
     $header = 'Tender Report Lookup';
     $page_title = 'Tender Reports';
@@ -332,7 +360,7 @@ if (isset($_POST['submitted'])) {
     require_once('../includes/header.html');
     ?>
     <h2>Re-print Tender Report</h2>
-    <form action="<?=$_SERVER['PHP_SELF']?>" method="post" name="tenderForm" onsubmit="return checkSubmission();">
+    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" name="tenderForm" onsubmit="return checkSubmission();">
 	<table cellpadding="5" border="0" width="100%">
 	    <tr>
 		<td>Date: </td>
