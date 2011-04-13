@@ -25,9 +25,21 @@ mysqli_select_db($db_master, 'is4c_op');
 $getBatchIDQ = "SELECT max(batchID) FROM batches";
 $getBatchIDR = mysqli_query($db_master, $getBatchIDQ);
 $getBatchIDW = mysqli_fetch_row($getBatchIDR);
+/*
+function filter($data) {
+    $data = trim(htmlentities(strip_tags($data)));
+ 
+    if (get_magic_quotes_gpc())
+        $data = stripslashes($data);
+ 
+    $data = mysql_real_escape_string($data);
+ 
+    return $data;
+}
+*/
 
 foreach ($_POST AS $key => $value) {
-    $$key = $value;
+    $$key = filter($value);
 }
 
 $batchID = $_GET['batchID'];
