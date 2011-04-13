@@ -133,7 +133,7 @@ if (isset($_POST['submitted'])) {
 	
 	include ('../includes/header.html');
 
-	echo '<form method = "post" action="product_list.php" target="_blank">
+/*	echo '<form method = "post" action="product_list.php" target="_blank">
 		<table border="0" cellspacing="3" cellpadding="5" align="center">
 			<tr> 
 		    <th colspan="2" align="center"> <p><b>Select Department</b></p></th>
@@ -184,7 +184,28 @@ if (isset($_POST['submitted'])) {
 				<td>&nbsp;</td>
 			</tr>
 		</table>
-	</form>';
+	</form>';*/
+include_once('../includes/dept_picker_generator.php');
+echo '<form method = "post" action="product_list.php" target="_blank">
+ <p id="select_department">Select Department</p>
+                <!--<td><font size="-1">Sort By: <select name="order">
+                <option value=upca>UPC</option>
+                <option value=dpa>Department</option>
+                <option value=sda>Subdepartment</option>
+                </select></td>-->';
+echo "<div id=\"dept_picker\">
+	<div><input type=\"checkbox\" value=1 name=\"allDepts\"><b>All Departments</b></div>";
+dept_picker('dept_tile');
+echo '</div>';
+ 
+echo '<p><b><input type="checkbox" value="1" name="deptDetails" CHECKED />
+                                Include department details</b>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="inUse" value=1><b>Filter PLUs that aren\'t In Use?</b></font><br />
+    <input type=submit name=submit value="Submit">
+                                <input type=reset name=reset value="Start Over">
+                        <input type="hidden" name="submitted" value="TRUE">
+                                
+        </form>';
 	include ('../includes/footer.html');
 }
 
