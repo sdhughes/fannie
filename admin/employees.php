@@ -171,8 +171,8 @@ while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
 	echo '<th><input type="text" name="Wage[' . $id . ']" maxlength="6" size="6" value="' . number_format($row[10], 2) . '" /></td>';
 	echo '<th><input type="text" name="Budgeted_Hours[' . $id . ']" maxlength="6" size="6" value="' . number_format($row[11], 2) . '" /></td>';
 	echo "<td><input type='checkbox' name='EmpActive[" . $id . "]'";
-	if ($row[6] == 1) echo ' CHECKED';
-	echo "</td>";
+	if ($row[6] == 1) echo ' checked="checked" ';
+	echo "/></td>";
 	echo "<td><input type=hidden name='id[]' value=".$row[0].">&nbsp;</td></tr>\n";
 }
 	$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
