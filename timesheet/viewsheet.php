@@ -251,6 +251,11 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
         }
 
     } else {
+	$header = 'Timesheet Management';
+	$page_title = 'Fannie - Administration Module';
+	include ('../includes/header.html');
+	include ('./includes/header.html');
+
         echo "<br /><br /><h3>The following errors occurred:</h3><ul>
             <p>- You forgot to select your name.</p></ul><br /><br /><br />";
 

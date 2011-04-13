@@ -9,8 +9,10 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         // Validate the data.
         $errors = array();
         
-        if (checkdate($_POST['month'], $_POST['date'], date('Y'))) {
-                $date = date('Y') . '-' . str_pad($_POST['month'], 2, 0, STR_PAD_LEFT) . '-' . $_POST['date'];
+        //if (checkdate($_POST['month'], $_POST['date'], date('Y'))) {
+       //2011-01-03 sdh - added a field to select a YEAR 
+        if (checkdate($_POST['month'], $_POST['date'],$_POST['year'])) {
+	        $date = $_POST['year'] . '-' . str_pad($_POST['month'], 2, 0, STR_PAD_LEFT) . '-' . $_POST['date'];
         } else {
                 $errors[] = 'The date you have entered is not a valid date.';
         }
@@ -176,6 +178,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
                                         document.getElementById(i + "14").disabled = true;
                         }
                 }
+		//this function was used by Matthaus (#7012) to hide certain Categories
                 function updateshifts(sIndex) {
                         if (sIndex == 7012) {
                                 for (var i = 1; i <= 5 ; i++) {
@@ -218,7 +221,14 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
                 if (date('d') == $i) echo ' SELECTED';
                 echo ">$i</option>\n";
             }
-        echo '</select> (Today is ';
+        echo '</select>';
+	echo ' Year: <select name="year">
+		<option value="2011">2011</option>
+		<option value="2010">2010</option>
+		<option value="2009">2009</option>
+		<option value="2008">2008</option>
+		<option value="2007">2007</option>
+		</select><br /> (Today is ';
         echo date('l\, F jS, Y');
         echo ')</p>';
         echo '<p>Lunch? <select name="lunch">
@@ -236,7 +246,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         // echo "<p>Please use enter times in (HH:MM) format. For example 8:45, 12:30, etc.</p>";
         echo "<table><tr><th>Time In</th><th>Time Out</th><th>Area Worked</th><th>Sub?</th></tr>\n";
         for ($i = 1; $i <= $max; $i++) {
-                $query = "SELECT * FROM is4c_log.shifts WHERE visible=true ORDER BY ShiftOrder ASC";
+                $query = "SELECT * FROM is4c_log.shifts WHERE visible=true ORDER BY ShiftName ASC";
                 $result = mysqli_query($db_master, $query);
                 
             echo '<tr>
