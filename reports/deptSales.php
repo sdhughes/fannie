@@ -174,7 +174,7 @@ function popup(mylink, windowname) {
 		    GROUP BY dept";
 	    }
 
-	    $openQ .= ") AS yearSpan";
+	    $openQ .= ") AS yearSpan group by dept ";
 
 	} else $openQ .= " UNION ALL ";
     }
@@ -221,20 +221,49 @@ function popup(mylink, windowname) {
 
     }
     
-    $report .= sprintf('<table cellspacing="2" cellpadding="3"><tr><th>Department Name</th><th>Gross Sales</th><th>Open Rings</th><th>Shrink</th></tr>');
+    $report .= sprintf('<table cellspacing="2" cellpadding="3" border="1"><tr>
+	<th>Department Name</th>
+	<th>Gross Sales</th>
+	<th>Vs Total</th>
+	<th>Open Rings</th>
+	<th>Open Rings vs Sales</th>
+	<th>Shrink</th>
+	<th>Shrink Vs Sales</th>
+	</tr>');
     
     foreach ($reportData AS $dept_no => $data) {
+
+	if (isset($data['sales'])) $salesHolder = $data['sales']; 
+	else $salesHolder = 0.00;
+
+	$vsOverall = ( $salesHolder / $totalSales ) * 100;
+
+	if (isset($data['shrink'])) $totalShrunk = $data['shrink'];
+	else $totalShrunk = 0;
+
+	if (isset($data['open'])) $totalOpen = $data['open'];
+	else $totalOpen = 0;
+
+	$shrinkVsSales = ( $totalShrunk / $salesHolder ) * 100;
+	$openVsSales = ( $totalOpen / $salesHolder ) * 100;
+
 	$report .= sprintf('<tr>
 				<td>%s</td>
 				<td align="right">$%s</td>
+				<td align="right">%s&#37;</td>
 				<td align="right">$%s&nbsp;<a href="openRingDetail.php?date1=%s&date2=%s&dept=%u" onClick="return popup(this, \'openRingDetail\')">(Detail)</a></td>
-				<td align="right">$%s</td>
+				<td align="right">%s&#37;</td>
+                                <td align="right">$%s</td>
+				<td align="right">%s&#37;</td>
 			    </tr>' . "\n",
 			   $data['name'],
 			   number_format(isset($data['sales']) ? $data['sales'] : 0.00, 2),
+			   number_format($vsOverall, 1),
 			   number_format(isset($data['open']) ? $data['open'] : 0.00, 2),
 			   $date1, $date2, $dept_no,
-			   number_format(isset($data['shrink']) ? $data['shrink'] : 0.00, 2));
+                           number_format($openVsSales,1),
+			   number_format(isset($data['shrink']) ? $data['shrink'] : 0.00, 2),
+                           number_format($shrinkVsSales,1));
     }
   /* 
 	$totalSalesQ = 'SELECT ROUND(SUM(t.total),2) AS total
@@ -249,9 +278,25 @@ function popup(mylink, windowname) {
 	
 	$totalSales = mysqli_fetch_row($totalSalesR);
 */
-	$report .= sprintf('</table><br/>Total Sales: %s </br>', $totalSales);
+
+	//Total Sales are tallied from the other dept totals, instead of making another db query.
+	$report .= sprintf('<td>Total Sales:</td><td align="right">$%s </td><td></td><td></td><td></td><td></td><td></td></table>', number_format($totalSales,2));
  
 /*	SELECT DISTINCT p.upc AS PLU, p.description AS Description, ROUND(p.normal_price,2) AS 'Current Price', ROUND(t.unitPrice,2) AS Price, p.department AS Dept, p.subdept AS Subdept, SUM(t.quantity) AS Qty, ROUND(SUM(t.total),2) AS Total, p.scale as Scale FROM is4c_log.dtransactions t, is4c_op.products p WHERE t.upc = p.upc AND t.department IN(8) AND t.datetime >= '2007-08-06 00:00:00' AND t.datetime <= '2007-08-13 23:59:59' AND t.emp_no <> 9999 AND t.trans_status <> 'X' AND t.upc NOT LIKE '%DP%' AND p.inUse = 1 GROUP BY CONCAT(t.upc, '-',t.unitprice) ORDER BY t.upc */
+
+
+	if (isset($_POST['groupBy'])) {
+
+		$groupBy = " GROUP BY CONCAT(t.upc, '-',t.unitprice) ";
+		$groupByMaster = " GROUP BY CONCAT(PLU Price) ";
+	}
+	else {
+		$groupBy = " GROUP BY t.upc ";
+		$groupByMaster = " GROUP BY PLU ";
+		$report .= "<p> Products are grouped by PLU, not sale price. Normal Price is shown. </p>";
+	}
+
+
     if (isset($_POST['deptDetails'])) {
 	if ($year1 == $year2 && $date2 != date('Y-m-d')) {
 	    $detailedQ = "SELECT DISTINCT
@@ -272,7 +317,7 @@ function popup(mylink, windowname) {
 		    AND t.trans_status <> 'X'
 		    AND t.upc NOT LIKE '%DP%'
 		    $inUse
-		GROUP BY CONCAT(t.upc, '-',t.unitprice)
+		    $groupBy
 		ORDER BY $order";
 	} else {
 	    $detailedQ = "SELECT PLU, Description, CurrPrice, Price, Dept, Subdept, SUM(Qty), SUM(Total), Scale FROM (";
@@ -295,7 +340,7 @@ function popup(mylink, windowname) {
 			AND t.trans_status <> 'X'
 			AND t.upc NOT LIKE '%DP%'
 			$inUse
-		    GROUP BY CONCAT(t.upc, '-',t.unitprice)";
+			$groupBy";
 
 		if ($i == $year2) {
 		    if ($date2 == date('Y-m-d')) {
@@ -317,10 +362,10 @@ function popup(mylink, windowname) {
 				AND t.trans_status <> 'X'
 				AND t.upc NOT LIKE '%DP%'
 				$inUse
-			    GROUP BY CONCAT(t.upc, '-',t.unitprice)";
+				$groupBy";
 		    }
 		    
-		    $detailedQ .= ") AS yearSpan GROUP BY CONCAT(PLU, Price) ORDER BY $order";
+		    $detailedQ .= ") AS yearSpan $groupByMaster ORDER BY $order";
 		} else $detailedQ .= " UNION ALL ";
 	    }
 	}
@@ -518,26 +563,11 @@ EOS;
 	    <h3><strong>Select Department</strong></h3>
 	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
             <form method="post" target="_blank" action="%s">', $msg, $_SERVER['PHP_SELF']);
-include_once('../includes/dept_picker_generator.php');
-dept_picker('dept_tile');
 
-	//	<table border="0" cellspacing="3" cellpadding="5">', $msg, $_SERVER['PHP_SELF']);
+    //create the dept picker
+    include_once('../includes/dept_picker_generator.php');
+    dept_picker('dept_tile');
 
-
-/*    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) OR dept_no = 40 ORDER BY dept_name ASC";
-    $deptR = mysqli_query($db_slave, $deptQ);
-
-    $count = 0;
-
-    while (list($name, $no) = mysqli_fetch_row($deptR)) {
-	if ($count % 3 == 0) echo '<tr>';
-	$count++;
-	printf('<td><input type="checkbox" name="dept[]" class="deptCheck" value="%u" %s />%s</td>', $no, (isset($_POST['dept']) && in_array($no, $_POST['dept']) ? 'checked="checked"' : ''), ucfirst(strtolower($name)));
-
-	if ($count % 3 == 0) echo '</tr>';
-    }
-*/
-//    printf('</table>
 printf ('</div>
         </div>
         <div id="box">
@@ -558,6 +588,9 @@ printf ('</div>
 		<tr>
 		    <td colspan="2" align="left"><input type="checkbox" name="inUse" checked="CHECKED" /><strong>Filter not "in use"</strong></td>
 		    <td colspan="2" align="left"><input type="checkbox" name="deptDetails" checked="CHECKED" /><strong>Include department details</strong></td>
+		</tr>
+		<tr>
+		    <td colspan="4" align="left"><input type="checkbox" name="groupBy" checked="CHECKED" /> Seperate by Sale Price? </td>
 		</tr>
                 <tr>
 		    <td colspan="4" align="center"><strong>Sort by: &nbsp;</strong>
