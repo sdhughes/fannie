@@ -16,7 +16,7 @@ function dept_picker($div_class_name) {
           // $count++;
            printf("
 			<div class='$div_class_name'>
-				<input type=\"checkbox\" name=\"dept[]\" class=\"deptCheck\" value=\"%u\" %s />%s
+				<label ><input type='checkbox' name='dept[]' class='deptCheck' value='%u' %s />%s</label>
 			</div>
 		", $no, (isset($_POST['dept']) && in_array($no, $_POST['dept']) ? 'checked="checked"' : ''), ucfirst(strtolower($name)));
 
