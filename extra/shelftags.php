@@ -54,7 +54,7 @@ if (isset($_POST['submitted'])) {
     }
 
     foreach ($dept as $deptno) {
-        if ($deptno == 7 || $deptno == 3 || $deptno == 4 || $deptno == 16) {$small = 'SMALL';}
+      //  if ($deptno == 7 || $deptno == 3 || $deptno == 4 || $deptno == 16) {$small = 'SMALL';}
     }
 
     if (!isset($small) || $small != 'SMALL') {$small = 'LARGE';}
@@ -494,15 +494,15 @@ if (isset($_POST['submitted'])) {
         $check = '../includes/checkmark.png';
         
         // Basic layout settings ///Old Wine sheets
-        $height = 33; //41.4;
-        $width = 88.9;	//98;
-        $left = 10.9; 	//9;
-        $top = 12.7;	//14;
+        $height = 32; 	//33; //41.4;
+        $width = 83; 	//88.9;	//98;
+        $left = 10;	//10.9; 	//9;
+        $top = 18.4;	//12.7;	//14;
         $right = 1.6; //5.5;
         $x = $left;
         $y = $top;
         $rightShift = $width + 9.2;	//6.5;
-        $downShift = $height + 3.2;	//6;
+        $downShift = $height + 2;	//6;
         $orientation = 'P';
         $xMax = 160;
         $yMax = 245;
@@ -696,7 +696,7 @@ if (isset($_POST['submitted'])) {
 
 		// Set up feach field...
 		$tagFields[] = array('height' => 7.5, 'width' => 90, 'x-offset' => 5, 'y-offset' => 21, 'justify' => 'C', 'field' => 'description', 'font' => 'HelveticaNeue', 'font-weight' => 'CB', 'font-size' => 16, 'type' => 'cell');
-		$tagFields[] = array('height' => 4, 'width' => 90, 'x-offset' => 5, 'y-offset' => 35, 'justify' => 'L', 'field' => 'ingredients', 'font' => 'HelveticaNeue', 'font-weight' => '', 'font-size' => 10, 'type' => 'multicell');
+		$tagFields[] = array('height' => 4, 'width' => 90, 'x-offset' => 5, 'y-offset' => 35, 'justify' => 'L', 'field' => 'ingredients', 'font' => 'HelveticaNeue', 'font-weight' => '', 'font-size' => 12, 'type' => 'multicell');
 		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 4, 'y-offset' => 60, 'justify' => 'C', 'field' => 'upc', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 35, 'type' => 'cell');
 		$tagFields[] = array('height' => 11, 'width' => 33.5, 'x-offset' => 40, 'y-offset' => 60, 'justify' => 'C', 'field' => 'price', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 25, 'type' => 'cell');
 		$tagFields[] = array('height' => 5.5, 'width' => 12, 'x-offset' => 80.5, 'y-offset' => 61, 'justify' => 'C', 'field' => 'order_no', 'font' => 'HelveticaNeue', 'font-weight' => 'B', 'font-size' => 14, 'type' => 'cell');
@@ -774,6 +774,7 @@ function drawForm($error = NULL) {
     $page_title = 'Fannie - Administration Module';
     $header = 'Shelftag Generator';
     include ('../includes/header.html');
+    require_once('../includes/dept_picker_generator.php');
     ?>
   <!--  <script src="../src/CalendarControl.js" language="javascript"></script> -->
 <!--    <script src="../src/putfocus.js" language="javascript"></script> -->
@@ -864,8 +865,9 @@ function drawForm($error = NULL) {
         </tr>
     </table>
 <?php 
-
-/*    <table border="0" cellspacing="3" cellpadding="3">
+/*
+   echo '
+    <table border="0" cellspacing="3" cellpadding="3">
         <tr>
             <td><font size="-1"><p>
                 <input type="checkbox" value=1 name="allDepts"><b>All Departments</b><br>
@@ -889,13 +891,22 @@ function drawForm($error = NULL) {
                 </p></font>
             </td>
         </tr>
- */
-include_once('../includes/dept_picker_generator.php');
-echo '<div id="dept_picker">';
-dept_picker('dept_tile');
-echo '</div>';
+   </table>';
+*/
+   require_once('../includes/mysqli_connect.php');
+   echo '<div id="dept_picker">';
+//   dept_picker('dept_tile');
 
-//   </table>
+        $deptQ = "SELECT substr(dept_name,1,13) AS name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) OR dept_no = 40 ORDER BY dept_name ASC";
+        $deptR = mysqli_query($db_master, $deptQ) or die("Query Error: " . mysqli_error($db_master));
+
+        while (list($name, $no) = mysqli_fetch_row($deptR)) {
+           printf("<div class='dept_tile'><input type='checkbox' name='dept[]' id='input$no' class='deptCheck' value='%u' %s /><label for='input$no'>%s</label></div>", $no, (isset($_POST['dept']) && in_array($no, $_POST['dept']) ? 'checked="checked"' : ''), ucfirst(strtolower($name)));
+
+        }
+
+   echo '</div>';
+
  ?>
     <table border="0" cellspacing="3" cellpadding="3">
     <tr>
