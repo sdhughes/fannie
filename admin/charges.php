@@ -2,8 +2,14 @@
 $page_title = 'Fannie - Administration Module';
 $header = 'House Charge Report';
 include ('../includes/header.html');
-
-?><SCRIPT TYPE="text/javascript">
+/* 
+print_r($_SERVER);
+echo "post:";
+print_r($_POST);
+echo "<br / >";
+*/
+?>
+<SCRIPT TYPE="text/javascript">
 <!--
 function popup(mylink, windowname)
 {
@@ -42,6 +48,7 @@ if (isset($_POST["Submit"])) {
 $year_start = substr($pay_start, 0, 4);
 $year_end = substr($pay_end, 0, 4);
 
+//pull the House charges for each staff member
 if ($year_start == $year_end) {
 
     $transtable = 'trans_' . $year_start;
@@ -73,7 +80,41 @@ if ($year_start == $year_end) {
 
 }
 
+
+//pull the Staff charges
+if ($year_start == $year_end) {
+
+    $transtable = 'trans_' . $year_start;
+
+    $staffQuery = "SELECT d.card_no, ROUND(SUM(d.total),2) as charges
+            FROM is4c_log.$transtable AS d
+            WHERE d.datetime BETWEEN '$pay_start' AND '$pay_end'
+            AND d.trans_subtype = 'MI'
+            AND d.emp_no <> 9999 AND d.trans_status <> 'X'
+            AND d.card_no IN (9999, 99999)
+            GROUP BY d.card_no";
+} else {
+    $staffQuery = "SELECT card_no, SUM(charges) FROM (";
+
+    for ($year = $year_start; $year <= $year_end; $year++) {
+        $staffQuery .= "SELECT card_no, ROUND(SUM(total),2) as charges
+            FROM is4c_log.trans_$year
+            WHERE datetime BETWEEN '$pay_start' AND '$pay_end'
+            AND trans_subtype = 'MI'
+            AND emp_no <> 9999 AND trans_status <> 'X'
+            AND card_no IN (9999, 99999)
+            GROUP BY card_no";
+
+        if ($year == $year_end)
+            $staffQuery .= ") AS yearSpan";
+        else
+            $staffQuery .= " UNION ALL ";
+    }
+
+}
+
 $queryR = mysqli_query($db_slave, $query);
+
 if (!$queryR) echo "<p>$query</p><p>" . mysqli_error($db_slave) . "</p>";
 $charge = array();
 while ($queryRow = mysqli_fetch_array($queryR, MYSQLI_NUM)) {
@@ -86,9 +127,11 @@ while ($queryRow = mysqli_fetch_array($queryR, MYSQLI_NUM)) {
     $charge[$first] = array('CardNo' => $queryRow[0], 'total' => $queryRow[1], 'last' => $last);
 }
 ksort($charge);
+//echo "query = " . $query . "<br />";
+//echo "staffQuery = " . $staffQuery . "<br />";
 
 echo "<center><h2>Previous Pay Period</h2></center> \n";
-echo "<center><h3>".strftime('%D', strtotime($pay_start))." through ".strftime('%D', strtotime($pay_end))."</h3></center> \n";
+echo "<center><h3><span id='date1'>".strftime('%D', strtotime($pay_start))."</span> through <span id='date2'>".strftime('%D', strtotime($pay_end))."</span></h3></center> \n";
 echo "<table border=0 width=95% cellspacing=0 cellpadding=5 align=center> \n";
 //echo "<th>Card No<th>Last Name<th>First Name<th>Type<th>Charges \n";
 // Table header.
@@ -115,12 +158,38 @@ foreach ($charge as $fn => $v) {
 	++$count;
 	$total += $v['total'];
 }
+//query the db about store charges
+$staffQueryR = mysqli_query($db_slave, $staffQuery);
+$row = mysqli_fetch_array($staffQueryR, MYSQLI_NUM);
+
+$storeNumber = $row[0];
+$storeChargeTotal =  $row[1];
+$date1 = substr($pay_start,0,10);
+$date2 = substr($pay_end,0,10);
+
 printf('</tbody><tfoot>
     <tr align="center" style="font-weight: bold;">
 	<td colspan="4">%u Employees House Charged For A Total of $%.2f</td>
     </tr>
-    </tfoot></table><br><br>', $count, -1 * $total);
+    <tr align="center" style="font-weight: bold;">
+	<td colspan="4" id="chargeDetail">
+    <form method="post" action="../reports/storeCharges.php">
+    <input type="hidden" name="date1" value="%s" />
+    <input type="hidden" name="date2" value="%s" /> 
+    Employees used #%u to Store Charge For A Total of $%.2f
+    (view charges<input type="submit" name="submitted" value="submit" />)
+  </form> 
+    </td>
+    </tr>
+    </tfoot></table>', $count, -1 * $total, $date1,$date2, $storeNumber,-1 * $storeChargeTotal);
 
+
+
+//fetch the data and print out the total staff charges
+echo "<div id='storeCharges'>";
+echo "</div>";
+
+//seriously? just use a <hr>.....
 echo "<table width=100% border=0><tr><td colspan='3' height='1' bgcolor='cccccc'></td></tr></table>";
 
 $query = "SELECT * FROM is4c_log.payperiods WHERE periodEnd <= curdate() ORDER BY periodEnd DESC LIMIT 45";
@@ -133,7 +202,7 @@ $results = mysqli_query($db_slave, $query) or
 echo "<br /><br /><center><table border=0 cellpadding=0 cellspacing=0><tr><td align=center> \n";
 echo "<h3>Select another pay period</h3> \n";
 echo "</td></tr><tr><td align=center> \n";
-echo "<form method=POST action=charges.php>";
+echo "<form method='POST' action='" . $_SERVER['PHP_SELF'] . "'>";
 echo "<select name=period id=period> \n";
 while ($row = mysqli_fetch_array($results, MYSQLI_ASSOC)) {
 	echo "<option value=" .$row["periodID"] . ">";

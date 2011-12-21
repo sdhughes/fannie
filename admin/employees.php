@@ -7,7 +7,9 @@ ob_start();
 $page_title = 'Fannie - Admin Module';
 $header = 'Employee Management';
 include_once ('../includes/header.html');
+echo "<script type='text/javascript' src='../includes/javascript/emp_mgmt.js'></script>";
 
+//print_r($_POST);
 if (isset($_POST['submit'])) {
 	foreach ($_POST AS $key => $value) {
 		$$key = $value;
@@ -21,23 +23,26 @@ if (isset($_POST['submit'])) {
 		$updateQ = "UPDATE employees SET
                         FirstName = '" . escape_data($FirstName[$emp_no]) . "',
                         LastName = '" . escape_data($LastName[$emp_no]) . "',
+                        RealFirstName = '" . escape_data($RealFirstName[$emp_no]) . "',
                         card_no=$CardNo[$emp_no], pay_rate=$Wage[$emp_no],
                         budgeted_hours=$Budgeted_Hours[$emp_no],
                         EmpActive=$active,
                         JobTitle = '{$JobTitle[$emp_no]}'
                     WHERE emp_no = $emp_no";
-		$updateR = mysqli_query($db_master, $updateQ);
+		$updateR = mysqli_query($db_master, $updateQ) or die("Update Error: " . mysqli_error());
 		if (!$updateR) {echo '<p><font color="red">One or more employees could not be updated. Please try again.</font> Query: ' . $updateQ . '</p>';}
 	}
 	$max = $_POST['add'];
-	if (isset($EmpActive[$max]) && $EmpActive[$max] == 'on') {
+	if (isset($EmpActive[$max]) && $EmpActive[$max] == 'on' && $_POST['submit'] == 'add') {
 		$insertQ = "INSERT INTO employees VALUES
                     ($max, $max, $max,
                     '" . escape_data($FirstName[$max]) . "',
                     '" . escape_data($LastName[$max]) . "',
-                    '{$JobTitle[$max]}', 1, 15, 15, " . (empty($CardNo[$max]) ? 'NULL' : $CardNo[$max]) . ", $Wage[$max], " . (empty($Budgeted_Hours[$max]) ? 'NULL' : $Budgeted_Hours[$max]) . ",
-                    '" . escape_data($FirstName[$max]) . "')";
-		$insertR = mysqli_query($db_master, $insertQ);
+                    '{$JobTitle[$max]}', 1, 15, 15, " . (empty($CardNo[$max]) ? 'NULL' : $CardNo[$max]) . ", ". (empty($Wage[$max]) ? 'NULL' :$Wage[$max]) . ", " . (empty($Budgeted_Hours[$max]) ? 'NULL' : $Budgeted_Hours[$max]) . ",
+                    '" . escape_data($RealFirstName[$max]) . "')";
+		echo $insertQ . "<br />";
+
+        $insertR = mysqli_query($db_master, $insertQ) or die('Insert Error: ' . mysqli_error($db_master));
 		if (mysqli_affected_rows($db_master) != 1) {
                         //printf("mySQL Error: %s\t Query: %s", mysqli_error($db_master), $insertQ);
 			echo '<p><font color="red">The new employee could not be added. Please try again.</font></p>';
@@ -146,16 +151,20 @@ echo '<form action="employees.php" method="POST">
 	</form>';
 
 echo '<form action="employees.php" method="POST">';
-echo "<table border=0 width=95% cellspacing=0 cellpadding=5 align=center>";
-echo "<th>Employee No.</th><th>Last Name</th><th>First Name</th><th>Job Title</th><th>Member No.</th><th>Wage</th><th>Budgeted Hours</th><th>Active?</th>&nbsp;";
+echo "<table id='employee_table'>";
+echo "<th>Emp No</th><th>Last Name</th><th>Nickname</th><th>First Name</th><th>Job Title</th><th>Card No.</th><th class='wage_element'>Wage</th>";
+echo "<th>Budgeted Hours</th><th>Active?</th><th>&nbsp;</th>";
+
+
 $bg = '#eeeeee';
 while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
 	$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
 	$id = $row[0];
 	echo "<tr bgcolor='$bg'>";
-	echo "<td>".$row[0]."</td>";
+	echo "<td class='emp_no'>".$row[0]."</td>";
 	echo '<td><input type="text" name="LastName[' . $id . ']" maxlength="20" size="10" value="' . $row[4] . '"></td>';
 	echo '<td><input type="text" name="FirstName[' . $id . ']" maxlength="20" size="10" value="' . $row[3] . '"></td>';
+	echo '<td><input type="text" name="RealFirstName[' . $id . ']" maxlength="20" size="10" value="' . $row[12] . '"></td>';
 	echo "<td><select name='JobTitle[$id]'>
 		<option value='STAFF'";
 	if ($row[5] == 'STAFF') echo ' SELECTED';
@@ -167,13 +176,15 @@ while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
 	if ($row[5] == 'WORKING MEMBER') echo ' SELECTED';
 	echo ">Working Member</option>
 		</select></td>";
-	echo '<th><input type="text" name="CardNo[' . $id . ']" maxlength="5" size="5" value="' . $row[9] . '" /></td>';
-	echo '<th><input type="text" name="Wage[' . $id . ']" maxlength="6" size="6" value="' . number_format($row[10], 2) . '" /></td>';
-	echo '<th><input type="text" name="Budgeted_Hours[' . $id . ']" maxlength="6" size="6" value="' . number_format($row[11], 2) . '" /></td>';
+	echo '<td><input type="text" name="CardNo[' . $id . ']" maxlength="5" size="5" value="' . $row[9] . '" /></td>';
+	echo '<td class="wage_element"><input type="text" name="Wage[' . $id . ']" maxlength="6" size="6" value="' . number_format($row[10], 2) . '" /></td>';
+	echo '<td><input type="text" name="Budgeted_Hours[' . $id . ']" maxlength="6" size="6" value="' . number_format($row[11], 2) . '" /></td>';
 	echo "<td><input type='checkbox' name='EmpActive[" . $id . "]'";
 	if ($row[6] == 1) echo ' checked="checked" ';
-	echo "/></td>";
-	echo "<td><input type=hidden name='id[]' value=".$row[0].">&nbsp;</td></tr>\n";
+	echo "/>";
+	echo "<input type=hidden name='id[]' value=".$row[0].">&nbsp;</td>"; 
+    echo "<td><button class='edit_employee' >edit</button></td>";
+    echo "</tr>\n";
 }
 	$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
 	$max;
@@ -181,19 +192,19 @@ while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
 	echo "<td>".$max."</td>";
 	echo '<td><input type="text" name="LastName[' . $max . ']" maxlength="20" size="10"></td>';
 	echo '<td><input type="text" name="FirstName[' . $max . ']" maxlength="20" size="10"></td>';
+	echo '<td><input type="text" name="RealFirstName[' . $max . ']" maxlength="20" size="10"></td>';
 	echo "<td><select name='JobTitle[$max]'>
 		<option value='STAFF'>Staff</option>
 		<option value='SUB'>Sub</option>
 		<option value='WORKING MEMBER'>Working Member</option>
 		</select></td>";
 	echo '<td><input type="text" name="CardNo[' . $max . ']" maxlength="5" size="5" /></td>';
-	echo '<td><input type="text" name="Wage[' . $max . ']" maxlength="6" size="6" /></td>';
+	echo '<td class="wage_element"><input type="text" name="Wage[' . $max . ']" maxlength="6" size="6" /></td>';
 	echo '<td><input type="text" name="Budgeted_Hours[' . $max . ']" maxlength="6" size="6" /></td>';
-	echo "<td><input type='checkbox' name='EmpActive[" . $max . "]'";
-	echo "</td>";
-	echo "<td><input type='hidden' name='add' value='" . $max . "'>&nbsp;</td></tr>\n";
+	echo "<td><input type='checkbox' name='EmpActive[" . $max . "]' />";
+	echo "<input type='hidden' name='add' value='" . $max . "'>&nbsp;</td>";
 
-echo "<tr><td><input type=submit name=submit value=submit></td></tr>";
+echo "<td><input type=submit name=submit value=add></td></tr>\n";
 echo "</table></form>";
 
 include ('../includes/footer.html');
