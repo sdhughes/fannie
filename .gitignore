@@ -12,3 +12,4 @@ includes/config.php
 extraContactList.php
 includes/queries.php
 documents/*
+mysql/*
