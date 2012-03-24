@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	
+	<meta http-equiv="Content-Language" content="en-us" />
+
+	<meta name="ROBOTS" content="ALL" />
+	<meta http-equiv="imagetoolbar" content="no" />
+	<meta name="MSSmartTagsPreventParsing" content="true" />
+
+	<meta name="description" content="_DESCRIPTION" />
+	<meta name="keywords" content="_KEYWORDS_" />
+
+	<title>Login Required | NCGA</title>
+	
+	<base href="http://ncga.coop/"></base>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css" media="all">@import "/misc/drupal.css";</style>
+<script type="text/javascript"><!--
+  var BASE_URL = "/";
+--></script>
+
+<script type="text/javascript" src="/misc/drupal.js"></script>
+<script type="text/javascript" src="/modules/img_assist/img_assist.js"></script>
+<!--[if lte IE 6]><script type="text/javascript" src="/modules/nice_menus/nice_menus.js"></script><![endif]-->
+<script type="text/javascript" src="/modules/shortcutmenu/shortcutmenu.js"></script>
+<link rel="shortcut icon" href="/files/ncga_favicon.ico" type="image/x-icon" />
+	
+	<link href="http://ncga.coop/themes/ncga/assets/css/layout.css" rel="stylesheet" type="text/css" media="all" />
+	<!--[if lt IE 7]>
+	<link rel="stylesheet" type="text/css" href="http://ncga.coop/themes/ncga/assets/css/ie.css" />
+	<![endif]-->
+	
+	<style type="text/css" media="all">@import "/modules/date/date.css";</style><style type="text/css" media="all">@import "/modules/ecommerce/cart/cart.css";</style><style type="text/css" media="all">@import "/modules/location/location.css";</style><style type="text/css" media="all">@import "/modules/shortcutmenu/shortcutmenu.css";</style>	
+	<!-- import the DOM logic from external javascript files -->
+	<script type="text/javascript" src="http://ncga.coop/themes/ncga/assets/java/theme.js"></script>
+
+	
+</head>
+
+
+<body class="" >
+
+<div id="logo">
+	<a href="#" title="NCGA - Home"><img src="http://ncga.coop/themes/ncga/assets/images/ncga_logo.png" alt="NCGA - National Cooperative Grocers Association" width="153px" height="153px" /></a>
+</div>
+
+<a id="skiptocontent" href="/weeklysales#center">Skip to content</a>
+
+<div id="header">
+	<div id="fruitbar"> </div>
+	<div id="headercontent">
+		<div class="block block-search" id="block-search-0">
+  <h2>Search</h2>
+  <div class="content"><form action="/search/node"  method="post" id="search_block_form">
+<div><div class="container-inline"><div class="form-item">
+ <input type="text" maxlength="128" name="edit[search_block_form_keys]" id="edit-search_block_form_keys"  size="32" value="search ..." title="Enter the terms you wish to search for" onblur="searchToggle();" onfocus="searchToggle();" class="form-text" />
+</div>
+<input type="submit" name="op" value="GO"  class="form-submit" />
+<input type="hidden" name="edit[form_id]" id="edit-search-block-form" value="search_block_form"  />
+</div>
+</div></form>
+</div>
+</div>
+		<h2 id="slogan"><span></span></h2>
+	</div>
+</div>
+
+<div id="container">
+<div id="container2">
+
+	<ul id="topnav">
+		<li id="nhome"><a href="" title="Home"><span>Home</span></a></li>
+		<li id="nmemb"><a href="member-stores" title="Member Stores"><span>Member Stores</span></a></li>
+		<li id="nnews"><a href="newsroom" title="Newsroom"><span>Newsroom</span></a></li>
+		<li id="nabou"><a href="about" title="About"><span>About</span></a></li>
+		<li id="ncare"><a href="careers" title="Careers"><span>Careers</span></a></li>
+		<li id="ncont"><a href="contact" title="Contact"><span>Contact</span></a></li>
+	</ul>
+
+	<div id="bluebar"> </div>
+
+	<div id="innercont" class="clearfix">
+
+		<div id="left">
+
+			<div id="fixednav">
+				<div class="block block-block" id="block-block-6">
+  <h2>Login</h2>
+  <div class="content">	<br />
+	 <h2 class="nohide">Login </h2>
+	 <!-- <form id="custom-login" action="https://www.ncga.coop/user/login?destination=weeklysales&ssl=off" method="post"> --><br />
+	 <form id="custom-login" action="http://ncga.coop/user/login?destination=weeklysales&amp;ssl=off" method="post">
+
+		 <span>Username: </span><br />
+		 <input type="text" maxlength="64" class="form-text" name="edit[name]" id="edit-name" size="15" value="username"
+		 onblur="if (!this.value) this.value = 'username'" onfocus="if (this.value) this.value = ''" />
+		 <span>Password: </span><br />
+		 <input type="password" class="form-password" maxlength="64" name="edit[pass]" id="edit-pass" size="15" value="xxxx"
+		onblur="if (!this.value) this.value = 'xxxx'" onfocus="if (this.value) this.value = ''" />
+		 <input type="hidden" name="edit[form_id]" id="edit-form_id" value="user_login" />
+		 <input type="submit" name="op" class="form-submit" value="Go" />
+	 </form>
+	 <p style="margin-top:5px"><a href="user/password">Forgot your username or password? </a></p>
+ <br class="clear" /></div>
+</div>
+<div class="block block-block" id="block-block-7">
+  <h2>About Membership</h2>
+  <div class="content"><p>Food co-ops throughout the <span class="caps">U.S. </span>are eligible for membership in <span class="caps">NCGA. </span><a href="/about/membership">Find out more about the requirements and benefits of membership. </a> </p><br class="clear" /></div>
+</div>
+			</div>
+
+		</div>
+		
+			
+		<div id="center">
+		
+					
+					
+							<h2 class="content-title">Login Required</h2>
+					
+					
+			<!-- start main content -->
+			<!-- begin content --><div class="node">
+
+			
+	<div class="content">
+		
+		<p>You must be logged in to view this page. If you are logged in, your account settings do not permit you to view this page.
+If you think this is an error, please contact Nick Summy for assistance  (via email  <a href="mailto:nick.summy@ncga.coop">nick.summy@ncga.coop </a> or phone at (866) 709-COOP Ext. 1121).<br />
+ </p>  
+
+<form id="custom-login" action="https://www.ncga.coop/user/login/?ssl=off&amp;destination=weeklysales" method="post">
+	 <input type="hidden" name="edit[destination]" value="" />
+	 <span>Username: </span><br />
+	 <input type="text" maxlength="64" class="form-text" name="edit[name]" id="edit-name" size="15" value="username"
+	 onblur="if (!this.value) this.value = 'username'" onfocus="if (this.value) this.value = ''" /><br />
+	 <span>Password: </span><br />
+	 <input type="password" class="form-password" maxlength="64" name="edit[pass]" id="edit-pass" size="15" value="xxxx"
+	onblur="if (!this.value) this.value = 'xxxx'" onfocus="if (this.value) this.value = ''" /><br />
+	 <input type="hidden" name="edit[form_id]" id="edit-form_id" value="user_login" />
+	 <input type="submit" name="op" class="form-submit" value="Go" />
+ </form>
+	<br />
+ <p>If you are having trouble logging in please try deleting your cookies first.  <a href="http://www.aboutcookies.org/page-2" target="_blank">Find out how. </a></p>
+	<br />
+ <p>If you aren't sure if you have a user account, please try the 'Forgot your username or password?' link on the left,
+or contact Nick Summy for assistance (via email  <a href="mailto:nick.summy@ncga.coop">nick.summy@ncga.coop </a> or phone at (866) 709-COOP Ext.1121.) Thanks! </p>
+ <br class="clear" />		
+				
+	</div>
+	
+</div><!-- end content -->			<!-- end main content -->
+			
+		</div>
+		
+		
+
+	</div>
+
+	<div id="footer">
+		&copy; National Cooperative Grocers Association, 14 S Linn Street, Iowa City, Iowa 52240. (319) 466-9029. <a href="contact/">Full contact information</a>.<br />
+<a href="privacy_policy/">Privacy policy</a> and <a href="terms_of_service/">terms of use</a>
+	</div>
+
+</div>
+</div>
+
+<div id="sitenav" class="closed">
+	<a href="#" onclick="toggleSiteNav();return false;" id="sitenavtoggle" title="click to open/close"><span>#</span></a>
+	<div id="sitenavcontent">
+		<div class="block block-shortcutmenu" id="block-shortcutmenu-0">
+  <h2>shortcut menu</h2>
+  <div class="content"><ul><li><a href="/stores" title="">Member Stores</a></li></ul><ul><li id="shortcutmenu-226" class="sm-expand"><a href="javascript:;" onclick="shortcutmenu_sub(226);"><img class="sm_closed" src="/modules/shortcutmenu/arrow-closed.gif" alt="arrow" /></a><a href="/newsroom" title="">Newsroom</a></li></ul><ul><li id="shortcutmenu-212" class="sm-expand"><a href="javascript:;" onclick="shortcutmenu_sub(212);"><img class="sm_closed" src="/modules/shortcutmenu/arrow-closed.gif" alt="arrow" /></a><a href="/about" title="">About</a></li></ul><ul><li><a href="/careers" title="">Careers</a></li></ul><ul><li><a href="/contact" title="">Contact NCGA</a></li><li><a href="/contact" title="">Contact NCGA</a></li></ul><ul><li><a href="http://ncga.coop/files/NCGA_catalogue_of_services.xls" title="Quick overview of NCGA&#039;s programs and services.">Catalogue of Services</a></li><li><a href="http://www.ncga.coop/node/3684" title="">Catapult User Group calls</a></li></ul></div>
+</div>
+	</div>
+</div>
+
+
+<script src="http://ncga.coop/themes/ncga/assets/java/ga-files.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-15285301-1");
+pageTracker._setDomainName(".ncga.coop");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</body>
+</html>
