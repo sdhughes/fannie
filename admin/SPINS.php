@@ -65,7 +65,7 @@ if (is_numeric($week_tag) || !$week_tag) {
                 AND upc > 99999 AND scale = 0 
                 AND emp_no <> 9999 AND trans_status <> 'X'
                 GROUP BY upc HAVING qty > 0";
-        // echo $query;
+        echo $query;
         $result = mysqli_query($db_slave, $query);
         $num = mysqli_num_rows($result);
 

@@ -41,9 +41,9 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
             ON (t.emp_no = e.emp_no)
             INNER JOIN is4c_log.payperiods AS p
             ON (t.periodID = p.periodID)
-        WHERE t.periodID = $periodID
-            AND t.area NOT IN (13, 14)
-        GROUP BY t.emp_no
+        WHERE t.periodID = $periodID" .
+        //    AND t.area NOT IN (13, 14)
+       " GROUP BY t.emp_no
         ORDER BY e.RealFirstName ASC";
 
     $result = mysqli_query($db_slave, $query);
@@ -207,7 +207,9 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
             if (is_null($oncall)) $oncall = 0;
             list($houseCharge) = mysqli_fetch_row($houseChargeR);
             $houseCharge = number_format($houseCharge * -1, 2);
-            if (is_null($houseCharge)) $houseCharge = '0.00';
+            //if (is_null($houseCharge)) $houseCharge = '0.00';
+
+    //echo "<br />House Charge Query: " . $houseChargeQ;
 
             if ($first == TRUE) {
                 echo "<p>Payroll Summary for $row[3] to $row[4]:</p>";
@@ -215,7 +217,8 @@ if (isset($_POST['submitted']) && is_numeric($_POST['period'])) { // If submitte
             }
             $bg = ($bg == '#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
             if ($row[0] > 80 || (isset($totalPOT[$emp_no]) && $totalPOT[$emp_no] > 0) ) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
-            printf("<tr bgcolor='$bg'><td>%s</td><td align='center'>%s%s", $row[2] . " " . substr($row[6], 0, 1), $fontopen, $row[0]);
+            //printf("<tr bgcolor='$bg'><td>%s</td><td align='center'>%s%s", $row[2] . " " . substr($row[6], 0, 1), $fontopen, $row[0]);
+            printf("<tr bgcolor='$bg'><td>%s</td><td align='center'>%s%s", $row[2] . " " . $row[6], $fontopen, $row[0]);
             if ($oncall > 0) {echo '<font color="red"><br />(On Call: ' . $oncall . ')</font>';}
             echo "$fontclose</td>";
 

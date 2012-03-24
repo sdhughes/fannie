@@ -9,9 +9,13 @@ mysqli_select_db($db_slave, 'is4c_log');
 if (isset($_GET['submitted'])) { // If the form has been submitted.
         // Validate the data.
         $errors = array();
-        
-        if (checkdate($_GET['month'], $_GET['date'], date('Y'))) {
-                $date = date('Y') . '-' . str_pad($_GET['month'], 2, 0, STR_PAD_LEFT) . '-' . $_GET['date'];
+       
+
+
+
+	//2011-01-03 sdh - added field to select by year 
+        if (checkdate($_GET['month'], $_GET['date'], $_GET['year'])) {
+                $date = $_GET['year'] . '-' . str_pad($_GET['month'], 2, 0, STR_PAD_LEFT) . '-' . $_GET['date'];
         } else {
                 $errors[] = 'The date you have entered is not a valid date.';
         }
@@ -21,10 +25,12 @@ if (isset($_GET['submitted'])) { // If the form has been submitted.
         }
         
         // Make sure we're in a valid pay period.
-        $query = "SELECT periodID FROM is4c_log.payperiods WHERE CURDATE() BETWEEN DATE(periodStart) AND DATE(periodEnd)";
-        $result = mysqli_query($db_master, $query);
-        list($periodID) = mysqli_fetch_row($result);
-        
+        if (isset($_GET['periodID'])) $periodID = $_GET['periodID'];
+        else {
+            $query = "SELECT periodID FROM is4c_log.payperiods WHERE CURDATE() BETWEEN DATE(periodStart) AND DATE(periodEnd)";
+            $result = mysqli_query($db_master, $query);
+            list($periodID) = mysqli_fetch_row($result);
+        }
         if (!is_numeric($_GET['emp_no'])) {
                 $errors[] = 'You didn\'t select your name.';
         } else {
@@ -157,7 +163,9 @@ if (isset($_GET['submitted'])) { // If the form has been submitted.
         
     $months = array(01=>'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
     
-    echo '<form action="' . $_SERVER['PHP_SELF'] . '" method="GET"><input type="hidden" name="function" value="add" />
+    echo '<form action="' . $_SERVER['PHP_SELF'] . '" method="GET">
+    <input type="hidden" name="function" value="add" />
+    <input type="hidden" name="periodID" value="' . $_GET['periodID'] .'" />
         <p>Name: <select name="emp_no">
             
             <option value="error">Who are You?</option>' . "\n";
@@ -182,7 +190,15 @@ if (isset($_GET['submitted'])) { // If the form has been submitted.
             if (date('d') == $i) echo ' SELECTED';
             echo ">$i</option>\n";
         }
-    echo '</select> (Today is ';
+    echo '</select> Year: <select name="year">
+	<option value="2012">2012</option>
+	<option value="2011">2011</option>
+	<option value="2010">2010</option>
+	<option value="2009">2009</option>
+	<option value="2008">2008</option>
+	<option value="2007">2007</option>
+	</select>';
+    echo '<br />(Today is ';
     echo date('l\, F jS, Y');
     echo ')</p>';
     echo '<p>Lunch? <select name="lunch">

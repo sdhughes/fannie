@@ -1,16 +1,28 @@
 <?php
 /********************************************************************************
-*
-*
-*
-*********************************************************************************/
+ *
+ * itemMaint.php - IS4C/Fannie's Item Maintenance Tool
+ *
+ * Authors: Some guys at the Wedge (CVR?, Tak?, JP?)
+ *          Matthaus Litteken (ACG)
+ *          Steve Hughes (ACG)
+ *
+ * This page has gone through multiple iterations as new features are added.
+ * There are notes throughout where you can see the development.
+ * Basically don't feel bad about tearing this POS up.
+ *
+ * Protected under the GPL.
+ *
+ *********************************************************************************/
 
 $page_title = 'Fannie - Item Maintenance';
-$header = 'Item Maintanence';
-$debug = true;
+$header = 'Item Maintenance';
+$debug = false;
 include('../includes/header.html');
-echo '<script type="text/javascript" src="../includes/javascript/jquery.js"></script>';
-echo '<script type="text/javascript" src="../includes/javascript/myquery.js"></script>';
+echo "<div id=''>";
+
+//echo '<script type="text/javascript" src="../includes/javascript/jquery.js"></script>'; //- moved to header.html
+//echo '<script type="text/javascript" src="../includes/javascript/myquery.js"></script>';
 require_once('../includes/itemFunction.php');
 ?>
 <html>
@@ -38,18 +50,31 @@ require_once ('../includes/mysqli_connect.php'); // Connect to the database.
 mysqli_select_db ($db_master, 'is4c_op');
 
 if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On form submission or list link clicking...
+/*
+    if (!isset($_REQUEST['upc']) || empty($_REQUEST['upc'])) {
+		$_REQUEST['upc'] = 1;
+	}
+*/
 
     if (isset($_REQUEST['upc']) && !empty($_REQUEST['upc'])) {
         $upc = $_REQUEST['upc'];
 
+	//if ( $upc == 1 ) $where = "upc <= 9999";
+	//else
         if (is_numeric($upc)) $where = "upc=$upc";
         else {
-		$where = "description LIKE '%" . mysql_real_escape_string($upc) . "%'";
-	}
+            $where = "description LIKE '%" . mysql_real_escape_string($upc) . "%'";
+        }
+    } else {//if the upc was left blank, list all products
+
+        $upc = "";
+	    $where = " (upc <= 9000 OR upc >= 90001 ) ";
+    }
+
+
 
        //2010-11-08 - sdh - added the option to filter by 'in use' 
-        if (isset($_REQUEST['inUse'])) 
-	{	
+    if (isset($_REQUEST['inUse']) && $_REQUEST['inUse']==1) {	
 		$where = $where . " AND inUse=1";
 		$antiInUse = 0;
 	} else {
@@ -58,20 +83,22 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
         //2010-12-09 - sdh - added an advanced dept filter option
 	if (isset($_POST['dept'])) {
-	        $selectedDeptArray = $_POST['dept'];
+	    $selectedDeptArray = $_POST['dept'];
 
 //      	print_r ($_POST['dept']);
 
 		$selectedDeptString = implode(",", $selectedDeptArray);
 
-        	$where .= " AND department IN ($selectedDeptString)";
-	} else { $selectedDeptArray = array(); }
+        $where .= " AND department IN ($selectedDeptString)";
+	} else { 
+            $selectedDeptArray = array(); 
+    }
 
 
 
-        $query = "SELECT p.upc, p.description, p.normal_price, p.qttyEnforced, p.foodstamp, p.deposit, p.scale, p.discount, p.discounttype, p.inUse, p.subdept, p.department, p.special_price, p.start_date, DATE_FORMAT(p.end_date, '%m/%d/%Y') AS end_date, substr(d.dept_name,1,13) as dept_name
+        $query = "SELECT p.upc, p.description, p.normal_price, p.qttyEnforced, p.foodstamp, p.deposit, p.scale, p.discount, p.discounttype, p.inUse, p.subdept, p.department as department, p.special_price, p.start_date, DATE_FORMAT(p.end_date, '%m/%d/%Y') AS end_date, substr(d.dept_name,1,13) as dept_name
             FROM products as p INNER JOIN departments as d ON p.department = d.dept_no WHERE $where ORDER BY p.department, p.description";
-        $result = mysqli_query($db_master, $query);
+        $result = mysqli_query($db_master, $query) or die ("<p>" . mysqli_error($db_master) . "</p>");
 
         if ($result) {
 
@@ -83,30 +110,33 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
                 //2010-11-08 - sdh - changed this to a table instead of just listing them.
 
-	echo "<form action=" . $_SERVER['PHP_SELF'] . " method='post'>";
-        echo "<p><span id='searchTerm'>More than one match found for (<font color='green'>$upc</font>).</span>&nbsp;&nbsp;&nbsp;";
+//print_r($_REQUEST);
+                echo "<form action=" . $_SERVER['PHP_SELF'] . " method='post'>";
+                if ($upc != "") echo "<p><span id='searchTerm'>More than one match found for (<font color='green'>$upc</font>).</span>&nbsp;&nbsp;&nbsp;";
+                else echo "<p><span id='searchTerm'>No search term entered. All products returned.</span>";
+                if (isset($_REQUEST['inUse']) && $_REQUEST['inUse']==1) {	
+                    echo " <input type='submit' name='submit' value='Show Unused Items' />"; 
+                    echo "<input type='hidden' name='inUse' value='$antiInUse' />";
+                } else {
 
-	if (isset($_REQUEST['inUse'])) {	
-		echo " <input type='submit' name='submit' value='Show In Use Items' />"; 
-	} else {
+                    echo " <input type='submit' name='submit' value='Hide Unused Items' />"; 
+                    echo "<input type='hidden' name='inUse' value='$antiInUse' />";
+                }
 
-		echo " <input type='submit' name='submit' value='Hide In Use Items' />"; 
-		echo "<input type='hidden' name='inUse' value='$antiInUse' />";
-	}
+                echo "<input type='hidden' name='upc' value='$upc' />
+                <input type='hidden' name='submitted' value='search' />";
 
-	echo "<input type='hidden' name='upc' value='$upc' />
-	<input type='hidden' name='submitted' value='search' />";
+                //create hidden input boxes to hold the values of an array.
+                foreach ($selectedDeptArray AS $value) {
+		            echo "<input type='hidden' name='dept[]' value='$value' />";
+	            }
 
-	foreach ($selectedDeptArray AS $value) {
-		echo "<input type='hidden' name='dept[]' value='$value' />";
-	}
+	            echo "</form>";
 
-	echo "</form>";
-
-        echo '<form action="changeInUse.php" method="post">'; 
+                echo '<form action="changeInUse.php" method="post">'; 
 
 		//2011-02-09 - sdh - added <form> and <inputs> so you can maintain item en masse
-	echo "<div id='itemMaint_toolbar'>
+	            echo "<div id='itemMaint_toolbar'>
     <div class='left'>
         <input type='submit' name='submit' action='changeInUse.php' value='Put In Use' />
         <input type='submit' name='submit' action='changeInUse.php' value='Take Out of Use' />
@@ -117,10 +147,10 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 </div>";
 
 
-		echo '<table id="item_results"><tr><th>UPC/PLU</th><th>Description</th><th>Price</th><th>Dept.</th><th>In Use</th><th>Alter?</th></tr>';
+		        echo '<table id="item_results"><tr><th>UPC/PLU</th><th>Description</th><th>Price</th><th>Dept.</th><th>In Use</th><th>Alter?</th></tr>';
 
                 while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-                    echo '<tr><td class="itemMaint_link"><a href="' . $_SERVER['PHP_SELF'] . '?upc=' 
+                    echo '<tr class="itemMaint_row"><td class="itemMaint_link"><a href="' . $_SERVER['PHP_SELF'] . '?upc=' 
                         . $row['upc'] . '&submitted=search">'
                         . $row['upc'] . '</a></td><td class="itemMaint_desc">' 
                         . $row['description'] . '</td><td class="itemMaint_price">$' 
@@ -135,29 +165,28 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
                 echo "<br />
 <input type='hidden' name='searchTerm' value='$upc' />
 ";
-	foreach ($selectedDeptArray as $value) {
+	            foreach ($selectedDeptArray as $value) {
 
-		echo "<input type='hidden' name='dept[]' value='$value' />";
-	}
+		            echo "<input type='hidden' name='dept[]' value='$value' />";
+	            }   
 
-		echo "</form>";
+		        echo "</form>";
 
-            } else { // No match, new product.
-                drawDetailsPage($upc);
-            }
+                } else { // No match, new product.
+                    drawDetailsPage($upc);
+                }
 
-        } else {
+            } else {
 
             // echo "<p>Query: $query</p><p>" . mysqli_error($dbc) . "</p>";
             drawSearchForm('There was an error retrieving the information for that product.');
-
         }
 
-    } else { // Throw an error, quit the script.
+    /*} else { // Throw an error, quit the script.
 
 	drawSearchForm('You left the search box empty.');
 
-    }
+    }taken out bc if nothing is entered then it searches for everything */
 
 
 } elseif (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'act') {
@@ -193,6 +222,8 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 
         $mainQ = "INSERT INTO products (upc, description, normal_price, pricemethod, groupprice, quantity, special_price, specialpricemethod, specialgroupprice, specialquantity, start_date, end_date, department, size, tax, foodstamp, scale, mixmatchcode, modified, advertised, tareweight, discount, discounttype, unitofmeasure, wicable, deposit, qttyEnforced, inUse, subdept) VALUES
                 ($upc, '$description', $price, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, $department, 0, 0, $fs, $scale, 0, now(), 0, 0, $nodisc, $SPO, 0, 0, $deposit, $qty, $inUse, $subdepartment)";
+
+	logAction('0001',1);
 
     } elseif (isset($_POST['action']) && $_POST['action'] == 'update') {
         // Error checking...data validation...
@@ -354,6 +385,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 			tag_type = $tagType
                     WHERE upc = $upc";
 
+	logAction('0001',2);
     }
 
     // Now if no errors, run the queries...
@@ -384,7 +416,6 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         include ('../includes/footer.html');
         exit();
     }
-
     drawSearchForm('Product Was Added/Edited Successfully');
 
 } else { // Show the form.
@@ -392,6 +423,6 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
     drawSearchForm();
 
 }
-
+echo "</div>";
 include ('../includes/footer.html');
 ?>

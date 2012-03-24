@@ -194,7 +194,7 @@ echo '
 	    INNER JOIN is4c_op.memtype AS m ON (c.memtype = m.memtype)
 	WHERE c.memtype BETWEEN 1 AND 5
 	    AND c.personnum = 1
-	GROUP BY m.Memtype
+	GROUP BY m.memtype
 	ORDER BY m.memtype ASC";
 
       $memTypesR = mysqli_query($db_slave, $memTypesQ);

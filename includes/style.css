@@ -1,352 +1,943 @@
-/*#body { 
-	color:444444;
-
-}*/
-
-#box { border: 2px;
-	border-style: solid;
-	padding: 2em;
-	margin: 0.75em;
-}
-
-p {
-	font: "Arial,Lucida";
-	color:330066;
-	font-size: 1em;
-	line-height: 1.4em;
-}
-
-h2 {
-	font: "Arial,Lucida";
-	font-size: 1.6em;
-	line-height: 1.8em;
-	color:330066;
-}
-
-h3 {
-	font: "Arial,Lucida";
-	font-size: 1.2em;
-	font-weight: bolder;
-	line-height: 0.2em;
-	color: 330066;
-}
-h4 {
-	font: "Arial,Lucida";
-	font-size: 1.4em;
-	line-height: 1.4em;
-	letter-spacing: 0.2em;
-	color:330066;
-}
-
-/*								*/
-/*	---	Autonomous Style	---	*/
-/*								*/
-
+/***
+ * ACG Styles
+ * edited by: SDH 2011-08-22
+ *
+ * Various styles used throughout Fannie
+ ***/
 body {
-	font-family:arial;
-	font-size:12px;
-	cursor:default;
-	color:AAAAAA;
-}
 
-td {
-	font-family:arial;
-	font-size:12px;
-	cursor:default;
-	color:444444;
+	font-size: .8em;
+	font-family: sans-serif;
+    background-color: #ddd;
 }
-
-th {
-	font-family:arial;
-	font-size:12px;
-	font-weight:bold;
-	color:444444;
+p {
+	color: #313131;
+	font-size: .9em;
+	font-family: 'Helvetica', sans-serif;
 }
-
 a {
-	color:330066;
-	text-decoration:none;
-	font-size:13px
+	text-decoration: none;
+	underline: none;
+	color: #555;
 }
-
-a:hover {
-	color:330066;
-	text-decoration:underline;
+h3 {
+	text-align: center;
 }
+/***
+ * Fannie's Header
+ * /pos/fannie/includes/header.html
+ *
+ ***/
+#acg_header {
+	color: purple;
+	padding: .5em;
+	position: relative;
+}
+#fannie {
+	font-family: 'Trebuchet MS';
+	color: purple;
+	font-size: 3em;
+	border-radius: 1em;
+	-moz-border-radius: 1em;
+	padding-left: .5em;
+	padding-right: .5em;
+}
+#fannie:hover {
+	color: white;
+	background-color: #639;
+	border-radius: 1em;
+	-moz-border-radius: 1em;
+}
+#fannie a {
+	color: purple;
+}
+#fannie a:hover {
+	color: white;
+}
+#fannie_sub {
+	color: #555;
+	font-size: 1.3em;
+	padding-left: 1em;
+}
+#fannie_date {
+	padding-left: 14em;
+}
+#fannie_timesheet:hover {
+	background-color: #D7A7FF;
+	border-radius: .3em;
+	-moz-border-radius: .3em;
+}
+/***
+ *
+ ****/
+#lane_manager {
+	width: 50%;
 
-input {
-	border-width:1;
-	margin: 1px;
-	font-family:monaco;
-	font-size:12px;
-	padding:2px;
-	height:21px;
-	border-color:CCCCCC;
-	border-style:solid;
-/*	background-color:F9F9F9; */
-	background-color:EEEEEE;
-	color:000000;
+}
+/***
+ *
+ * Generic Classes
+ * 
+ ***/
+#loading {
+        font:bold 12px Verdana;                                                                      
+        color: red;                                                                                   
 }
 .right {
-	text-align: right;
+        text-align: right;                                                                           
 }
 .left {
-	text-align: left;
+    text-align: left;
+}
+.green {
+        color: green;                                                                                
+}
+#shiftTable {
+	font-size: .6em;
+}
+.shiftCell {
+	width: 1px;
+}
+.red {  
+        color: white;                                                                                  
+        background-color: red;
+}
+.under {
+	text-decoration: underline;
+
 }
 .label {
-    text-align: right;
+    text-align: right;                                                                               
+}
+.strong {
+	font-weight: bold;
+
+}
+#box {
+    margin: 0 auto;
+    width: 42em;
+}
+.column {
+    vertical-align: top;
+    display: inline-block;
+	width: 49.3%;
+	margin: 0 auto;
+
+}
+.inline_item {
+    display: block-inline;
+}
+.sales_column_left {
+
+    width: 62%;
+    display: inline-block;
+
+}
+.sales_column_right {
+        
+   max-width: 36%;
+    display: inline-block;
+    vertical-align: top;
+
+}
+#sales_tool_container {
+   margin: 0 auto; 
+   vertical-align: top;
+}
+
+.directions {
+	border: 1px solid black;
+	-moz-border-radius: .5em;
+	border-radius: .5em;
+	text-align: left;
+	vertical-align: top;
+	font-family: 'Helvetica' sans;
+    font-size: 1.1em;
+	color: purple;
+	padding: 1em;
+}
+.thinborder {
+
+    border: 1px solid black;
+
+}
+.thinborder td {
+
+    border: 1px solid black;
+
+}
+.centered {
+    text-align: center;
+	margin: 0 auto;
+}
+.reminder {
+    
+    padding: .5em;
+    border: 1px solid black;
+}
+.reminder:hover {
+    
+    color: red;
+}
+.padded {
+    padding: 1em;
+}
+/***
+ *
+ * Common Functions Styles
+ * /pos/fannie/includes/common.php
+ *
+ ***/
+.dept_tile {
+    display: inline-block;
+    width: 24%;                                                                                 
+}
+.dept_tile label:hover {
+    background: #D7A7EF;
+	border-radius: 1em;
+
+}
+.salesTool_dept_tile {
+    display: inline-block;
+    font-size: .9em;
+    width: 48%;
+}
+.top_block {
+    width: 70%;
+    margin: 0 auto;
+}
+.top_block > div {
+
+    display: inline-block;
+    width: 30%;
+    margin: 0 auto;
+    
+}
+.subdept_tile {
+
+	border: 1px solid purple;
+	width: 100%;
+}
+.subdept_container {
+    border: 1px solid black;
+    radius: .5em;
+    border-radius: .5em;
+    -moz-border-radius: .5em;
     color: black;
 }
-.red {
-	color: red;
+.subdept_container > div {
+    padding: .5em;
 }
+.subdept_tile div {
+	display:inline-block;
+	width: 49%;
+    font-size: .9em;
 
-.green {
+}
+.subdept_header {
+	font-style: bold;
 	color: green;
 }
-.even {
-	background: #ddd;
+/***
+ * 
+ * Fannie Front Page 
+ * /pos/fannie/index.php
+ * 
+ * 
+ ***/
+#column1 {
+	text-align: center;
+    width: 65%;
 }
-.over {
-	background: #aaa;
-}
-table.detailTable .results {
-   bottom-border: 1pt solid black;
-   border-bottom: 1pt solid black;
-}
-p.thinborder {
-    padding: .5em;
-    border: 1pt solid black;
-}
-span#searchTerm {
-	font-size: 1.4em;
-}
-td#itemMaint {
-    color: #121212;
-    line-height: 1.6em;    
+#column1 p {
+	
+	text-align: left;
 
 }
-#itemMaint_toolbar {
+#column1 h1 h2 h3 {
+	text-align: center;
+}
+#column1 ul {
+	list-style-type: none;
+	padding: 1em;
+	margin: 0;
+}
+#column2 {
+	text-align: center;
+    width: 33%;
+}
+#main_timesheet a:hover {
+
+	font-color: white;
+}
+#main_timesheet {
+	border: 1px solid orange;
+	border-radius: 1em;
+	-moz-border-radius: 1em;
+	width: 90%;
 	margin: 0 auto;
-	margin-top: 1em;
-	margin-bottom: 1em;
 }
-
-.itemMaint_checkbox {
-
-	height: .7em;
-
+#main_links {
+	border: 1px solid orange;
+	border-radius: 1em;
+	-moz-border-radius: 1em;
+	width: 94%;
+	margin: 0 auto;
 }
-.itemMaint_inUse {
-	width: 4em;
+#main_links ul {
+    display:inline-block;
+    width: 42%;
 }
-.itemMaint_select {
-	width: 4em;
-	text-align: center;
-}
-table#item_results td {
-
-    padding-left: .2em;
-    padding-right: .2em;
-}
-table#item_results .itemMaint_link {
-    
-}
-
-table#item_results .itemMaint_desc {
-    
-}
-table#item_results .itemMaint_dept {
-	text-align: right;
-	font-size: .5em;
-}
-table#item_results .itemMaint_price {
-    bottom-border: 1px solid black;
-	text-align: right;
-}
-table#item_results .itemMaint_inUse {
-	text-align: center;
-
-}
-.dept_tile {
-	display: inline-block;
-	width: 9em;
+#main_links li {
+	border-radius: .2em;
+	-moz-border-radius: .2em;
 	text-align: left;
-	margin-left: 1em;	
+}
+#main_links li {
+	font-size: 1.1em;
+}
+#main_links li:hover {
+	background: #D7A7FF;
+}
+#tagline {
+	text-size: .8em;
+	text-color: white;
+	background-color: #eeeeee;
+	border-radius: 4em;
+}
+#bottom_div {
+	width: 90%;
+	margin: 0 auto;
+	margin-top: 3em;
+}
+#footer {
+	margin-top: 1.5em;
+	text-align: center;
+	vertical-align: middle;
+	height: 2.5em;
+}
+
+#footer hr {
+	width: 50%;
+}
+#main_content {
+	padding-top: .5em;
 
 }
-div#dept_picker {
+#acg_navbar {
+    text-align: center;
+	position: relative;
+}
+#acg_main {
+    width: 930px;
+    margin: 0 auto;
+    position: relative;
 	text-align: left;
-	border: 1px solid black;
-	margin: 0px auto;
-	margin-bottom: 1em;
-}
-#search_box {
-	margin-bottom: .8em;
-}
-#adv_search {
-	width: 33em;
-	display: inline-block;
-}
-#submit_controls {
 	vertical-align: top;
-	width: 9em;
-	display: inline-block;
+	background: #fff url('logo.png') no-repeat 100% 64px;
+    border-radius: .7em;
+    -moz-border-radius: .7em;
+    -webkit-border-radius: .7em;
+    box-shadow: 7px 7px 25px #111;
+    -moz-box-shadow: 7px 7px 25px #111;
+    -webkit-shadow: 7px 7px 25px #111;
+
+}
+#main_page_header {
+    font-size: 2em;
+    font-weight: bold;
+    color: black;
+    text-align: center;
+}
+#acg_content {
+    border: 1px solid purple;
+	position: relative;
+    width: 94%;
+    margin: 0 auto 1.5em;
+
+	border-radius: 1.3em;
+	-moz-border-radius: 1.3em;
+	-webkit-border-radius: 1.3em;
+
+    padding:1em;
+
+}
+#acg_content lh {
 	text-align: left;
-}
-#picker_toggle:hover {
-
-	color: white;
-	background-color: gray;
-
-}
-#ncga_data {
-
-	text-align: right;
-
-}
-#loading {
-	font:bold 12px Verdana;
-	color:red;
-}
-span#owner_search_term {
-	font-size: 1.2em;
-	color:green;
-}
-p#select_department {
+	font-family: 'Trebuchet MS';
+	color: purple;
 	font-size: 1.4em;
-	font-weight: bold;
+
+}
+.content_header + a:hover {
+    background: #D7A7FF;
+}
+#acg_content .content_header {
+	
+	font-size: 14pt;
+	text-align: center;
+	margin-bottom: .5em; 
+	margin-top: .5em; 
+	font-family: 'Trebuchet MS';
+	color: purple;
+	background: white;
+	border-radius: .5em;
+	-moz-border-radius: .5em;
+	-webkit-border-radius: .5em;
+}
+.duplex_calendar div, .acg_calendar div{
+    
+    /*Opacity*/
+    filter:alpha(opacity=50); /* msie */  
+    -moz-opacity: 0.50; /* firefox 1.0 */  
+    -khtml-opacity: 0.50; /* webkit */  
+    opacity: 0.50; /* css 3 */
+}
+#acg_center {
+	margin: 0 auto;
+}
+
+#announcement_table {
+	vertical-align: top;
+    height: 20em;
+    overflow: hidden;
+}
+table#announcement_display {
+	border: 1px solid black;
+	vertical-align: top;
+	text-align: center;
+	
+}
+table#announcement_display td{
+
+	border: 1px solid black;
+	vertical-align: top;
+	text-align: justify;
+
+}
+table#announcement_display td.author{
+
+}
+table#announcement_display td.title{
+	width: 15em;
+	text-align: center;
+
+}
+table#announcement_display td.message{
+	width: 35em;
+	text-align: justify;
+
+}
+#main_announcements {
+    overflow: auto;
+    max-height: 24em;
+    margin-top: .5em;
+    position: relative;
+    width: 97%;
+}
+div#main_announcements > ul > li.announcement_item  p{
+    
+	text-align: justify;
+}
+.announcement_item {
+    margin-top: 1.8em;
+/*    padding: 0 15 0 15;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+*/
+}
+
+.announcement_item a {
+    background: #ddd;
+}
+.announcement_item a:hover {
+	background: #D7A7FF;
+	border-radius: .3em;
+	-moz-border-radius: .3em;
+	
+}
+.announcement_item span {
+	position: relative;
+	left: 10em;
+}
+#sales_calendar_box {
+    position: absolute;
+    bottom: 1em;
+    width: 63%;
+}
+#today {
+    background: #FFE979;
+
+}
+/***
+ * 
+ * Announcement Admin Tables
+ * /pos/fannie/admin/announcement
+ *
+ ***/
+table#announcement_display {
+    width: 100%;
+}
+table#announcement_display td.authorbox{
+	width: 5em;
+}
+#announcement_display td.authorbox input {
+    width: 100%;
+}
+#announcement_display td.titlebox {
+	width: 12em;
+}
+#announcement_display td.titlebox input {
+     width: 100%;
+}
+#announcement_display td.messagebox {
+	
+}
+#announcement_display td.messagebox textarea {
+    width: 100%;
+	height: 5em;
+}
+#announcement_display td.enablebox {
+    width: 2em;
+
+}
+#announcement_display td.enablebox input {
+}
+#announcement_display td.idbox {
+    width: 3em;
+}
+#announcement_display td.idbox input {
+    width: 1%;
+}
+#announcement_display td.buttonbox {
+    width: 1%;
+}
+#announcement_display td.buttonbox input {
+    
+}
+ .new_authorbox {
+	width: 5em;
+}
+ .new_titlebox {
+	width: 12em;
+}
+.new_messagebox {
+	width: 40em;
+	wrap: soft;
+}
+.new_messagebox {
+
+    height: 7em;
+}
+.new_authorbox:hover {
+	background: #D7A7FF;
+	
+}
+ .new_titlebox:hover {
+	background: #D7A7FF;
+}
+ .new_messagebox:hover {
+	background: #D7A7FF;
+}
+/***
+ *
+ *
+ *
+ *
+ ***/
+#employee_table {
+    border: 0;
+    width: 95%;
+    margin: 0 auto;
+
+}
+
+
+#employee_table td {
+    margin: 0;
+    padding: 5px; 
+    text-align:center;
+}
+/***
+ *
+ *
+ *
+ *
+ ***/
+#storeCharges {
+    font-size: 1.4em;
+    text-align: center;
+
+}
+
+
+
+/***
+ * Navigation Menu
+ * /pos/fannie/includes/navmenu.html
+ *
+ ****/
+.menu_category {
+    display: inline-block;
+	position: static;
+    width: 11.2%;
+    height: 2em;
+    text-align: center;
+    vertical-align: bottom;
+ 
+    margin: 1em auto;
+}
+.menu_name {
+    position: relative;
+    font-size: 1.1em;
+    font-color: black;
+    border: 1px solid white;
+    radius: 0.3em;
+    border-radius: 0.3em;
+    -moz-border-radius: 0.3em;
+    -webkit-border-radius: 0.3em;
+}
+.menu_name:hover {
+    border: 1px solid orange;
+}
+.menu_list {
+    position: absolute;
+
+	text-align: left;
+	background: white;
+	z-index: 100;
+	
+    border: 1px solid orange;
+    radius: 0.3em;
+    border-radius: 0.3em;
+    -moz-border-radius: 0.3em;
+    -webkit-border-radius: 0.3em;
+
+	display: none;	
+}
+.menu_list div {
+	z-index:101;
+
+	margin:.5em;
+	border-radius: .3em;
+	-moz-border-radius: .3em;
+    -webkit-radius: .3em;
+}
+.menu_list div:hover {
+	background: #D7A7FF;
+}
+/***
+ *
+ * Item Maintenance
+ * /pos/fannie/item/itemMaint.php
+ *
+ ***/
+td.itemMaint_dept {
+        font-size: .6em;
+}
+td.itemMaint_inUse {
+    text-align: center;
+}
+/***
+ * Sales Calendar
+ * /pos/fannie/index.php
+ *
+ ***/
+table#sales_table {
+	width: 94%;
+	margin: 0 auto;
+
+    border: 1px solid orange;
+    -moz-border-radius: .5em;
+    border-radius: .5em;
+    padding: .5em;
+}
+table#sales_table tr td {
+	border-bottom: 1px solid black;
+    padding: .2em;
+    border-radius: .3em;
+    radius: .3em;
+    -moz-border-radius: .3em;
+    -webkit-border-radius: .3em;
+}
+    
+tr#days_row {
 	text-align: center;
 }
-p#select_department table {
+#sales_table span {
+	display: inline;
+}
+#sales_table span.calDay {
+	font-size: .5em;
+	text-align: left;
+    padding:1px;
+    border-radius: 5px;
+    border: 1px solid black;
+    background: white;
+}
+#sales_table span.calTotal {
+
+	font-size: .7em;
+	color: green;
+	text-align: right;
+	display: block;
+}
+#sales_table span.calCust {
+	font-size: .7em;
+	color: purple;
+    text-align: right;
+    padding-left: 2em;
+}
+/***
+ *
+ *
+ *
+ ***/
+
+table#MAD_Coupon_totals tr td,table#MAD_owner_coupons tr td{
+    text-align: center;
+
+}
+
+/***
+ *
+ * Sales Tool
+ * /pos/fannie/reports/salesTool.php
+ *
+ ***/
+table#salesSearchForm tr td{
+	vertical-align: top;
+}
+table#salesSearchForm tr td.leftPane{
+    width: 50%;
+}
+.form_element div {
+    display: inline-block;
+}
+.form_label {
+    text-align: right;
+    vertical-align: top;
+    font-size: 1em;
+    text-decoration: underline;
+    margin-right: 1em;
+}
+.form_element input {
+
+    width: 20em;
+}
+.normal_label {
+    font-size: 1.3em;   
+    text-decoration: underline;
+}
+
+.salesTool_container {
+	border: 1px solid black;
+	border-radius: .5em;
+	text-align: left;
+	vertical-align: top;
+	font-family: 'Helvetica' sans;
+	padding: 1em;
+ }
+.salesTool_container > div:first {
+       width: 80%;
+       margin: 0 auto;
+ }
+/*******
+ *  Shrink Tables
+ *
+ * /pos/fannie/reports/shrinkReport.php
+ *
+ *******/
+
+table#shrinkTable {
+	border: 1px solid black;
+	text-align: center;
+	margin: 0 auto;
+	font-size: .9em;
+	font-color: #eee;
+}
+#shrinkTable td {
+
+	padding: 2px;	
+	border: 1px solid black;
 	text-align: center;
 }
-/*									*/
-/*	---	phpMyEdit Styles		---	*/
-/*									*/
-									
-hr.pme-hr		     { border: 0px solid; padding: 0px; margin: 0px; border-top-width: 1px; height: 1px; }
-table.pme-main 	     { border: #004d9c 1px solid; border-collapse: collapse; border-spacing: 0px; width: 100%; }
-table.pme-navigation { border: #004d9c 0px solid; border-collapse: collapse; border-spacing: 0px; width: 100%; }
-th.pme-header	     { border: #004d9c 1px solid; padding: 4px; background: #add8e6; }
-td.pme-key-0, td.pme-value-0, td.pme-help-0, td.pme-navigation-0, td.pme-cell-0,
-td.pme-key-1, td.pme-value-1, td.pme-help-0, td.pme-navigation-1, td.pme-cell-1,
-td.pme-sortinfo, td.pme-filter { border: #004d9c 1px solid; padding: 3px; }
-td.pme-buttons { text-align: left;   }
-td.pme-message { text-align: center; }
-td.pme-stats   { text-align: right;  }
+#shrinkHeader {
+	text-align: center;
+}
+.shrinkHeader_sub {
+	width: 43%;
+	margin: 0 auto;
+	display: inline-block;
+	vertical-align: top;
+}
+#shrinkContent {
+    text-align: center;
+}
+/**
+ * timesheet headers
+ * /pos/fannie/timesheet/
+ *
+ **/
+.timesheet_header {
+    font-size: 1.5em;
+    color: purple;
+}
+.date_col {
+    text-align: right;
+}
+.hour_col {
+    text-align: center;
+}
+/****
+ *
+ * Admin stuff
+ *
+ *
+ ****/
+.admin_menu_box {
+    width: 70em;
+    margin: 0 auto;
+}
+.admin_menu_item {
+    display: inline-block;
+    width: 32%;
+    margin: 0 auto;
 
-/* 									*/
-/*	---	CalendarControl Styles	---	*/
-/*									*/
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid white;
+    radius: 1em; 
+    border-radius: 1em;
+    -moz-border-radius: 1em;
 
-#CalendarControlIFrame {
-  display: none;
-  left: 0px;
-  position: absolute;
-  top: 0px
-  height: 250px;
-  width: 250px;
-  z-index: 99;
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
+}
+.admin_menu_item p {
+    font-size: 1.2em;
+    font-color: purple;
+
+
+}
+.admin_menu_item a {
+
+    font-size: 2em;
+    font-color: black;
+
+
+}
+div.admin_menu_item:hover {
+	background: #D7A7FF;
+    border: 1px solid purple;
+    radius: 1em; 
+    border-radius: 1em;
+    -moz-border-radius: 1em;
+}
+/****
+ *	Extras Index page
+ *
+ *
+ *
+ ****/
+.tool_menu_tile {
+    vertical-align: top;
+    width: 47%;
+    display: inline-block;
+
+}
+.tool_menu_link {
+
+    border: 1px solid white;
+    border-radius: .5em;
+    padding: 1em;
+
+
+}
+.tool_menu_link:hover {
+    background: #D7A7FF;
+    border: 1px solid purple;
+    radius: 1em; 
+    border-radius: 1em;
+    -moz-border-radius: 1em;
+}
+/****
+ *
+ * Employee Management
+ * /pos/fannie/admin/emp_mgmt.php
+ *
+ ****/
+
+table.emp_details, .emp_details td {
+    border: 1px solid black;
+    padding: .5em;
 }
 
-#CalendarControl {
-  position:absolute;
-  background-color:#FFF;
-  margin:0;
-  padding:0;
-  display:none;
-  z-index: 100;
+#emp_mgmt_nav {
+    text-align: center;
+    padding: .3em;
+    margin-bottom: 1em;
+}
+#emp_mgmt_nav span {
+    
+    padding: .3em;
+
 }
 
-#CalendarControl table {
-  font-family: arial, verdana, helvetica, sans-serif;
-  font-size: 8pt;
-  border-left: 1px solid #336;
-  border-right: 1px solid #336;
+/***********
+ *
+ *
+ ***********/
+
+.hey {
+    font-size: 2em;
+ }
+.hey a{
+    font-size: 1.1em;
+    background: #ddd;
+ }
+/***********
+ *
+ *
+ ***********/
+.lab_link {
+	list-style: none;
+	font-size: 1.3em;
+	font-family: "Trebuchet MS";
+	
+	display: block-inline;
+	width: 10%;
+	margin-top: .2em;
+}
+.lab_link > a {
+	vertical-align: middle;
+
 }
 
-#CalendarControl th {
-  font-weight: normal;
+/***********
+ *
+ *
+ ***********/
+#activity_container {
 }
+#activity_form {
+	width: 10em;
+	margin: 0 auto;
 
-#CalendarControl th a {
-  font-weight: normal;
-  text-decoration: none;
-  color: #FFF;
-  padding: 1px;
+	border: 1px solid black;
+
 }
-
-#CalendarControl td {
-  text-align: center;
+#activity_table {
+	text-align: center;
 }
+#activity_table td {
+	text-align: center;
 
-#CalendarControl .header {
-  background-color: #330066;
 }
-
-#CalendarControl .weekday {
-  background-color: #DDD;
-  color: #000;
+#table_column_div {
+	width: 70%;
 }
-
-#CalendarControl .weekend {
-  background-color: #FFC;
-  color: #000;
+.activity_column {
+	display: inline-block;
+	vertical-align: top;
 }
-
-#CalendarControl .current {
-  border: 1px solid #339;
-  background-color: #336;
-  color: #FFF;
-}
-
-#CalendarControl .weekday,
-#CalendarControl .weekend,
-#CalendarControl .current {
-  display: block;
-  text-decoration: none;
-  border: 1px solid #FFF;
-  width: 2em;
-}
-
-#CalendarControl .weekday:hover,
-#CalendarControl .weekend:hover,
-#CalendarControl .current:hover {
-  color: #FFF;
-  background-color: #336;
-  border: 1px solid #999;
-}
-
-#CalendarControl .previous {
-  text-align: left;
-}
-
-#CalendarControl .next {
-  text-align: right;
-}
-
-#CalendarControl .previous,
-#CalendarControl .next {
-  padding: 1px 3px 1px 3px;
-  font-size: 1.4em;
-}
-
-#CalendarControl .previous a,
-#CalendarControl .next a {
-  color: #FFF;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-#CalendarControl .title {
-  text-align: center;
-  font-weight: bold;
-  color: #FFF;
-}
-
-#CalendarControl .empty {
-  background-color: #CCC;
-  border: 1px solid #FFF;
-}
-

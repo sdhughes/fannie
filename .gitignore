@@ -5,3 +5,10 @@ config.php
 *.tsv
 *.txt
 CoMET/*
+includes/config.php
+cron/ncgaWeeklySales.sh
+mysql/scripts/*
+includes/config.php
+extraContactList.php
+includes/queries.php
+documents/*

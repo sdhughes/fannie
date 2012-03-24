@@ -64,10 +64,10 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
                 FROM $transtable
                 WHERE date(datetime) = '$db_date'
                 AND department <= 35
-                AND department <> 0
                 AND trans_status <> 'X'
                 AND emp_no <> 9999";
 
+                //AND department <> 0
                 $results = mysqli_query($db_slave, $grossQ);
                 list($gross) = mysqli_fetch_row($results);
                 if (!$gross) $gross = -1;
@@ -82,7 +82,7 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 	 */
         echo '<link rel="stylesheet" href="../reports/style.css" type="text/css" />';
         echo '<BODY BGCOLOR = "FFCC99" > <font SIZE=2><link rel="STYLESHEET" href="../reports/style.css" type="text/css">';
-
+/*
 	$deptArray = array(
 	    array('name' => 'Grocery', 'depts' => '1, 13, 28, 30'),
 	    array('name' => 'Bulk', 'depts' => '2, 31'),
@@ -103,7 +103,27 @@ if ( isset($_POST['submitted']) || isset($_GET['today']) ) {
 	    array('name' => 'Gift Card Sales', 'depts' => '44'),
 	    array('name' => 'Member Equity', 'depts' => '45')
 	);
-
+*/
+	$deptArray = array(
+	    array('name' => 'Grocery', 'depts' => '1, 13, 28, 30'),
+	    array('name' => 'Frozen', 'depts' => '6'),
+	    array('name' => 'Perishables', 'depts' => '3, 15, 16, 32'),
+	    array('name' => 'Dairy', 'depts' => '4'),
+	    array('name' => 'Cheese', 'depts' => '7'),
+	    array('name' => 'Beer', 'depts' => '14'),
+	    array('name' => 'Wine', 'depts' => '5, 29'),
+	    array('name' => 'Supplements', 'depts' => '9, 12, 35'),
+	    array('name' => 'Personal Care', 'depts' => '11'),
+	    array('name' => 'Non-Foods', 'depts' => '10, 34'),
+	    array('name' => 'Produce', 'depts' => '8, 33'),
+	    array('name' => 'Bulk', 'depts' => '2, 31'),
+	    array('name' => 'Gift Card Sales', 'depts' => '44'),
+	    array('name' => 'Marketing', 'depts' => '18'),
+	    array('name' => 'Tri-Met', 'depts' => '40'),
+	    array('name' => 'Bottle Return', 'depts' => '41'),
+	    array('name' => 'Bottle Deposit', 'depts' => '42, 43'),
+	    array('name' => 'Member Equity', 'depts' => '45')
+	);
 	$dept_subtotalQ = "SELECT ROUND(SUM(d.total),2) AS 'Department Subtotal'
                 FROM $transtable d
                 WHERE date(d.datetime) = '$db_date'

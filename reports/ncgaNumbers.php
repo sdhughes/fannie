@@ -1,6 +1,6 @@
 <?php
-$page_title = 'Fannie - NCGA Numbers';
-$header = 'NCGA Numbers';
+$page_title = 'Fannie - Executive Summary by Date Range';
+$header = 'Executive Summary';
 include('../includes/header.html');
 echo "<html><head><title>Numbers Relevant to NCGA</title>";
 ?>    
@@ -8,7 +8,6 @@ echo "<html><head><title>Numbers Relevant to NCGA</title>";
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
-    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
@@ -34,7 +33,6 @@ if ( $_POST['submit'] == 'Submit' ) {
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
 
-    echo "<h2>NCGA Data</h2>";
     echo "<p>Numbers have been compiled from between $date1 and $date2.</p>";
 
 
@@ -62,14 +60,14 @@ if ( $_POST['submit'] == 'Submit' ) {
                AND trans_status <> 'X'
                AND emp_no <> 9999";
 
-        $CouponQ .= "SELECT ROUND(SUM(total),2) AS total
+        $CouponQ .= "SELECT SUM(total) AS total
                FROM is4c_log.trans_$i
                WHERE DATE(datetime) BETWEEN '$date1' AND '$date2'
                AND trans_subtype = 'IC'
                AND trans_status <> 'X'
                AND emp_no <> 9999";
 
-        $GrossQ .= "SELECT ROUND(SUM(total),2) AS 'total'
+        $GrossQ .= "SELECT SUM(total) AS 'total'
                FROM is4c_log.trans_$i
                WHERE DATE(datetime) BETWEEN '$date1' AND '$date2'
                AND department <> 0
@@ -99,14 +97,14 @@ if ( $_POST['submit'] == 'Submit' ) {
                AND trans_status <> 'X'
                AND emp_no <> 9999";
 
-	        $CouponQ .= " UNION ALL SELECT ROUND(SUM(total),2) AS total
+	        $CouponQ .= " UNION ALL SELECT SUM(total) AS total
                FROM is4c_log.dtransactions
                WHERE DATE(datetime) BETWEEN '$date1' AND '$date2'
                AND trans_subtype = 'IC'
                AND trans_status <> 'X'
                AND emp_no <> 9999";
 
-        	$GrossQ .= " UNION ALL SELECT ROUND(SUM(total),2) AS 'total' FROM is4c_log.dtransactions WHERE DATE(datetime) BETWEEN '$date1' AND '$date2' AND department <> 0 AND trans_status <> 'X' AND trans_subtype <> 'MC' AND emp_no <> 9999";
+        	$GrossQ .= " UNION ALL SELECT SUM(total) AS 'total' FROM is4c_log.dtransactions WHERE DATE(datetime) BETWEEN '$date1' AND '$date2' AND department <> 0 AND trans_status <> 'X' AND trans_subtype <> 'MC' AND emp_no <> 9999";
 
         	$NetQ .= "UNION ALL SELECT SUM(total) 
                FROM is4c_log.dtransactions

@@ -75,13 +75,18 @@ if (isset($_POST['submitted'])) {
         ORDER BY t.emp_no";
     $otherR = mysqli_query($db_slave, $otherQ);
     
+    $refundCount = 0;
+    $cashCount = 0;
+
     if ($otherR) {
         echo '<table border="1" cellspacing="3" cellpadding="3">
             <tr><th>Emp. #</th><th>Name</th><th>Number of Refunds</th><th>Total Value of Refunds</th><th>Average Refund</th></tr>';
         while (list($count, $sum, $emp_no, $name) = mysqli_fetch_row($otherR)) {
-            echo "<tr><td>$emp_no</td><td>$name</td><td align='center'>$count</td><td>$" . number_format($sum * -1, 2) . "</td><td>$" . number_format(($sum * -1)/$count, 2) . "</td></tr>";
+	    $refundCount += $count;
+	    $cashCount += $sum;
+            echo "<tr><td>$emp_no</td><td>$name</td><td align='center'>$count</td><td align='right'>$" . number_format($sum * -1, 2) . "</td><td align='right'>$" . number_format(($sum * -1)/$count, 2) . "</td></tr>";
         }
-        echo '</table>';
+        echo "<tr><td>&nbsp;</td><td>Totals:</td><td align='center'>$refundCount</td><td align='right'> $$cashCount</td><td align='right'> $" . number_format(($cashCount*-1)/$refundCount,2) . "</td></tr></table>";
     } else {
         echo "<p>Error...</p><p>Query: $otherQ</p>" .  mysqli_error($db_slave);
     }

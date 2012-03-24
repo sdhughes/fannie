@@ -13,21 +13,17 @@ $page_title = 'Fannie - Owner Details';
 $header = 'Owner Details';
 $debug = true;
 include('../includes/header.html');
-echo '<script type="text/javascript" src="../includes/javascript/jquery.js"></script>';
 echo '<script type="text/javascript" src="../includes/javascript/myquery.js"></script>';
+echo '<script type="text/javascript" src="../includes/javascript/ownerDetails.js"></script>';
 ?>
 <html>
 <head>
 
 <?php
-//going to move this to some other file for security
-$h = 'localhost';
-$u = 'comet';
-$p = 'c0m3t';
-$d = 'comet';
-
+require_once('../includes/mysqli_connect.php');
+global $db_master;
 // Connect to the database.
-$conn_comet = mysqli_connect($h,$u,$p, $d);
+//$conn_comet = mysqli_connect($h,$u,$p, $d);
 
 
 if ( isset($_REQUEST['submitted']) && ($_REQUEST['submitted'] == 'search') ) { // On form submission or list link clicking...
@@ -51,7 +47,7 @@ else $where = 'lastName LIKE \'%' . mysql_real_escape_string($cardNo) . '%\'';
         WHERE %s GROUP BY d.cardNo",$where);
 //echo $query;
 
-    $result = mysqli_query($conn_comet, $query) or die('bad query: ' . mysqli_error($conn_comet));
+    $result = mysqli_query($db_master, $query) or die('bad query: ' . mysqli_error($conn_comet));
     $counter = 0;
     $numRows = mysqli_num_rows($result);	
 
@@ -63,7 +59,7 @@ else $where = 'lastName LIKE \'%' . mysql_real_escape_string($cardNo) . '%\'';
    }
     else echo " no matches." 
    */
-    echo '<p>Please click on a name to display associated details.</p>';
+    echo '<p class="directions">Please click on a name to display associated details.</p>';
     
     while ($row = mysqli_fetch_array($result,MYSQL_ASSOC)){
 	//echo $row;
@@ -93,7 +89,7 @@ else $where = 'lastName LIKE \'%' . mysql_real_escape_string($cardNo) . '%\'';
 	}
 
 //echo '<br />Connected successfully' . $card_no;
-mysqli_close($conn_comet);
+mysqli_close($db_master);
 
 } else { // Show the form.
 

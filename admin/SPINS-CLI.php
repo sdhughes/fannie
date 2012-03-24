@@ -102,7 +102,7 @@ if ($start_year == $end_year) {
         GROUP BY upc HAVING qty > 0";
 }
 
-//echo $query;
+echo $query;
 $result = mysqli_query($db_slave, $query);
 $num = mysqli_num_rows($result);
 

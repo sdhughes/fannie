@@ -153,7 +153,8 @@ echo '<form action="employees.php" method="POST">
 echo '<form action="employees.php" method="POST">';
 echo "<table id='employee_table'>";
 echo "<th>Emp No</th><th>Last Name</th><th>Nickname</th><th>First Name</th><th>Job Title</th><th>Card No.</th><th class='wage_element'>Wage</th>";
-echo "<th>Budgeted Hours</th><th>Active?</th><th>&nbsp;</th>";
+echo "<th>Budgeted Hours</th><th>Active?</th>";
+//<th>&nbsp;</th>";
 
 
 $bg = '#eeeeee';
@@ -183,7 +184,7 @@ while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
 	if ($row[6] == 1) echo ' checked="checked" ';
 	echo "/>";
 	echo "<input type=hidden name='id[]' value=".$row[0].">&nbsp;</td>"; 
-    echo "<td><button class='edit_employee' >edit</button></td>";
+//    echo "<td><button class='edit_employee' >edit</button></td>";
     echo "</tr>\n";
 }
 	$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
@@ -202,9 +203,13 @@ while ($row = mysqli_fetch_array($result, MYSQLI_NUM)) {
 	echo '<td class="wage_element"><input type="text" name="Wage[' . $max . ']" maxlength="6" size="6" /></td>';
 	echo '<td><input type="text" name="Budgeted_Hours[' . $max . ']" maxlength="6" size="6" /></td>';
 	echo "<td><input type='checkbox' name='EmpActive[" . $max . "]' />";
-	echo "<input type='hidden' name='add' value='" . $max . "'>&nbsp;</td>";
+	echo "<input type='hidden' name='add' value='" . $max . "'>&nbsp;</td></tr>";
 
-echo "<td><input type=submit name=submit value=add></td></tr>\n";
+//echo "<td><input type=submit name=submit value=add></td></tr>\n";
+echo "<tr><td colspan=8>
+<input type=submit name=submit value=submit>
+<input type=submit name=submit value=add>
+</td></tr>\n";
 echo "</table></form>";
 
 include ('../includes/footer.html');

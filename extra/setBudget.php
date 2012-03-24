@@ -2,7 +2,7 @@
 ini_set('display_errors', 'on');
 ini_set('error_reporting', E_ALL);
 
-require_once('includes/mysqli_connect.php');
+require_once('../includes/mysqli_connect.php');
 mysqli_select_db($db_master, 'is4c_log');
 
 if (isset($_POST['submitted'])) {

@@ -4,9 +4,27 @@ $page_title = "Fannie - Reports Module";
 require_once ('../includes/header.html');
 require_once ('../includes/mysqli_connect.php');
 
-echo '<link href="../style.css" rel="stylesheet" type="text/css">
-  <script src="../src/CalendarControl.js" language="javascript"></script>';
+//echo '<link href="../style.css" rel="stylesheet" type="text/css">
+//  <script src="../src/CalendarControl.js" language="javascript"></script>';
 
+?>
+ <link rel="STYLESHEET" type="text/css" href="../includes/style.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+    <script language='javascript' type="text/javascript" src="../includes/javascript/jquery.js"></script>
+    <script language='javascript' type="text/javascript" src="../includes/javascript/myquery.js"></script>
+    <script language='javascript' type="text/javascript" src="../includes/javascript/flot/jquery.flot.js"></script>
+    <script language='javascript' type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+    <script language='javascript' type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script language='javascript' type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+    <script language='javascript' type="text/javascript">
+        Date.format = 'yyyy-mm-dd';
+        $(function(){            
+                $('.datepick').datepicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true, changeMonth:true, changeYear: true, dateFormat: 'yy-mm-dd'});
+        });
+    </script>
+<?php
 if (isset($_POST['submitted'])) {
     mysqli_select_db ($db_slave, 'is4c_op');
     $ID = $_POST['batch'];
@@ -36,6 +54,8 @@ if (isset($_POST['submitted'])) {
         }
     } else {
         echo "<p>Error: there were no results...maybe try a different date range?</p>";
+        echo "<p>Query:    $rangeQ</p>";
+        echo "<p>Query:    $batchQ</p>";
         include_once ('../includes/footer.html');
         exit();
     }
@@ -65,6 +85,9 @@ if (isset($_POST['submitted'])) {
         }
     } else {
         echo "<p>Error: there were no results...maybe try a different date range?</p>";
+
+        echo "<p>Query:    $rangeQ</p>";
+        echo "<p>Query:    $batchQ</p>";
         include_once ('../includes/footer.html');
         exit();
     }
@@ -124,8 +147,8 @@ if (isset($_POST['submitted'])) {
                         <p><b>End</b></p>
                         </td>
                         <td>			
-                                <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
-                                <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                                <p><input type=text size=10 name=date1 class="datepick"></p>
+                                <p><input type=text size=10 name=date2 class="datepick"></p>
                         </td>
                         <td colspan=2>
                                 <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>

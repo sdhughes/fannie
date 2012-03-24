@@ -44,15 +44,23 @@ if (isset($_GET['submit'])) {
 	$del = 0;
 }
 
-
-echo "<form action=addItems.php action=GET>";
-echo "<table border=0><tr><td><b>Sale Price: </b><input type=text name=saleprice size=6></td>";
-echo "<td><b>UPC: </b><input type=text name=upc></td>";
+echo "<div class='inline_item'>";
+echo "<form action=addItems.php action=GET>Add/Remove Item in Sales Batch<br />";
+echo "<b>Sale Price: </b><input type=text name=saleprice size=6></td>";
+echo "<b>UPC: </b><input type=text name=upc>";
 echo "<input type=hidden name=batchID value=$batchID>";
-echo "<td><b>Delete</b><input type=checkbox name=delete value=1>";
-echo "<td><input type=submit name=submit value=submit></td></tr></table>";
+echo "<b>Delete</b><input type=checkbox name=delete value=1>";
+echo "<input type=submit name=submit value=submit>";
+echo "</form>";
 
-//echo "this is upc" . $upc;
+//echo "<h2>this is upc" . $upc . "</h3>";
+if ($upc == '0000000000000') {
+    echo "<script type='text/javascript' language='javascript' >
+            alert('No upc entered, please try again');
+            </script>";
+
+} else {
+
 
 $selBListQ = "SELECT * FROM batchList WHERE upc = $upc
               AND batchID = $batchID";
@@ -91,6 +99,8 @@ if ($del == 1) {
          //echo $upBItemQ;
          $upBItemR = mysqli_query($db_master, $upBItemQ);
       }
+}
+
 }
 ?>
 </body>

@@ -18,6 +18,10 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
         $page_title = 'Fannie - Administration Module';
         include ('../includes/header.html');
         include ('./includes/header.html');
+//        echo "<script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>";
+        echo "<script type=\"text/javascript\" src=\"../includes/javascript/timesheet.js\"></script>";
+
+
         $query = "SELECT ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.time_in, t.time_out))/60, 2),
                 date_format(t.date, '%a %b %D'),
                 t.emp_no,
@@ -109,11 +113,25 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
             $periodHours = 0;
             while ($row = mysqli_fetch_array($result)) {
                 if ($first == TRUE) {
-                    echo "<p>Timesheet for $row[3] from $row[4] to $row[5]:</p>";
-                    echo "<table><tr><th>Date</th><th>Total Hours Worked</th><th></th></tr>\n";
+                    echo "<p class='timesheet_header'>Timesheet for $row[3] from $row[4] to $row[5]:</p>";
+                    echo "<table><tr><th colspan=2>Date</th><th>Total Hours Worked</th><th></th></tr>\n";
                 }
                 if ($row[0] > 24) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
-                echo "<tr><td>$row[1]</td><td>$fontopen$row[0]$fontclose</td><td><a href=\"editdate.php?emp_no=$emp_no&date=$row[6]&periodID=$periodID\">(Edit)</a></td></tr>\n";
+
+		if (is_numeric(substr($row[1],8,2))) {
+			$datePart1 = substr($row[1],4,6);
+			$supScript = substr($row[1],10,2);
+		} else { 
+			$datePart1 = substr($row[1],4,5);
+			$supScript = substr($row[1],9,2);
+		}
+
+                echo "<tr>"
+                        . "<td class=''>" . substr($row[1],0,4) . "<sup>&nbsp;</sup></td>" 
+                        . "<td>" . $datePart1 . "<sup>" . $supScript . "</sup></td>" 
+                        . "<td class='hour_col'>$fontopen$row[0]$fontclose</td>" 
+                        . "<td><a href=\"editdate.php?emp_no=$emp_no&date=$row[6]&periodID=$periodID\">(Edit)</a></td>" 
+                        . "</tr>\n";
                 $first = FALSE;
                 $periodHours += $row[0];
             }
@@ -130,18 +148,19 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
 
             echo "</table>
             <form action='viewsheet.php' method='POST'>
-            <p>Total hours in this pay period: " . number_format($periodHours, 2) . "</p>
+            <p class='timesheet_header'>Total hours in this pay period: " . number_format($periodHours, 2) . "</p>
             <table cellpadding='5'><tr><td>Week One: ";
             if ($weekone > 40) {echo '<font color="red">'; $font = '</font>';} else {$font = NULL;}
             echo number_format($weekone, 2) . $font . "</td>";
-            echo "<td>Gross Wages (before taxes): $" . number_format($Wage * ($periodHours + $vacation), 2) . "</td></tr>";
+            //echo "<td>Gross Wages (before taxes): $" . number_format($Wage * ($periodHours + $vacation), 2) . "</td>
+		echo "</tr>";//took this from the previous line to close the row
             echo "<tr><td>Week Two: ";
             if ($weektwo > 40) {echo '<font color="red">'; $font = '</font>';} else {$font = NULL;}
             echo number_format($weektwo, 2) . $font . "</td>";
             echo "<td>Amount House Charged: $" . number_format($houseCharge, 2) . "</td></tr>";
             echo "<tr><td>Vacation Hours: ";
             if ($vacation > 0) {echo '<font color="red">'; $font = '</font>';} else {$font = NULL;}
-            echo "<input type='text' name='vacation' size='5' maxlength='5' value='" . number_format($vacation, 2) . "' />" . $font . "
+            echo "<input type='text' name='vacation' id='vacation_hours_input' size='5' maxlength='5' value='" . number_format($vacation, 2) . "' />" . $font . "
                 <input type='hidden' name='vacationID' value='$vacationID' />
                 <input type='hidden' name='period' value='$periodID' />
                 <input type='hidden' name='emp' value='$emp_no' /></td>";
@@ -171,7 +190,7 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
 		    </tr>
 		    <tr>
 			<td>Vacation Hours:
-			    <input type='text' name='vacation' size='5' maxlength='5' value='" . number_format($vacation, 2) . "' />
+			    <input type='text' name='vacation' id='vacation_hours_input' size='5' maxlength='5' value='" . number_format($vacation, 2) . "' />
 			    <input type='hidden' name='vacationID' value='$vacationID' />
 			    <input type='hidden' name='period' value='$periodID' />
 			    <input type='hidden' name='emp' value='$emp_no' />

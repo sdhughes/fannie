@@ -166,6 +166,9 @@ if (isset($_POST['submitted'])) {
     
     
 } else { // Show the form
+$page_title = 'Fannie - Reports Module';
+$header = 'Detailed Daily Report';
+include ('../includes/header.html');
         ?>
         
 <!-- <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
@@ -184,7 +187,6 @@ if (isset($_POST['submitted'])) {
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
-	<script type="text/javascript" src="../includes/javascript/jquery.js"></script>
 	<script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
 	<script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
 	<script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
@@ -206,18 +208,14 @@ if (isset($_POST['submitted'])) {
         </script>
 	<?php
 
-$page_title = 'Fannie - Reports Module';
-$header = 'Detailed Daily Report';
-include ('../includes/header.html');
 ?>
 <form target="_blank" action="detailedDayReport.php" method="POST">
     <p>Which day do you want a report for?&nbsp&nbsp</p>
     <span style="width: 175px !important;float:left;"><input type="text" size="10" name="date" class="datepick" autocomplete="off" /></span>
     <br /><br />
     <input type="hidden" name="submitted" value="TRUE" />
-    <button name="submit" type="submit">Show me the numbers!</button>
+    <button name="submit" type="submit" id='myButton'>Show me the numbers!</button>
 </form> 
 <?php
 include ('../includes/footer.html');
 }
-?>

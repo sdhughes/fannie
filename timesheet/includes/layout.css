@@ -1,9 +1,6 @@
 body {
-	font: 12px "Lucida Sans Unicode", Verdana, sans-serif;
+	//font: 12px "Lucida Sans Unicode", Verdana, sans-serif;
 	color: #333333;
-	background: #FFF;
-	margin: 0;
-	padding: 0;
 }
 #wrapper {
 	margin: 0 auto;
@@ -82,13 +79,6 @@ html>#nav li a {
 	background-image: none;
 	text-align: center;
 	padding: 0;
-}
-#footer {
-	border-bottom: 1px solid #000;
-	border-top: 1px solid #000;
-	margin: 0 25px 0 25px;
-	padding: 10px;
-	text-align: center;
 }
 p span.attention {
    color: red;

@@ -7,7 +7,6 @@ require_once ('../includes/mysqli_connect.php');
 mysqli_select_db ($db_master, 'is4c_op');
 
 ?>
-    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     <script type="text/javascript">
 	function updateChange(id) {
 	    $('#' + id).val('TRUE');

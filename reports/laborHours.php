@@ -207,7 +207,7 @@ if (isset($_POST['submitted'])) {
     echo '<form action="laborHours.php" method="POST">
         <h3>Report Options</h3>
         <div>
-        <input type="radio" name="type" value="month" checked="CHECKED" /><font color="black">By Month</font><br />
+        <input type="radio" name="type" value="month" checked="CHECKED" id="byMonth"/><label for="byMonth"><font color="black">By Month</font></label><br />
         (Months are inclusive)
         <p>Start Month: <select name="start_month">';
     foreach ($months AS $number => $month) {
@@ -230,9 +230,9 @@ if (isset($_POST['submitted'])) {
 
     echo '</select></p></div><div>';
 
-    $query = "SELECT periodID, DATE_FORMAT(periodStart, '%W %M %D, %Y') AS Start, DATE_FORMAT(periodEnd, '%W %M %D, %Y') AS End FROM payperiods WHERE periodID > 17 AND periodStart < now() ORDER BY periodID ASC";
+    $query = "SELECT periodID, DATE_FORMAT(periodStart, '%W %M %D, %Y') AS Start, DATE_FORMAT(periodEnd, '%W %M %D, %Y') AS End FROM payperiods WHERE periodID > 17 AND periodStart < now() ORDER BY periodID DESC";
     $result = mysqli_query($db_slave, $query);
-    echo '<input type="radio" name="type" value="payperiod" /><font color="black">By Payperiod</font><br />
+    echo '<input type="radio" name="type" value="payperiod" id="byPayperiod" /><label for="byPayperiod"><font color="black">By Payperiod</font></label><br />
         (Payperiods are also inclusive)
         <p>Start Pay Period: <select name="start_period">';
     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
@@ -240,7 +240,7 @@ if (isset($_POST['submitted'])) {
     }
     echo '</select></p>
         <p>Ending Pay Period: <select name="end_period">';
-    $query = "SELECT periodID, DATE_FORMAT(periodStart, '%W %M %D, %Y') AS Start, DATE_FORMAT(periodEnd, '%W %M %D, %Y') AS End FROM payperiods WHERE periodID > 17 AND periodStart < now() ORDER BY periodID ASC";
+    $query = "SELECT periodID, DATE_FORMAT(periodStart, '%W %M %D, %Y') AS Start, DATE_FORMAT(periodEnd, '%W %M %D, %Y') AS End FROM payperiods WHERE periodID > 17 AND periodStart < now() ORDER BY periodID DESC";
     $result = mysqli_query($db_slave, $query);
     while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
         echo "<option value=\"{$row['periodID']}\">{$row['End']}</option>";
@@ -249,6 +249,7 @@ if (isset($_POST['submitted'])) {
     echo '<input type="hidden" name="submitted" value="TRUE" />
     <button name="submit" type="submit">Do It!!</button>
     </form>';
+    echo "</div>";//added this in to make it format.... sdh 2011-11-21
     include ('../includes/footer.html');
 }
 ?>

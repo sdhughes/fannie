@@ -2,9 +2,15 @@
 require_once('../includes/mysqli_connect.php');
 mysqli_select_db($db_master, 'is4c_op');
 
+echo '    <div class="directions">
+        Select the employees name, pay period in which to add, edit or delete hours, and the action to perform.<br />Please be sure to double check any changes for accuracy.
+    </div>
+';
+
+
 echo '<form action="admin.php" method="get">
     <div id="box">
-        <p><input type="radio" name="function" value="view" id="view" checked="checked" /><label for="view">View/Edit Sheets</label></p>';
+        ';
     
     $query = "SELECT FirstName, emp_no FROM employees where EmpActive=1 ORDER BY FirstName ASC";
     $result = mysqli_query($db_master, $query);
@@ -31,7 +37,11 @@ echo '<form action="admin.php" method="get">
         echo ">($row[0] - $row[1])</option>";
     }
     echo '</select></p>';
-    echo    '<p><input type="radio" name="function" value="add" id="add" /><label for="add">Add Hours Posthumously</label></p>
+    echo    '
+    <div class="thinborder padded" >
+        <input type="radio" name="function" value="view" id="view" checked="checked" /><label for="view">View/Edit Sheets</label> 
+    <input type="radio" name="function" value="add" id="add" /><label for="add">Add Hours Posthumously</label>
+    </div>
     <br /><button type="submit">Master the Sheets of Time!</button>
     </div>
 </form>';

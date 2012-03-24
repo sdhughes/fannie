@@ -98,7 +98,8 @@ if (isset($_POST['submitted'])) {
 
 	$emptyLine = '<tr><td colspan="6">&nbsp;</td></tr>';
 
-	$receipt = '<table width="400px">';
+	$receipt = '<table>';
+	//$receipt = '<table width="400px">';
 	sixCellLine('TENDER REPORT', $receipt);
 
 	$receipt .= '<tr><th colspan="2">' . "Lane " . trim($reg) . '</th><th colspan="2">' . $shiftname . '</th><th colspan="2">' . $date . "</th></tr>";
@@ -326,16 +327,21 @@ if (isset($_POST['submitted'])) {
 //	});
 //    </script>
 
+    // Create the form.
+    $header = 'Tender Report Lookup';
+    $page_title = 'Tender Reports';
+
+    require_once('../includes/header.html');
 
 echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
     <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
     <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
-    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
     <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>
     <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
     <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
     <script type=\"text/javascript\">
                 Date.format = 'yyyy-mm-dd';
+		//$(document).ready(function(){alert('in')});
                 $(function(){
                                 $('.datepick').datepicker({ 
                                                 startDate:'2007-08-01',
@@ -353,11 +359,6 @@ echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/u
 ";
 
 
-    // Create the form.
-    $header = 'Tender Report Lookup';
-    $page_title = 'Tender Reports';
-
-    require_once('../includes/header.html');
     ?>
     <h2>Re-print Tender Report</h2>
     <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" name="tenderForm" onsubmit="return checkSubmission();">

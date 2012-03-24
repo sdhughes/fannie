@@ -85,6 +85,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
+                    AND t.upc != 0
+                    AND t.upc != '0000000000000'
+                    AND t.department != '0'
                     AND t.emp_no <> 9999";
 
             if ($i == $year2) {
@@ -95,6 +98,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
+                    AND t.upc != 0
+                    AND t.upc != '0000000000000'
+                    AND t.department != '0'
                     AND t.emp_no <> 9999";
                 }
 
@@ -114,6 +120,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
+                    AND t.upc != 0
+                    AND t.upc != '0000000000000'
+                    AND t.department != '0'
                     AND t.emp_no <> 9999";
 
             $grossQ .= " UNION ALL SELECT ROUND(SUM(t.total), 2) AS Total
@@ -121,9 +130,12 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
+                    AND t.upc != 0
+                    AND t.upc != '0000000000000'
+                    AND t.department != '0'
                     AND t.emp_no <> 9999";
-
-	    $grossQ .= ") AS yearSpan";
+            
+            $grossQ .= ") AS yearSpan";
 
         } else {
 
@@ -132,6 +144,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                 WHERE p.subdept = $subdepartment AND t.UPC = p.UPC
                     AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                     AND t.trans_status <> 'X'
+                    AND t.upc != 0
+                    AND t.upc != '0000000000000'
+                    AND t.department != '0'
                     AND t.emp_no <> 9999";
 
         }
@@ -144,6 +159,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
 	printf("mySQL Error: %s\nQuery: %s", mysqli_error($db_slave), $grossQ);
 
     echo "<p>Sub-department gross sales: $gross</p><br />";
+   // echo "<p>Sub-department gross sales query: $grossQ</p><br />";
 
     // Print the row headers.
     echo '<table border="1" class="tablesorter">
@@ -185,6 +201,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             p.inUse as inUse
                             FROM is4c_op.products AS p RIGHT JOIN is4c_log.trans_$year1 AS t ON (p.UPC = t.UPC)
                             WHERE p.subdept = $subdepartment
+                    AND t.department != '0'
+                    AND t.upc != '0000000000000'
+                    AND t.upc != 0
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
@@ -199,6 +218,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             p.inUse as inUse
                             FROM is4c_op.products AS p RIGHT JOIN is4c_log.dtransactions AS t ON (p.UPC = t.UPC)
                             WHERE p.subdept = $subdepartment
+                    AND t.department != '0'
+                    AND t.upc != '0000000000000'
+                    AND t.upc != 0
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
@@ -216,6 +238,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             p.inUse as inUse
                             FROM is4c_op.products AS p RIGHT JOIN is4c_log.trans_$year1 AS t ON (p.UPC = t.UPC)
                             WHERE p.subdept = $subdepartment
+                    AND t.department != '0'
+                    AND t.upc != '0000000000000'
+                    AND t.upc != 0
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
@@ -237,6 +262,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             p.inUse as inUse
                             FROM is4c_op.products AS p RIGHT JOIN is4c_log.trans_$i AS t ON (p.UPC = t.UPC)
                             WHERE p.subdept = $subdepartment
+                    AND t.department != '0'
+                    AND t.upc != '0000000000000'
+                    AND t.upc != 0
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
@@ -256,6 +284,9 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
                             p.inUse as inUse
                             FROM is4c_op.products AS p RIGHT JOIN is4c_log.dtransactions AS t ON (p.UPC = t.UPC)
                             WHERE p.subdept = $subdepartment
+                    AND t.department != '0'
+                    AND t.upc != '0000000000000'
+                    AND t.upc != 0
                             AND DATE(t.datetime) BETWEEN '$date1' AND '$date2'
                             AND t.emp_no <> 9999
                             AND t.trans_status <> 'X'
@@ -320,7 +351,6 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
     $page_title = 'Fannie - Reports Module';
     $header = 'Sub-department Movement Report';
     include ('../includes/header.html');
-    //echo '<script src="../src/CalendarControl.js" language="javascript"></script>';
     /**
     **	BEGIN CHAINEDSELECTOR CLASS
     **/
@@ -360,23 +390,11 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
         $subdept->printUpdateFunction();
     ?>
     </script>
-<!--     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/datePicker.css" />
-    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/datepicker/demo.css" />
-        <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
-        <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
-        <script type="text/javascript" src="../includes/javascript/datepicker/jquery.datePicker.js"></script>
-        <script type="text/javascript">
-            Date.format = 'yyyy-mm-dd';
-            $(function(){
-                $('.datepick').datePicker({startDate:'2007-08-01', endDate: (new Date()).asString(), clickInput: true})
-                .dpSetOffset(0, 125);
-            });
--->
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
-	<script type="text/javascript" src="../includes/javascript/jquery.js"></script>
-	<script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+<!--	<script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+-->	<script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
 	<script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
 	<script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
 	<script type="text/javascript">
@@ -397,6 +415,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
         </script>
     </head>
     <body>
+    <div id='box'>
     <form name="pickSubDepartment" action="subdeptmovement.php" method="post" target="_blank">
     <h3>Please select a subdepartment:</h3>
     <?php
@@ -436,7 +455,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted, print the r
     <br />
     <input type="hidden" name="submitted" value="TRUE" />
     <input type="submit" name="submit" value="Submit" />
-    </form>
+    </form></div>
     </body>
     <?php
     include ('../includes/footer.html');

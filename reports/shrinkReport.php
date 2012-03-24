@@ -55,6 +55,7 @@ if (isset($_POST['submitted'])) {
     $year1 = substr($date1, 0, 4);
     $year2 = substr($date2, 0, 4);
 //2010-12-27 sdh - added emp_no and First name to query and shrink report
+
     $shrinkQ = sprintf("SELECT CASE WHEN s.UPC < 1000 THEN SUBSTR(s.UPC, 11, 3) WHEN s.UPC < 10000 THEN SUBSTR(s.UPC, 10, 4) ELSE s.UPC END AS UPC,
 		       p.description, s.price, SUM(s.quantity), s.emp_no, e.FirstName, %s
 	FROM is4c_log.shrinkLog AS s
@@ -65,6 +66,20 @@ if (isset($_POST['submitted'])) {
 	    AND DATE(datetime) BETWEEN '%s' AND '%s'
 	    AND s.emp_no <> 9999
 	GROUP BY s.UPC %s", ($reasons ? 'sr.shrinkReason AS reason' : 'NULL'), $deptArray, $date1, $date2, ($reasons ? ', reason' : NULL));
+
+/*
+//this query has 1 less INNER JOIN with the employee tables
+
+$shrinkQ = sprintf("SELECT CASE WHEN s.UPC < 1000 THEN SUBSTR(s.UPC, 11, 3) WHEN s.UPC < 10000 THEN SUBSTR(s.UPC, 10, 4) ELSE s.UPC END AS UPC,
+		       p.description, s.price, SUM(s.quantity), s.emp_no, %s
+	FROM is4c_log.shrinkLog AS s
+	    INNER JOIN is4c_op.products AS p ON s.upc = p.upc
+	    INNER JOIN is4c_log.shrinkReasons AS sr ON s.reason = sr.shrinkID
+	WHERE s.department IN (%s)
+	    AND DATE(datetime) BETWEEN '%s' AND '%s'
+	    AND s.emp_no <> 9999
+	GROUP BY s.UPC %s", ($reasons ? 'sr.shrinkReason AS reason' : 'NULL'), $deptArray, $date1, $date2, ($reasons ? ', reason' : NULL));
+*/	
 
     $shrinkR = mysqli_query($db_slave, $shrinkQ);
 
@@ -95,6 +110,7 @@ if (isset($_POST['submitted'])) {
 	$shrinkCount = 0;
 	
 	while (list($upc, $description, $price, $quantity,$emp_no, $who, $reason) = mysqli_fetch_row($shrinkR)) {
+	//while (list($upc, $description, $price, $quantity,$emp_no, $reason) = mysqli_fetch_row($shrinkR)) {
 	    printf('<tr><td>%s</td><td>%s</td><td>$%s</td><td>$%s</td><td>%s</td><td>%s</td>%s</tr>',
 		   $upc, $description, number_format($price, 2), number_format($price * $quantity, 2), $quantity,$who, ($reasons ? '<td>' . $reason . '</td>' : NULL));
 	    $shrinkTotal += ($price * $quantity);
@@ -118,7 +134,6 @@ function drawForm($msg = NULL, $_POST = NULL) {
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
-    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
@@ -151,22 +166,7 @@ EOS;
 	    <h3><strong>Select Department</strong></h3>
 	    <button name="selectAll" id="selectAll" type="button">All Departments</button>
             <form method="post" action="shrinkReport.php" target="_blank">
-	    <div align="center">',$msg);
-/*	printf('	<table border="0" cellspacing="3" cellpadding="5">');
-    $deptQ = "SELECT dept_name, dept_no FROM is4c_op.departments WHERE dept_no <= 18 AND dept_no NOT IN (13, 15, 16, 17) ORDER BY dept_name ASC";
-    $deptR = mysqli_query($db_slave, $deptQ);
-
-    $count = 0;
-
-    while (list($name, $no) = mysqli_fetch_row($deptR)) {
-	if ($count % 2 == 0) echo '<tr>';
-	$count++;
-	printf('<td><input type="checkbox" name="dept[]" class="deptCheck" value="%u" %s />%s</td>', $no, (isset($_POST['dept']) && in_array($no, $_POST['dept']) ? 'checked="checked"' : ''), ucfirst(strtolower($name)));
-
-	if ($count % 2 == 0) echo '</tr>';
-    }
-
-    printf('</table> */
+	    <div align="left">',$msg);
 dept_picker('dept_tile');
 printf ('</div>  
         </div>

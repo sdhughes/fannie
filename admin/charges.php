@@ -118,16 +118,16 @@ $queryR = mysqli_query($db_slave, $query);
 if (!$queryR) echo "<p>$query</p><p>" . mysqli_error($db_slave) . "</p>";
 $charge = array();
 while ($queryRow = mysqli_fetch_array($queryR, MYSQLI_NUM)) {
-    $newQ = "SELECT FirstName, LastName
-        FROM is4c_op.custdata
-        WHERE CardNo = $queryRow[0]
-        AND (staff IN (1,2) OR personNum=1)";
+    $newQ = "SELECT FirstName, LastName, emp_no
+        FROM is4c_op.employees
+        WHERE card_no = $queryRow[0]
+        AND EmpActive = 1";
     $newR = mysqli_query($db_slave, $newQ);
-    list($first, $last) = mysqli_fetch_array($newR, MYSQLI_NUM);
-    $charge[$first] = array('CardNo' => $queryRow[0], 'total' => $queryRow[1], 'last' => $last);
+    list($first, $last, $emp_no) = mysqli_fetch_array($newR, MYSQLI_NUM);
+    $charge[$emp_no] = array('CardNo' => $queryRow[0], 'total' => $queryRow[1], 'last' => $last, 'first' => $first);
 }
-ksort($charge);
-//echo "query = " . $query . "<br />";
+//ksort($charge);
+echo "query = " . $query . "<br />";
 //echo "staffQuery = " . $staffQuery . "<br />";
 
 echo "<center><h2>Previous Pay Period</h2></center> \n";
@@ -147,12 +147,12 @@ $bg = '#eeeeee';
 $count = 0;
 $total = 0;
 
-foreach ($charge as $fn => $v) {
+foreach ($charge as $emp_no => $v) {
 	$bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
 	echo "<tr bgcolor='$bg'>
                 <td>{$v['CardNo']}</td>
                 <td>{$v['last']}</td>
-                <td>$fn</td>
+                <td>{$v['first']}</td>
                 <td align=\"right\">$" . number_format($v['total'],2) . "</td>";
 	echo '<td align=right><a href="chgdetail.php?cn='.$v['CardNo'].'&ps='.$pay_start.'&pe='.$pay_end.'" onClick="return popup(this, \'chgdetail\')">detail</a></tr>';
 	++$count;

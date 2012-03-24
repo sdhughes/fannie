@@ -1,30 +1,53 @@
 <?php
+/****
+ *
+ *	functions useful for item Maintenance
+ *
+ *
+ ****/
+function logAction ($emp_no,$action) {
+global $db_master;
+
+	$logQ = "INSERT INTO is4c_log.update_log (emp_no, action) VALUES ($emp_no, $action)";
+
+	$logR = mysqli_query($db_master,$logQ);
+//	echo $logR . " " . $logQ . " <br />";
+	return $logR;	
+
+}
+
 function drawSearchForm($error = NULL) {
 
 	require_once('../includes/dept_picker_generator.php');
 
-//require_once('./mysqli_connect.php');
-//$db = mysqli_connect('localhost','cron','cr0n','is4c_op');
 	if (!empty($error)) echo '<h3><font color="red">' . $error . '</font></h3>';
 	
-	echo '<BODY onLoad="putFocus(0,0);">
+	echo '
+   <div id="acg_center"> 
 		<form action="' . $_SERVER['PHP_SELF'] . '" method="post">
-		<div id="search_box"><input name="upc" type="text" id="upc" /> Enter UPC/PLU or product name</div>';
+		<div id="search_box"> Enter UPC/PLU, Product Name (or leave blank for<span class="strong"> all items</span> in dept range)
+		    <br /><input name="upc" type="text" id="upc" />
+			<input type="hidden" id="inUse" name="inUse" /><!-- <label for="inUse">Only "In Use"?</label> -->
+			<input name="submit" type="submit" value="Submit" >
+		</div>';
         
-	echo '<div id="submit_controls"><label><input type="checkbox" name="inUse">Only "In Use"?</input></label>';
-	echo '<br /><input name="submit" type="submit" value="Submit" /></div>';
-	echo '<div id="adv_search">
-		<div><input id="picker_toggle" type="button" value="Adv. Search" /></div>';
+	echo '<div id="adv_search">';
  
-	echo '<div id="dept_picker">';
+	echo '  <div id="dept_picker">
+                <p>
+                    &nbsp;&nbsp;Select departments. None selected searches <span class="strong" >all departments.</span> 
+                </p>';
 
 	dept_picker('dept_tile'); //dynamically generate the department picker
 
-	echo '</div></div>';
+	echo '</div>
+    </div>';
 
 
        echo '<input name="submitted" type="hidden" value="search" />
-       </form>';
+       </form></div>';
+       //print_r($_POST);
+    echo "</div>";
     include ('../includes/footer.html');
     exit();
 }
@@ -184,7 +207,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
 		<tr>
 		    <td align="left"><strong>Recommended Price</strong></td>
 		    <td align="left"><strong>$' . number_format($detailRow["cost"] / (1 - ($detailRow["margin"]/100)), 2) . '</strong></td>
-		    <td align="left"><strong>Current Markup</strong></td>
+		    <td align="left"><strong>Current Margin</strong></td>
 		    <td align="left"><strong>' . number_format((($rowItem['normal_price'] - $detailRow['cost'])/$rowItem['normal_price']) * 100,2) . '%</strong></td>
 		</tr>
 		<tr id="bitField"></tr>' . $bulkRows . '
@@ -203,6 +226,7 @@ function drawDetailsPage($upc, $rowItem = NULL) {
                     <td colspan="4"><textarea name="ingredients" cols="80" rows="5">' . htmlentities($detailRow["ingredients"]) . '</textarea></td>
                 </tr>
             </table><br />
+<!-- <input type="text" name="emp_no" size="20" value="" /> -->
             <center><button name="submit" type="submit">Submit!</button></center>
             <input type="hidden" name="submitted" value="act" />' . "\n";
         if (isset($rowItem)) echo '<input type="hidden" name="action" value="update" />' . "\n";
@@ -287,5 +311,10 @@ function chainedSelector($department = NULL, $subdepartment = NULL) {
     **/
     // echo '<p>' . $department . '</p>Is it there?<p>' . $subdepartment . '</p>';
 }
+
+function log_item_update () {
+
+}
+
 
 ?>

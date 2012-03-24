@@ -8,10 +8,14 @@ function reloadtable($table) {
             "192.168.1.53"
             );
 
-    $server = "localhost";
+//    $aLane = array ("192.168.1.51");
+
+    require_once('../../config.php');    
+    $server = MASTER_HOST;
     $opDB = "is4c_op";
-    $serveruser = "root";
-    $serverpass = "lung*vIa";
+    $serveruser = MASTER_USER;
+    $serverpass = MASTER_PASS;
+    $opDB = "is4c_op";
 
     $laneuser = "root";
     $lanepass = "";
@@ -34,6 +38,8 @@ function reloadtable($table) {
 
     if ($s_conn = mysql_connect($server, $serveruser, $serverpass)) {
         $continue = 1;
+	//DEBUG - Please comment out
+//    	echo "<p>Successfully Connected to Server</p>";
     } else {
         echo "<p><font color='#800000' face=helvetica size=-1>Failed to connect to server</font>";
     }
@@ -56,6 +62,8 @@ function reloadtable($table) {
 
     // synchronize lanes
 
+    //DEBUG - Please comment out
+  //  echo "<p>Server Data Ready. Starting Synchronization.</p>";
     if ($continue == 1) {
 
         $continue = 0;
@@ -65,7 +73,9 @@ function reloadtable($table) {
         $i = 1;
         foreach ($aLane as $lane) {
             $lane_num = "lane ".$i;
+            
             $i++;
+
             $lane_continue = 0;
             if ($lane_conn = mysql_connect($lane, $laneuser, $lanepass)) $lane_continue = 1;
             else echo "<br><font color='#800000' face=helvetica size=-1>Unable to connect to ".$lane_num."</font>";

@@ -102,7 +102,7 @@ if (isset($_POST['submitted'])) {
 		$file = fopen($filename,'w');
 		$currentWorkingDirectory = getcwd();
 		
-		//echo '<br /> you are in: ' . $currentWorkingDirectory . '<br />';	
+		echo '<br /> you are in: ' . $currentWorkingDirectory . '<br />';	
 		
 		echo '<table>';
 		
@@ -123,7 +123,7 @@ if (isset($_POST['submitted'])) {
 		echo '</table>';
 
 		fclose($file);
-		if ($writable) echo "<br />You just printed to: <a href='$currentWorkingDirectory/$filename' id = 'contactListLink'>$currentWorkingDirectory/$filename </a>";
+		if ($writable) echo "<br />You just printed to: <a href='$filename' id = 'contactListLink'>$currentWorkingDirectory/$filename </a>";
 
 	//	print_r($row);
 	//	echo $fullString;		

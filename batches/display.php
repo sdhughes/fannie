@@ -21,6 +21,15 @@
 
 *********************************************************************************/
 require_once ('../includes/mysqli_connect.php');
+        $header = 'Batch Maintanence';
+        $page_title = 'Fannie - Batch Module';
+
+//include ('../includes/header.html');
+?>
+
+
+<?php
+
 mysqli_select_db($db_master, 'is4c_op');
 $getBatchIDQ = "SELECT max(batchID) FROM batches";
 $getBatchIDR = mysqli_query($db_master, $getBatchIDQ);
@@ -52,20 +61,40 @@ if ($getBatchIDW[0] < $batchID) {
    }
    
    if ($endDate > $startDate) {
-         $insBatchQ = "INSERT INTO batches(startDate,endDate,batchName,batchType,discounttype)
-                 VALUES('$startDate','$endDate','$batchName',$batchType,$discounttype)";
+         $insBatchQ = "INSERT INTO batches(startDate,endDate,batchName,batchType,discounttype,maintainer)
+                 VALUES('$startDate','$endDate','$batchName',$batchType,$discounttype,$maintainer)";
         $insBatchR = mysqli_query($db_master, $insBatchQ);
    } else {
-        $header = 'Batch Maintanence';
-        $page_title = 'Fannie - Batch Module';
-        include ('../includes/header.html');
         echo "<p><font color='red'>Error: Your sale batch can't end before it's started. Please try again.</font></p>";
-        include ('../includes/footer.html');
         exit();
    }
 }
 ?>
-	<FRAMESET rows='40,*' frameborder='0'>
+ <FRAMESET rows='60,*' frameborder='0'>
 	   <FRAME src='addItems.php?batchID=<?php echo $batchID; ?>' name='add' border='0' scrolling='no'>
 	   <FRAME src='batches.php?batchID=<?php echo $batchID; ?>' name='items' border='0' scrolling='yes'>
-	</FRAMESET>
+	</FRAMESET> 
+<!--
+	<div>
+	   <div id='addItemDiv'></div>
+	   <div id='batchesDiv'></div>
+        <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+       <script type='text/javascript' language='javascript'>
+        $(document).ready(function() {
+           alert(<?php //echo $batchID ?>); 
+            $('#addItemDiv').load('addItems.php',{'batchID':'<?php //echo $batchID ?>','submit':'submit','upc':<?php //echo $_GET['upc']; ?>},function(data){
+            $('#batcesDiv').load('batches.php',{'batchID':'<?php //echo $batchID ?>','submit':'submit','upc':<?php //echo $_GET['upc']; ?>},function(data){
+                    //$(this).html(data);
+            });    
+            $('#batchesDiv').load('batches.php',{'batchID':'<?php //echo $batchID ?>'},function(data){
+                    //$(this).html(data);
+                    //alert(data);
+            });    
+            
+  //  alert('heyo');
+        });       
+      </script> 
+-->
+<?php
+        //include ('../includes/footer.html');
+?>

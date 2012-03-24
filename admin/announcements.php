@@ -18,7 +18,7 @@
 	}
 	
 	if (isset($_POST['submit']) && $_POST['submit']=='add') {
-		$updateQuery = "INSERT INTO fannie.announcements (author, title, message, enabled) VALUES ('" . $new_announcement_author ."','" . $new_announcement_title . "','" . mysql_real_escape_string($new_announcement_message) . "','" . (($new_announcement_enabled=='on')?1:0) . "')";
+		$updateQuery = "INSERT INTO fannie.announcements (author, title, message, enabled) VALUES (\"" . $new_announcement_author ."\",\"" . $new_announcement_title . "\",\"" . mysql_real_escape_string($new_announcement_message) . "\",\"" . (($new_announcement_enabled=='on')?1:0) . "\")";
 		
 		$result = mysqli_query($db_master,$updateQuery) or die('Query Error: ' . mysqli_error($db_master));
 		$answer = mysqli_fetch_row($result);

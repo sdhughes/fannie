@@ -83,8 +83,16 @@ echo '
         </div>
     </div>
     <div class="admin_menu_item">
-        <a href="admin/OADays.php" >Owner Appreciation Days</a>
+        <a href="/admin/OADays.php" >Owner Appreciation Days</a>
         <div>Add and Remove Owner Appreciation Days</div>
+    </div>
+    <div class="admin_menu_item">
+        <a href="/admin/activitylog.php" >Activity Log</a>
+        <div>View Register Activities</div>
+    </div>
+    <div class="admin_menu_item">
+        <a href="../timesheet/admin.php" >Timesheet Admin</a>
+        <div>Master the Sheet\'s of Time!</div>
     </div>
 
     <div class="admin_menu_item">
@@ -94,7 +102,7 @@ echo '
         </div>
     </div>
     <div class="admin_menu_item">
-        <a href="/CoMET/">CoMET</a>
+        <a href="http://192.168.1.103/CoMET/">CoMET</a>
         <div>Access Co-op Membership Equity Tracking utility</div>
     </div>
 </div>';

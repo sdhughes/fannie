@@ -223,6 +223,7 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
             }
         echo '</select>';
 	echo ' Year: <select name="year">
+		<option value="2012">2012</option>
 		<option value="2011">2011</option>
 		<option value="2010">2010</option>
 		<option value="2009">2009</option>
@@ -277,6 +278,6 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
 
 }
         
-include ('./includes/footer.html');
+//include ('./includes/footer.html');
 include ('../includes/footer.html');
 ?>

@@ -331,7 +331,8 @@ if (isset($_POST['submitted'])) {
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
-    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+<!--    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+-->    <script type="text/javascript" src="../includes/javascript/myquery.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
@@ -369,7 +370,7 @@ if (isset($_POST['submitted'])) {
         </tr>
     </table>
     <input type="hidden" name="submitted" value="TRUE" /><br />
-    <button name="submit" type="submit">Submit</button>
+    <button name="submit" type="submit" id="myButton">Submit</button>
     </form>';
     include ('../includes/footer.html');
 }

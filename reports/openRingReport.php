@@ -43,7 +43,7 @@ if (isset($_POST['submitted'])) {
         AND trans_status <> 'X'
         AND emp_no <> 9999
         AND date(datetime) BETWEEN '$date1' AND '$date2'
-        ORDER BY emp_no, datetime";
+        ORDER BY datetime, emp_no";
     $result = mysqli_query($db_slave, $query);
     
     if ($result) {

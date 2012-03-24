@@ -55,7 +55,7 @@ if (isset($_POST['submitted']) && $_POST['submit'] == 'submit') {
 	$result = mysqli_query($db_master, $query);
 	if (!$result) {
 		$page_title = 'Fannie - Membership Module';
-		$header = 'Print Member Labels';
+		$header = 'Set Last Print Date';
 		include_once('../includes/header.html');
 		echo "<h1>The print date could not be set, please try again later.</h1>";
 		include ('../includes/footer.html');
@@ -74,11 +74,31 @@ $header = 'Generate Phone Bank List';
 include_once('../includes/header.html');
 printf('
     <head>
-    <script src="../src/CalendarControl.js"
-            language="javascript"></script>
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
+    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+    <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+    <script type="text/javascript">
+		Date.format =\'yyyy-mm-dd\';
+		$(function(){
+		   $(\'.datepick\').datepicker({
+                                                startDate:\'2007-08-01\',
+                                                endDate: (new Date()).asString(), 
+                                                clickInput: true, 
+                                                dateFormat: \'yy-mm-dd\', 
+                                                changeMonth: true, 
+                                                changeYear: true,
+                                                duration: 0
+                                                 });
+			// $(\'.datepick\').focus();
+	        });
+    </script> 
     </head>
     <form name="labels" action="phoneList.php" method="post">
-            <p>Please select a start and end date for phone bank list generation.<br />
+            <p>Please select a start and end date for membership phone bank list generation.<br />
             If no end date is selected, it will default to today.</p>
             <table border="0" cellspacing="3" cellpadding="3">
                     <tr>
@@ -87,8 +107,8 @@ printf('
                                     <p><b>End</b></p>
                             </td>
                             <td>			
-                                    <p><input type=text size=10 name=date1 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
-                                    <p><input type=text size=10 name=date2 onfocus="showCalendarControl(this);">&nbsp;&nbsp;*</p>
+                                    <p><input type=text size=10 name=date1 class="datepick"></p>
+                                    <p><input type=text size=10 name=date2 class="datepick"></p>
                             </td>
                             <td colspan=2>
                             <p>Date format is YYYY-MM-DD</br>(e.g. 2004-04-01 = April 1, 2004)</p>
@@ -96,6 +116,8 @@ printf('
                     </tr>
             </table><br />
             <input type="hidden" name="submitted" value="TRUE" />
+            <input type="radio" name="orderBy" id="orderbycard" value="card" checked="true"  /><label for="orderbycard">Order By Card #</label>
+            <input type="radio" name="orderBy" id="orderbydate" value="date" /><label for="orderbydate">Order By Date</label><br />
             <table border="0" cellspacing="3" cellpadding="3">
                     <tr>
                             <td align="left"><button name="submit" value="submit">Submit</button></td>

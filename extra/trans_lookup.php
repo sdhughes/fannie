@@ -32,7 +32,6 @@ echo '<HEAD>';
 echo "<link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.core.css\" />
     <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.theme.css\" />
     <link rel=\"STYLESHEET\" type=\"text/css\" href=\"../includes/javascript/ui.datepicker.css\" />
-    <script type=\"text/javascript\" src=\"../includes/javascript/jquery.js\"></script>
     <script type=\"text/javascript\" src=\"../includes/javascript/datepicker/date.js\"></script>
     <script type=\"text/javascript\" src=\"../includes/javascript/ui.datepicker.js\"></script>
     <script type=\"text/javascript\" src=\"../includes/javascript/ui.core.js\"></script>
@@ -140,6 +139,17 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
                 $sm .= " AND emp_no = $em";
             }
         }
+
+        if (isset($_POST['tt']) && $_POST['tt'] == 'tt') {
+            if (empty($_POST['cashier'])) {
+		$error[] = 'You didn\'t select a Tender Type.';
+		$tt = false;
+	    } else {
+		$tt = escape_data($_POST['tt']);
+		$sm .= " AND trans_type = $tt";
+	    }
+
+	}
     }
     
     if (empty($errors)) {
@@ -148,16 +158,20 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
         // Results!
 	$order_by = 'time DESC';
 
-        $query = "SELECT DATE(datetime) AS date,
-                TIME(datetime) AS time,
-                emp_no,
-                register_no,
-                trans_no,
-                CONCAT(DATE(datetime),'-',emp_no,'-',register_no,'-',trans_no) AS t_id,
-                CONCAT(emp_no,'-',register_no,'-',trans_no) AS daytrans_no,
-                card_no,
-                unitPrice
-                FROM $transtable
+        $query = "SELECT DATE(t.datetime) AS date,
+                TIME(t.datetime) AS time,
+                t.emp_no,
+                t.register_no,
+                t.trans_no,
+                CONCAT(DATE(t.datetime),'-',t.emp_no,'-',t.register_no,'-',t.trans_no) AS t_id,
+                CONCAT(t.emp_no,'-',t.register_no,'-',t.trans_no) AS daytrans_no,
+                t.card_no,
+                t.unitPrice"
+//, <--must use this comma! 
+//trying to get the TenderType to show up!
+//INNER JOIN (SELECT datetime, emp_no, register_no, trans_no, CONCAT(emp_no,'-',register_no,'-',trans_no) AS daytrans_no,trans_type,trans_subtype FROM $transtable WHERE trans_type = 'T' AND date(datetime) = '$da'  group by daytrans_no) AS tt ON t.daytrans_no = tt.daytrans_no
+//		tt.trans_subtype
+ . "              FROM $transtable t 
                 WHERE trans_type = 'C'
                 AND description LIKE 'Subtotal%'
                 AND $sm
@@ -168,6 +182,9 @@ if ((isset($_POST['submitted'])) || (isset($_GET['sort']))) {
 
         $result = mysqli_query ($db_slave, $query);
         // Display the  number of matches.
+
+	//echo "query: " . $query . "<br />";
+
 
         if (!$result || mysqli_num_rows($result) == 0) {
             echo '<div id="alert"><p class="error">Your search yielded no results.</p></div>';
@@ -242,7 +259,20 @@ $result = mysqli_query($db_slave, $query);
 	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
 		echo '<option value='. $row['emp_no'] . '>' . $row['FirstName'] . ' ' . substr($row['LastName'],0,1) . '.';
 	}
-	echo '</select></p></td></tr>
+	echo '</select></p></td></tr>';
+
+
+/*	$typeQ = 'SELECT TenderCode,TenderName FROM is4c_op.tenders';
+	$typeR = mysqli_query($db_slave, $typeQ);
+	
+	echo '<tr><td><p><input type="checkbox" name="tt" id="tt" value="tt" >Tender Type: </input></td><td><select name="tendertype" onclick="document.getElementById(\'tt\').checked = \'checked\'">';
+
+	while ($row = mysqli_fetch_array($typeR, MYSQLI_ASSOC)) {
+		echo '<option value='. $row['TenderCode'] . '>' . $row['TenderName']. '</option>';
+	}
+	echo '</select></p></td></tr>';
+*/
+	echo '
 		<tr><td><input type="submit" name="submit" value="Submit" />
 		<td> <input type=reset name=reset value="Start Over"> </td>
 		<input type="hidden" name="submitted" value="TRUE" /></td>

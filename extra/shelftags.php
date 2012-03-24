@@ -777,8 +777,8 @@ function drawForm($error = NULL) {
     require_once('../includes/dept_picker_generator.php');
     ?>
   <!--  <script src="../src/CalendarControl.js" language="javascript"></script> -->
-<!--    <script src="../src/putfocus.js" language="javascript"></script> -->
-    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+<!--    <script src="../src/putfocus.js" language="javascript"></script> 
+-->    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
@@ -930,7 +930,7 @@ function drawForm($error = NULL) {
     </tr>
     </table>
     </form>
-	<p class="thinborder">REMINDER: When printing, be sure to change Page Scaling to "None" and uncheck "Auto Rotate and Center" in the Page Handling Section of the Print Options.</p>
+	<p class="reminder">REMINDER: When printing, be sure to change Page Scaling to "None" and uncheck "Auto Rotate and Center" in the Page Handling Section of the Print Options.</p>
     <?php
 
     include('../includes/footer.html');

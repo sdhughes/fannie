@@ -7,7 +7,7 @@ $storeArea = 2440;
 
 if (!isset($_POST['submitted'])) {
    $page_title = 'Fannie - Reports Module';
-   $header = 'Membership Report';
+   $header = 'Finance Report';
    include ('../includes/header.html');
    echo '<form method="post" action="' . $_SERVER["PHP_SELF"] . '" target="_blank">
       <div id="box">
