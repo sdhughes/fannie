@@ -63,7 +63,7 @@ if (isset($_POST['submit'])) {
     //iterator
 
    echo "<div id='lane_manager' class='centered'>"; 
-    echo "<table id='lane_management_table'>";
+    echo "<table id='lane_management_table' class='thinborder'>";
     echo "<tr><th>Lane #</th><th>Location</th><th>IP Address</th><th>Ping?</th></tr>";
     while ($row = mysqli_fetch_row($result)) {
         echo "<tr>";
@@ -84,9 +84,9 @@ if (isset($_POST['submit'])) {
 	echo "</td>";
 	echo "<td>";
 	if (ping(long2ip($ip))) {
-		echo "O";
+		echo "&nbsp;O&nbsp;";
 	} else {
-		echo "X";
+		echo "&nbsp;X&nbsp;";
 	}
 
         echo "</td>";

@@ -39,7 +39,7 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
             AND t.periodID = $periodID
 	    AND (t.vacation IS NULL OR t.vacation = 0)
             GROUP BY t.date";
-
+//echo $query . "<br />";
         $periodQ = "SELECT periodStart, periodEnd FROM is4c_log.payperiods WHERE periodID = $periodID";
         $periodR = mysqli_query($db_slave, $periodQ);
         list($periodStart, $periodEnd) = mysqli_fetch_row($periodR);
@@ -106,7 +106,28 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
         if (is_null($houseCharge)) $houseCharge = 0;
         list($Wage) = mysqli_fetch_row($WageR);
         if (is_null($Wage)) $Wage = 0;
+/*
+//this was made at the top but including it here just sos you know what you're getting.
+        $query = "SELECT ROUND(SUM(TIMESTAMPDIFF(MINUTE, t.time_in, t.time_out))/60, 2),
+                date_format(t.date, '%a %b %D'),
+                t.emp_no,
+                e.FirstName,
+                date_format(p.periodStart, '%M %D, %Y'),
+                date_format(p.periodEnd, '%M %D, %Y'),
+                t.date
+            FROM is4c_log.timesheet AS t
+                INNER JOIN is4c_op.employees AS e
+                ON (t.emp_no = e.emp_no)
+                INNER JOIN is4c_log.payperiods AS p
+                ON (t.periodID = p.periodID)
+            WHERE t.emp_no = $emp_no
+            AND t.area <> 13
+            AND t.periodID = $periodID
+	    AND (t.vacation IS NULL OR t.vacation = 0)
+            GROUP BY t.date";
+*/
 
+    //finally asking the query that we made at the top of the page.
         $result = mysqli_query($db_slave, $query);
         if (mysqli_num_rows($result) > 0) {
             $first = TRUE;
@@ -118,13 +139,13 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
                 }
                 if ($row[0] > 24) {$fontopen = '<font color="red">'; $fontclose = '</font>';} else {$fontopen = NULL; $fontclose = NULL;}
 
-		if (is_numeric(substr($row[1],8,2))) {
-			$datePart1 = substr($row[1],4,6);
-			$supScript = substr($row[1],10,2);
-		} else { 
-			$datePart1 = substr($row[1],4,5);
-			$supScript = substr($row[1],9,2);
-		}
+                if (is_numeric(substr($row[1],8,2))) {
+                    $datePart1 = substr($row[1],4,6);
+                    $supScript = substr($row[1],10,2);
+                } else { 
+                    $datePart1 = substr($row[1],4,5);
+                    $supScript = substr($row[1],9,2);
+                }
 
                 echo "<tr>"
                         . "<td class=''>" . substr($row[1],0,4) . "<sup>&nbsp;</sup></td>" 
@@ -135,7 +156,6 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
                 $first = FALSE;
                 $periodHours += $row[0];
             }
-
             $roundhour = explode('.', number_format($periodHours, 2));
 
             if ($roundhour[1] < 13) {$roundhour[1] = 00;}

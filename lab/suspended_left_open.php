@@ -190,6 +190,9 @@ echo '
 
             // Fetch and print all the records.
             $bg = '#eeeeee'; // Set background color.
+
+            $grand_total = 0;
+
             while ($row = mysqli_fetch_array ($result, MYSQLI_ASSOC)) {
                 $bg = ($bg=='#eeeeee' ? '#ffffff' : '#eeeeee'); // Switch the background color.
                 echo '<tr bgcolor="' . $bg . '">';
@@ -202,9 +205,17 @@ echo '
                 else { echo $row['card_no']; }
                 echo '</td><td align="right">' . money_format('%n',$row['total']/2) . '</td>
                         </tr>';
-            }
 
+            $grand_total += $row['total'];
+            }
+            echo '<tr>
+                    <td colspan="3">The totals are innaccurate, please click for details.</td>
+                    <td>&nbsp;</td>
+                    <td><b>Total Lost:</td>
+                    <td>$' . $grand_total . '</td>
+                    </tr>';
             echo '</table>';
+
 
             mysqli_free_result ($result); // Free up the resources.
         }
