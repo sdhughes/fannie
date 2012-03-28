@@ -1,0 +1,27 @@
+use is4c_op;
+
+update products p, batchList l set
+p.special_price = 0,
+p.start_date = 0,
+p.end_date = 0,
+p.discounttype = 0,
+l.active = 0
+WHERE p.discounttype <> 3;
+
+update products p, batches b, batchList l
+set p.start_date = b.startDate,
+p.end_date = b.endDate,
+p.special_price = l.salePrice,
+p.discounttype = b.discountType,
+l.active = 1
+WHERE b.batchID = l.batchID
+AND l.upc = p.upc
+AND DATE(b.startDate) <= curdate()
+AND b.endDate >= curdate();
+
+update products p, batches b, batchList l
+set p.inuse = 0
+WHERE b.batchType = 2
+AND b.batchID = l.batchID
+AND l.upc = p.upc
+AND (DATE(b.endDate+1) = DATE(curdate()));
