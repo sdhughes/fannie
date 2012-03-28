@@ -157,7 +157,7 @@ if ((isset($_POST['submitted']) && is_numeric($_POST['period'])) || (is_numeric(
                 $periodHours += $row[0];
             }
             $roundhour = explode('.', number_format($periodHours, 2));
-
+//print_r($roundhour). 'debugging....<br/>';
             if ($roundhour[1] < 13) {$roundhour[1] = 00;}
             elseif ($roundhour[1] >= 13 && $roundhour[1] < 37) {$roundhour[1] = 25;}
             elseif ($roundhour[1] >= 37 && $roundhour[1] < 63) {$roundhour[1] = 50;}
