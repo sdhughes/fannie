@@ -263,7 +263,7 @@ $( function() {
 	GROUP BY dept";
 
     $shrinkR = mysqli_query($db_slave, $shrinkQ);
-    
+   //echo $shrinkQ . "<br />"; 
     // If the query fails, reload the form and show an error.
     if (!$shrinkR) {
 	$message  = sprintf('Invalid query: %s' . "\n" . 'Whole query: %s', mysqli_error($db_slave), $shrinkQ);

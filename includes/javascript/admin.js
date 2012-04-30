@@ -15,6 +15,7 @@ $(document).ready(function() {
                 window.location.href = $(this).attr('href');
             
             }); 
+
+    //$('.admin_menu_box').sortable();    
     
-    
-    });
+    //});

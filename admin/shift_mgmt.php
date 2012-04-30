@@ -164,7 +164,7 @@ echo "<table> <tr>";
 //echo "<td>Day</td></tr>";
 //echo "<tr>";
 echo "<td>";
-makeEmployeeSelector();
+emp_selector();
 echo "</td>";
 echo "<td>";
 echo "<select name='shift_selection' >";

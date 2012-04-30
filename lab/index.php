@@ -38,9 +38,12 @@ function createIndex() {
     $links = new DirectoryIterator($directory);
 echo "<ul>";
     foreach ($links as $link) {
-        if ((!$link->isDot()) && $link->isFile()) {
+        
+        $fn = $link->getFilename();
+    
+        if ((stripos($fn,".") != 0 ) && !($link->isDot()) && $link->isFile()) {
             
-            $filename = $link->getPath() . DIRECTORY_SEPARATOR . $link->getFilename();
+            $filename = $link->getPath() . DIRECTORY_SEPARATOR . $fn;
 	
             make_link($filename);
         }

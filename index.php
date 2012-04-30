@@ -21,7 +21,8 @@ global $db_master;
 					<li><a href="/documents/bell_schedule.docx" target="_blank">Bell Schedule</a></li>
 					<li><a href="/documents/Staff Phone List.ods" target="_blank">Staff Phone List </a></li>
 					<li><a href="https://spreadsheets.google.com/a/albertagrocery.coop/spreadsheet/ccc?key=0AvQPKvYhG_yjcC1UMkdUSlFLS3dwclNIclpRaTg3YkE&hl=en_US&pli=1#gid=0" target="_blank">Working Owner Calendar</a></li>
-			</ul>
+<!--					<li><a href="file:///shared/shared/" target="_blank">Experimental Shared</a></li>
+	-->		</ul>
 			</div>
 			<!--put announcements here -->
 			<div id='main_announcements'>

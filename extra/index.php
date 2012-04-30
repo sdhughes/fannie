@@ -64,6 +64,10 @@ $(document).ready(function() {
 		<a href="/extra/contactList.php">Generate Owner Email List</a><br>
 		Generate Email List of Membership
 	</div>
+	<div class='tool_menu_link'>
+		<a href="/extra/MADCoupons.php">Manage Owner Appreciation Coupons</a><br>
+		Manage Owner-Appreciation-Month Coupons
+	</div>
 </div>
 <?php
    include ('../includes/footer.html');

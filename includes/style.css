@@ -1,9 +1,10 @@
 /***
  * ACG Styles
- * edited by: SDH 2011-08-22
  *
  * Various styles used throughout Fannie
+ * Broken down roughly by general page layouts and then by individual pages. Should they be moved?
  ***/
+
 body {
 
 	font-size: .8em;
@@ -66,13 +67,6 @@ h3 {
 	background-color: #D7A7FF;
 	border-radius: .3em;
 	-moz-border-radius: .3em;
-}
-/***
- *
- ****/
-#lane_manager {
-	width: 50%;
-
 }
 /***
  *
@@ -467,6 +461,14 @@ div#main_announcements > ul > li.announcement_item  p{
 }
 #today {
     background: #FFE979;
+
+}
+/***
+ * Lane Manager 
+ * /pos/fannie/admin/lane_manager
+ ****/
+#lane_manager {
+	width: 50%;
 
 }
 /***

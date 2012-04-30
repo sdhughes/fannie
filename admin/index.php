@@ -3,7 +3,8 @@
    $header = 'Admin Section Index';
    include ('../includes/header.html');
 
-echo '<body>';
+    //echo '<script type="text/javascript" language="javascript" src="../includes/javascript/ui/jquery.ui.core.js"></script>';
+    //echo '<script type="text/javascript" src="../includes/javascript/ui/jquery.ui.sortable.js"></script>';
    echo '<script type="text/javascript" language="javascript">';
    include ('../includes/javascript/admin.js');
    echo '</script>';
@@ -96,9 +97,9 @@ echo '
     </div>
 
     <div class="admin_menu_item">
-        <a href="/admin/announcements.php">Edit Front Page Announcements</a>
+        <a href="/admin/front_page_admin.php">Edit Fannie Front Page</a>
         <div>
-            Edit the Message that Appear on Fannie\'s Front Page
+            Edit the Messages that Appear on Fannie\'s Front Page
         </div>
     </div>
     <div class="admin_menu_item">

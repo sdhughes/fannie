@@ -135,7 +135,7 @@
 
         //choose to create a list of select one from the batch list
         echo "<div class='salesTool_container'><p>Use this tool to get sales totals by department, subdepartment, vendor and/or description. Or simply select a sales batch on which to report.</p>
-        <form action='salesTool.php' method='post'> 
+        <form action='" . $_SERVER['PHP_SELF'] . "' method='post'> 
         <div class='top_block'>
                     <label>Start Date:</label><input type='text' name='date1' value='' id='searchDate1' class='datepick' />
                     <label>End Date:</label><input type='text' name='date2' value='' id='searchDate2' class='datepick' />";
@@ -169,7 +169,7 @@
             </tr>
         </table></div>
         <div>
-                <div class='directions'><p >Or choose a batch:<br />";
+                <div class='directions'><p >Or choose a batch whose items you'd like to track<br />(you'll still get sales results from between the chosen start and end dates):<br />";
 
         //create the batch list select box
         global $db_slave;
@@ -184,7 +184,7 @@
         
         if ($result) {
                 while (list($batchName, $start, $end, $ID) = mysqli_fetch_row($result)) {
-                    echo "          <option value=\"$ID\">$batchName ($start -> $end)</option>";
+                    echo "          <option value=\"$ID\">$batchName ( ". str_replace('-','/',$start) . " - " . str_replace('-','/',$end) . " )</option>";
                 }
         } else {
                 echo "<p>Error...</p><p>Query: $query</p>" .  mysqli_error($db_slave);

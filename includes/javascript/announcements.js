@@ -1,4 +1,11 @@
 $(document).ready(function(){
+        var col_head = "<th>Delete?</th>";
+        $('#announcement_display tr').first().append(col_head);
+
+        var buttons = "<td class='buttonbox'><input type='button' class='deleteButton' name='deleteMessage' value='delete' /><br /><input type='button' class='updateButton' name='updateMessage' value='update' /></td>";
+    $('#announcement_display .ann_row').each(function() { $(this).append(buttons)});
+
+
 
 /*******************
  * deleteButton action

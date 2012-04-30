@@ -35,7 +35,23 @@ if (isset($_POST['submitted'])) { // If the form has been submitted.
         } else {
                 $emp_no = $_POST['emp_no'];
         }
+
+        //edit
+
+        //get emp_no's for suspended transactions, compare and stop if they have one.
+        $suspendedQ = "select s.card_no,e.emp_no from suspendedtoday s inner join is4c_op.employees e on s.card_no = e.card_no group by card_no";
+        $suspR = mysqli_query($db_master, $suspendedQ); 
+    
+        $emp_array = array();
+    
+        while ($susRow = mysqli_fetch_row($suspR)) $emp_array[] = $susRow[1];
         
+        if (in_array($emp_no,$emp_array)) {
+            $errors[] = "You still have a suspended transaction open. Please close it and then you may log your hours.";
+        }
+
+        
+        //edit end
         if ($datediff > 1) { // Bad.
                 $errors[] = 'You can\'t add hours more than a day after the pay period has ended.';
                 $date = NULL;

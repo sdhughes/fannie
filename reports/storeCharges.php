@@ -1,4 +1,8 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 $header = "Store Charges Report";
 $page_title = "Fannie - Reports Module";
 require_once ('../includes/header.html');
@@ -32,12 +36,12 @@ if (isset($_POST['submitted'])) {
     $date1 = $_POST['date1'];
     $date2 = $_POST['date2'];
     
-    $query = "SELECT DATE(datetime), emp_no, upc, description, ROUND(unitprice, 2), itemqtty FROM transarchive
-        WHERE card_no = 9999
-        AND trans_subtype = 'MI'
-        AND department <> 0
-        AND trans_status <> 'X'
+    $query = "SELECT DATE(datetime), emp_no, upc, description, total, itemqtty FROM transarchive
+        WHERE trans_subtype = 'MI'
+        " . //AND department <> 0
+        "AND trans_status <> 'X'
         AND emp_no <> 9999
+        AND card_no = 9999
         AND date(datetime) BETWEEN '$date1' AND '$date2'
         ORDER BY datetime";
    /* $query = "SELECT DATE(datetime), emp_no, upc, description, ROUND(unitprice, 2), itemqtty FROM transarchive
@@ -50,6 +54,8 @@ if (isset($_POST['submitted'])) {
         ORDER BY datetime";*/
     $result = mysqli_query($db_slave, $query);
     $chargeTotal = 0;
+
+echo $query . "<br />";
 echo "<div align='center'>";
         echo "<h3>Charges between $date1 and $date2:</h3>";
     if ($result) {

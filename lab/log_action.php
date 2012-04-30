@@ -8,11 +8,15 @@
 <<<EOS
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/themes/smoothness/jquery.ui.all.css" />
+    <link rel="STYLESHEET" type="text/css" href="../includes/javascript/themes/smoothness/jquery.ui.dialog.css" />
     <link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
     <!-- a script ref to jquery.js was removed bc it was double included from the header  -->
+    <script type="text/javascript" src="../includes/javascript/jquery.js"></script>
+    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
     <script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
     <script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
-    <script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
+    <script type="text/javascript" src="../includes/javascript/jquery.ui.custom.js"></script>
     <script type="text/javascript">
         Date.format = 'yyyy-mm-dd';
         $(function(){
@@ -38,7 +42,7 @@
         });
 
 	$('#update_button').live('click',function(event){
-	$('#login_form').show();
+	$('#login_form').dialog();
 
 
 	});

@@ -186,15 +186,10 @@ mysqli_select_db($db_master, 'is4c_log') or die('Could not select DB:' . mysqli_
                          s.price, 
                          sr.shrinkReason 
                       FROM shrinkLog as s 
-                         INNER JOIN is4c_op.employees as e 
-                         INNER JOIN is4c_op.products as p 
-                         INNER JOIN is4c_op.departments as d 
-                         INNER JOIN shrinkReasons as sr 
-                      ON 
-                         s.emp_no = e.emp_no 
-                         AND s.upc = p.upc 
-                         AND s.department = d.dept_no 
-                         AND s.reason = sr.shrinkID 
+                         LEFT JOIN is4c_op.employees as e ON s.emp_no = e.emp_no 
+                         LEFT JOIN is4c_op.products as p ON s.upc = p.upc
+                         LEFT JOIN is4c_op.departments as d ON s.department = d.dept_no
+                         LEFT JOIN shrinkReasons as sr ON s.reason = sr.shrinkID
                       WHERE 
                          date(datetime) BETWEEN '$startDate' 
                          AND '$endDate' 
@@ -230,33 +225,51 @@ echo "<form action='editShrinkLog.php' method=post>
 	<th>Timestamp</th><th>Who?</th><th>UPC</th><th>Description</th><th>Dept</th><th>Qty</th><th>Price</th><th>Total</th><th>Reason</th><th>Unshrink?</th>
 </tr>
 ";
+
+        $totalShrink = 0;
+    
 		while ($row = mysqli_fetch_row($result)) {
 			
 
-		$total = $row[5] * $row[6];
-	/*		echo "<tr><td class='timestamp'>$row[0]</td>
-				<td class='empno'>$row[1]</td>
-				<td class='UPC'>$row[2]</td>
-				<td class='dept'>$row[3]</td>
-				<td class='quantity'>$row[4]</td>
-				<td class='price'>$$row[5]</td>
-				<td class='total'>$$total</td>
-				<td class='reason'>$row[6]</td>
-				<td class='delete'><input type='submit' name='delete' value='delete' class='deletebutton' /></td> 
-</tr>";*/
-		$output = sprintf("<tr><td class='timestamp'>%s</td>
-				<td class='empno'>%s</td>
-				<td class='UPC'>%s</td>
-				<td class='description'>%s</td>
-				<td class='dept'>%s</td>
-				<td class='quantity'>%s</td>
-				<td class='price'>$%s</td>
-				<td class='total'>$%.2f</td>
-				<td class='reason'>%s</td>
-				<td class='delete'><input type='submit' name='delete' value='delete' class='deletebutton' /></td> 
-</tr>",$row[0],$row[1],$row[2],$row[3],$row[4],$row[5],$row[6],$total,$row[7]);
-			echo $output;
+                $total = $row[5] * $row[6];
+            /*		echo "<tr><td class='timestamp'>$row[0]</td>
+                        <td class='empno'>$row[1]</td>
+                        <td class='UPC'>$row[2]</td>
+                        <td class='dept'>$row[3]</td>
+                        <td class='quantity'>$row[4]</td>
+                        <td class='price'>$$row[5]</td>
+                        <td class='total'>$$total</td>
+                        <td class='reason'>$row[6]</td>
+                        <td class='delete'><input type='submit' name='delete' value='delete' class='deletebutton' /></td> 
+        </tr>";*/
+                $output = sprintf("<tr><td class='timestamp'>%s</td>
+                        <td class='empno'>%s</td>
+                        <td class='UPC'>%s</td>
+                        <td class='description'>%s</td>
+                        <td class='dept'>%s</td>
+                        <td class='quantity'>%s</td>
+                        <td class='price'>$%s</td>
+                        <td class='total'>$%.2f</td>
+                        <td class='reason'>%s</td>
+                        <td class='delete'><input type='submit' name='delete' value='delete' class='deletebutton' /></td> 
+        </tr>",$row[0],$row[1],$row[2],$row[3],$row[4],$row[5],$row[6],$total,$row[7]);
+                    echo $output;
+                    $totalShrink += $total;
 		}
+        echo "
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Total:</td>
+            <td>" . sprintf("$%.2f",$totalShrink) . "</td>
+            <td></td>
+            <td></td>
+        </tr>
+";
 		echo "</table>";
 
 	//echo "<input type='submit' value='submit' />";

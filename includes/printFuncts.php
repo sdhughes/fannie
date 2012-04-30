@@ -1,5 +1,6 @@
-BIG
-{
+<?php 
+
+function print_big_tags($upc, $how_many) {
         /**
          * begin to create PDF file using fpdf functions
          */
@@ -43,7 +44,9 @@ BIG
          * Increment through items in query
          */
 
-        while ($row = mysqli_fetch_array($result)) {
+        //while ($row = mysqli_fetch_array($result)) {
+        $row = mysqli_fetch_array($result);
+        for ($i = 0; $i < $how_many; $i++ ) {
            /**
             * check to see if we have made 32 labels.
             * if we have start a new page....
@@ -134,11 +137,10 @@ BIG
             $vendLeft = $vendLeft + $LeftShift;
             $labelCount++;
         }
-    }
+}
 
 
-TINY
-{
+function print_tiny_tags ($upc, $how_many) {
         /**
          * begin to create PDF file using fpdf functions
          */
@@ -266,11 +268,10 @@ TINY
             $skuLeft = $skuLeft + $LeftShift;
             $labelCount++;
         }
-    }
+}
 
 
-CIRCLE
-{
+function print_circle_tags($upc, $how_many) {
 	// Basic static settings
 	$top = 12.7;
 	$left = 4.85;
@@ -396,10 +397,9 @@ CIRCLE
 		$pdf->AddPage('P');
 	    }
 	}
-    }
+}
 
-WINE
-{
+function print_wine_tags ($upc, $how_many) {
         $check = '../includes/checkmark.png';
         
         // Basic layout settings
@@ -416,15 +416,15 @@ WINE
         $xMax = 160;
         $yMax = 245;
         
-	// Inititialize the object
-	$pdf=new PDF($orientation, 'mm', 'Letter');
-        
+        // Inititialize the object
+        $pdf=new PDF($orientation, 'mm', 'Letter');
+
         // Add special fonts.
-	$pdf->AddFont('Helvetica', '', 'Helvetica.php');
-	$pdf->AddFont('Helvetica', 'B', 'HelveticaBold.php');
-        
-	$pdf->SetMargins($left ,$top);
-	$pdf->SetAutoPageBreak('off', 0);
+        $pdf->AddFont('Helvetica', '', 'Helvetica.php');
+        $pdf->AddFont('Helvetica', 'B', 'HelveticaBold.php');
+
+        $pdf->SetMargins($left ,$top);
+        $pdf->SetAutoPageBreak('off', 0);
         
         // Set up feach field...
 	//use a multi-dim array to store parameters for displaying each label, notice there isn't one for local
@@ -512,11 +512,10 @@ WINE
 	} else {
 	    drawForm(sprintf('Query: %s<br />Error: %s', $mainQ, mysqli_error($db_slave)));
 	}
-    }
+}
 
 
-BULK
-{
+function print_bulk_tags ($upc,$how_many) {
 	$tagCert = (int) $_POST['tagCert'];
 	$tagType = (int) $_POST['tagSize'];
 /*
@@ -667,5 +666,5 @@ BULK
 	    }
 
 	    $x += $rightShift;
-	}
-    }
+        }
+}

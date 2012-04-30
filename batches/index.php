@@ -5,7 +5,7 @@
 //</head>
 
 $_SESSION['batchID'] = 1;
-$header = 'Batch Maintanence';
+$header = 'Batch Maintenance';
 $page_title = 'Fannie - Batch Module';
 include ('../includes/header.html');
 ?>
@@ -86,7 +86,7 @@ if (!isset($_POST["showinactive"])) {$_POST["showinactive"] = "hide";}
 
 
 //if (isset($_POST["delete"]) && is_array($_POST["deleteList"])) {print_r $_POST["deleteList"];}
-echo "<br/>$batchListQ<br/>";
+//echo "<br/>$batchListQ<br/>";
         echo '<p align="center"><input id="toggleBatches" type=submit value="Show Inactive" /></p>';
 
 echo '<form action="'. $_SERVER['PHP_SELF'] . '" method="POST">';
