@@ -105,7 +105,6 @@ global $db_master;
 
 	}
     $j = $counter;
-
     for ($j = $counter; $j < 14; $j++) {
         $day = (int)$day + 1;
         	echo "<td>

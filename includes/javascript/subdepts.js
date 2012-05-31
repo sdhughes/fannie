@@ -27,7 +27,7 @@ $(document).ready(function (){
          
             switch (action) {
                 case 'update':
-                        
+                    location.reload();                       
                     break;
 
                 case 'cancel':
@@ -52,7 +52,8 @@ $(document).ready(function (){
             switch (action) {
                 case 'edit':
 
-                        var editor = "<div class='subdept_edit'><span>" + subdept_id + "</span><input id='update_name_field' type='text' name='update_name' value='" + subdept_name + "' /><div class='myButton'>update</div><div class='myButton' >cancel</div></div>";        
+                        var editor = "<div class='subdept_edit'><form action='' method='post' ><span>" + subdept_id + "</span><input id='update_name_field' type='text' name='update_name' value='" + subdept_name + "' /><div class='myButton'>update</div><div class='myButton' >cancel</div></form></div>";        
+                        //var editor = "<div class='subdept_edit'><form action='<?php echo $_SERVER['PHP_SELF']; ?>' method='post' ><span>" + subdept_id + "</span><input id='update_name_field' type='text' name='update_name' value='" + subdept_name + "' /><div class='myButton'>update</div><div class='myButton' >cancel</div></form></div>";        
                         var new_left = loc.left + (100);
                             $('#editPane').css({'left':100,'top':loc.top});
                             $('#editPane').show();

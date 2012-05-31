@@ -5,6 +5,7 @@ config.php
 *.tsv
 *.txt
 CoMET/*
+meteor/*
 includes/config.php
 cron/ncgaWeeklySales.sh
 mysql/scripts/*

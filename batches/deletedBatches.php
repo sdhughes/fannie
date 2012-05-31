@@ -92,7 +92,7 @@ echo '<form action="saletags.php" method="POST" target="_blank">
     <button name="tags" type="submit">Generate Sale Tags!</button>
     <input type="hidden" name="batchID" value="' . $batchID . '">
     </form>';
-echo "<form action='batches.php' method='POST'>";
+echo "<form action='" . $_SERVER['PHP_SELF'] . "' method='POST'>";
 echo "<table border=0 cellspacing=0 cellpadding=5 margin=3>
 	<tr>
 		<td>Batch Name: <font color=blue>$batchInfoW[3]</font></td>

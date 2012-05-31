@@ -122,8 +122,10 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
                     echo " <input type='submit' name='submit' value='Hide Unused Items' />"; 
                     echo "<input type='hidden' name='inUse' value='$antiInUse' />";
                 }
+$escaped_upc = mysqli_real_escape_string($db_master,$upc);
+            echo "testing: " . $escaped_upc;
 
-                echo "<input type='hidden' name='upc' value='$upc' />
+                echo "<input type='hidden' name='upc' value=\"$upc\" />
                 <input type='hidden' name='submitted' value='search' />";
 
                 //create hidden input boxes to hold the values of an array.
@@ -223,7 +225,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
         $mainQ = "INSERT INTO products (upc, description, normal_price, pricemethod, groupprice, quantity, special_price, specialpricemethod, specialgroupprice, specialquantity, start_date, end_date, department, size, tax, foodstamp, scale, mixmatchcode, modified, advertised, tareweight, discount, discounttype, unitofmeasure, wicable, deposit, qttyEnforced, inUse, subdept) VALUES
                 ($upc, '$description', $price, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, $department, 0, 0, $fs, $scale, 0, now(), 0, 0, $nodisc, $SPO, 0, 0, $deposit, $qty, $inUse, $subdepartment)";
 
-	logAction('0001',1);
+	//logAction('0001',1);
 
     } elseif (isset($_POST['action']) && $_POST['action'] == 'update') {
         // Error checking...data validation...
@@ -385,7 +387,7 @@ if (isset($_REQUEST['submitted']) && $_REQUEST['submitted'] == 'search') { // On
 			tag_type = $tagType
                     WHERE upc = $upc";
 
-	logAction('0001',2);
+	//logAction('0001',2);
     }
 
     // Now if no errors, run the queries...

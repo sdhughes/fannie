@@ -74,18 +74,19 @@ mysqli_select_db($db_master, 'is4c_op') or die("DB Select Error" . mysqli_error(
     echo "</td>";
 
 
-/* no selector bc the dept should be set
     echo "<td>";
                 //print dept selector, drop down
-                dept_selector('dept',$dept);
+              //  dept_selector('dept',$dept);
+                echo "<input id='dept' name='dept' type='hidden' value='$dept' />";
     echo "</td>";
-*/
     echo "<td>";
 
                 echo "<input id='add_button' name='submit' type='submit' value='add' />";
             echo "</td>";
     echo "</tr>";
     echo "</table>";
+    echo "</form>";
+    echo "</div>";
 }
 
 /**

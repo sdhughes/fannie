@@ -12,7 +12,7 @@ include ('../includes/header.html');
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.core.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.theme.css" />
 	<link rel="STYLESHEET" type="text/css" href="../includes/javascript/ui.datepicker.css" />
-	<script type="text/javascript" src="../includes/javascript/deleteBatch.js"></script>
+	<script type="text/javascript" src="../includes/javascript/batches.js"></script>
 	<script type="text/javascript" src="../includes/javascript/datepicker/date.js"></script>
 	<script type="text/javascript" src="../includes/javascript/ui.datepicker.js"></script>
 	<script type="text/javascript" src="../includes/javascript/ui.core.js"></script>
@@ -34,7 +34,7 @@ include ('../includes/header.html');
 <?php
 
 require_once ('../includes/mysqli_connect.php');
-require_once ('../includes/dept_picker_generator.php');
+require_once ('../includes/common.php');
 //original batch query, replaced by SDH 2011-05-16
 //$batchListQ= "SELECT b.batchID,b.batchName,b.batchType,DATE(b.startDate),b.endDate,d.dept_name as department FROM batches as b INNER JOIN departments as d on b.department = d.dept_no ORDER BY b.batchID DESC";
 if (isset($_POST['orderBy'])) {
