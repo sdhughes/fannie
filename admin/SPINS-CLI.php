@@ -2,9 +2,9 @@
 require_once('/pos/fannie/includes/mysqli_connect.php');
 mysqli_select_db($db_slave, 'is4c_log');
 
-DEFINE(FTP_SERVER, 'ftp.spins.com');
-DEFINE(FTP_USER, 'alb_gr');
-DEFINE(FTP_PASS, 'alb540*');
+DEFINE(FTP_SERVER, '');
+DEFINE(FTP_USER, '');
+DEFINE(FTP_PASS, '');
 
 /////////  O P T I O N S 	//////////////////
 //	Pick a year
